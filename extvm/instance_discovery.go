@@ -2,18 +2,17 @@
  * Copyright 2023 steadybit GmbH. All rights reserved.
  */
 
-package extrobots
+package extvm
 
 import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"github.com/steadybit/extension-scaffold/config"
 	"net/http"
 )
 
-const discoveryBasePath = basePath + "/discovery"
+const discoveryBasePath = TargetIDVM + "/discovery"
 
 func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler(discoveryBasePath, exthttp.GetterAsHandler(getDiscoveryDescription))
@@ -47,7 +46,7 @@ func GetDiscoveryList() discovery_kit_api.DiscoveryList {
 
 func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id:         targetID,
+		Id:         TargetIDVM,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
@@ -59,7 +58,7 @@ func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 
 func getTargetDescription() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
-		Id:      targetID,
+		Id:      TargetIDVM,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:    extutil.Ptr(targetIcon),
 
@@ -100,14 +99,14 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 }
 
 func getDiscoveredTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
-	targets := make([]discovery_kit_api.Target, len(config.Config.RobotNames))
-	for i, name := range config.Config.RobotNames {
-		targets[i] = discovery_kit_api.Target{
-			Id:         name,
-			TargetType: targetID,
-			Label:      name,
-			Attributes: map[string][]string{"robot.reportedBy": {"extension-scaffold"}},
-		}
-	}
+	targets := make([]discovery_kit_api.Target, 0)
+	//for i, name := range config.Config.RobotNames {
+	//	targets[i] = discovery_kit_api.Target{
+	//		Id:         name,
+	//		TargetType: TargetIDVM,
+	//		Label:      name,
+	//		Attributes: map[string][]string{"robot.reportedBy": {"extension-azure"}},
+	//	}
+	//}
 	exthttp.WriteBody(w, discovery_kit_api.DiscoveredTargets{Targets: targets})
 }

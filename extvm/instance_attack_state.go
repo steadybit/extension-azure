@@ -2,7 +2,7 @@
  * Copyright 2023 steadybit GmbH. All rights reserved.
  */
 
-package extrobots
+package extvm
 
 import (
 	"context"
@@ -44,14 +44,14 @@ func (l *logAction) NewEmptyState() LogActionState {
 // Describe returns the action description for the platform with all required information.
 func (l *logAction) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.log", targetID),
+		Id:          fmt.Sprintf("%s.log", TargetIDVM),
 		Label:       "log",
 		Description: "collects information about the monitor status and optionally verifies that the monitor has an expected status.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(targetIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
 			// The target type this action is for
-			TargetType: targetID,
+			TargetType: TargetIDVM,
 			// You can provide a list of target templates to help the user select targets.
 			// A template can be used to pre-fill a selection
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
