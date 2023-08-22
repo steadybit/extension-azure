@@ -198,7 +198,11 @@ func getDiscoveredTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
   //subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 
   ctx := context.Background()
-  client := utils.GetClientByCredentials()
+  client, err := utils.GetClientByCredentials()
+  if err != nil {
+    log.Error().Msgf("failed to get client: %v", err)
+    return
+  }
   results, err := client.Resources(ctx,
     armresourcegraph.QueryRequest{
       Query: to.Ptr("Resources | where type =~ 'Microsoft.Compute/virtualMachines' | project name, type, resourceGroup, location, tags, properties, subscriptionId | limit 10"),
