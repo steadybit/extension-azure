@@ -7,167 +7,160 @@ package extvm
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog/log"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
+	"github.com/steadybit/extension-azure/utils"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extconversion"
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-type logAction struct{}
-
-// Make sure action implements all required interfaces
-var (
-	_ action_kit_sdk.Action[LogActionState]           = (*logAction)(nil)
-	_ action_kit_sdk.ActionWithStatus[LogActionState] = (*logAction)(nil) // Optional, needed when the action needs a status method
-	_ action_kit_sdk.ActionWithStop[LogActionState]   = (*logAction)(nil) // Optional, needed when the action needs a stop method
-)
-
-type LogActionState struct {
-	FormattedMessage string
+type virtualMachineStateAction struct {
+	clientProvider func(account string) (virtualMachineStateChangeApi, error)
 }
 
-type LogActionConfig struct {
-	Message string
+// Make sure lambdaAction implements all required interfaces
+var _ action_kit_sdk.Action[InstanceStateChangeState] = (*virtualMachineStateAction)(nil)
+
+type InstanceStateChangeState struct {
+	SubscriptionId    string
+	VmName            string
+	ResourceGroupName string
+	Action            string
 }
 
-func NewLogAction() action_kit_sdk.Action[LogActionState] {
-	return &logAction{}
+type virtualMachineStateChangeApi interface {
+	BeginStart(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginStartOptions) (*runtime.Poller[armcompute.VirtualMachinesClientStartResponse], error)
+	BeginRestart(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginRestartOptions) (*runtime.Poller[armcompute.VirtualMachinesClientRestartResponse], error)
+	BeginDelete(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginDeleteOptions) (*runtime.Poller[armcompute.VirtualMachinesClientDeleteResponse], error)
+	BeginPowerOff(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginPowerOffOptions) (*runtime.Poller[armcompute.VirtualMachinesClientPowerOffResponse], error)
+	BeginDeallocate(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginDeallocateOptions) (*runtime.Poller[armcompute.VirtualMachinesClientDeallocateResponse], error)
 }
 
-func (l *logAction) NewEmptyState() LogActionState {
-	return LogActionState{}
+func NewVirtualMachineStateAction() action_kit_sdk.Action[InstanceStateChangeState] {
+	return &virtualMachineStateAction{defaultClientProvider}
 }
 
-// Describe returns the action description for the platform with all required information.
-func (l *logAction) Describe() action_kit_api.ActionDescription {
+func (e *virtualMachineStateAction) NewEmptyState() InstanceStateChangeState {
+	return InstanceStateChangeState{}
+}
+
+func (e *virtualMachineStateAction) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:          fmt.Sprintf("%s.log", TargetIDVM),
-		Label:       "log",
-		Description: "collects information about the monitor status and optionally verifies that the monitor has an expected status.",
+		Id:          VirtualMachineStateActionId,
+		Label:       "Change Virtual Machine State",
+		Description: "Restart, start, stop, deallocate or delete Azure virtual machines",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(targetIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
-			// The target type this action is for
 			TargetType: TargetIDVM,
-			// You can provide a list of target templates to help the user select targets.
-			// A template can be used to pre-fill a selection
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label: "by robot name",
-					Query: "steadybit.label=\"\"",
+					Label:       "by vm-id",
+					Description: extutil.Ptr("Find azure virtual machine by vm-id"),
+					Query:       "azure-vm.vm.id=\"\"",
+				},
+				{
+					Label:       "by vm-name",
+					Description: extutil.Ptr("Find azure virtual machine by name"),
+					Query:       "azure-vm.vm.name=\"\"",
 				},
 			}),
 		}),
-		// Category for the targets to appear in
-		Category: extutil.Ptr("other"),
-
-		// To clarify the purpose of the action, you can set a kind.
-		//   Attack: Will cause harm to targets
-		//   Check: Will perform checks on the targets
-		//   LoadTest: Will perform load tests on the targets
-		//   Other
-		Kind: action_kit_api.Other,
-
-		// How the action is controlled over time.
-		//   External: The agent takes care and calls stop then the time has passed. Requires a duration parameter. Use this when the duration is known in advance.
-		//   Internal: The action has to implement the status endpoint to signal when the action is done. Use this when the duration is not known in advance.
-		//   Instantaneous: The action is done immediately. Use this for actions that happen immediately, e.g. a reboot.
-		TimeControl: action_kit_api.TimeControlInternal,
-
-		// The parameters for the action
+		Category:    extutil.Ptr("state"),
+		TimeControl: action_kit_api.TimeControlInstantaneous,
+		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
-				Name:         "message",
-				Label:        "Message",
-				Description:  extutil.Ptr("What should we log to the console? Use %s to insert the robot name."),
-				Type:         action_kit_api.String,
-				DefaultValue: extutil.Ptr("Hello from %s"),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(0),
+				Name:        "action",
+				Label:       "Action",
+				Description: extutil.Ptr("The kind of state change operation to execute for the azure virtual machines"),
+				Required:    extutil.Ptr(true),
+				Type:        action_kit_api.String,
+				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+					action_kit_api.ExplicitParameterOption{
+						Label: "Restart",
+						Value: "restart",
+					},
+					action_kit_api.ExplicitParameterOption{
+						Label: "Power Off",
+						Value: "power-off",
+					},
+					action_kit_api.ExplicitParameterOption{
+						Label: "Start",
+						Value: "start",
+					},
+					action_kit_api.ExplicitParameterOption{
+						Label: "Delete",
+						Value: "delete",
+					},
+					action_kit_api.ExplicitParameterOption{
+						Label: "Deallocate",
+						Value: "deallocate",
+					},
+				}),
 			},
 		},
-		Status: extutil.Ptr(action_kit_api.MutatingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("1s"),
-		}),
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
-// Prepare is called before the action is started.
-// It can be used to validate the parameters and prepare the action.
-// It must not cause any harmful effects.
-// The passed in state is included in the subsequent calls to start/status/stop.
-// So the state should contain all information needed to execute the action and even more important: to be able to stop it.
-func (l *logAction) Prepare(_ context.Context, state *LogActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	log.Info().Str("message", state.FormattedMessage).Msg("Logging in log action **prepare**")
-
-	var config LogActionConfig
-	if err := extconversion.Convert(request.Config, &config); err != nil {
-		return nil, extension_kit.ToError("Failed to unmarshal the config.", err)
+func (e *virtualMachineStateAction) Prepare(_ context.Context, state *InstanceStateChangeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+	vmName := request.Target.Attributes["azure-vm.vm.name"]
+	if len(vmName) == 0 {
+		return nil, extension_kit.ToError("Target is missing the 'azure-vm.vm.name' attribute.", nil)
 	}
 
-	state.FormattedMessage = fmt.Sprintf(config.Message, request.Target.Name)
+	subscriptionId := request.Target.Attributes["azure-vm.subscription.id"]
+	if len(subscriptionId) == 0 {
+		return nil, extension_kit.ToError("Target is missing the 'azure-vm.subscription.id' attribute.", nil)
+	}
 
-	return &action_kit_api.PrepareResult{
-		//These messages will show up in agent log
-		Messages: extutil.Ptr([]action_kit_api.Message{
-			{
-				Level:   extutil.Ptr(action_kit_api.Info),
-				Message: fmt.Sprintf("Prepared logging '%s'", state.FormattedMessage),
-			},
-		})}, nil
+	resourceGroupName := request.Target.Attributes["azure-vm.resource-group.name"]
+	if len(resourceGroupName) == 0 {
+		return nil, extension_kit.ToError("Target is missing the 'azure-vm.resource-group.name' attribute.", nil)
+	}
+
+	action := request.Config["action"]
+	if action == nil {
+		return nil, extension_kit.ToError("Missing attack action parameter.", nil)
+	}
+
+	state.SubscriptionId = subscriptionId[0]
+	state.VmName = vmName[0]
+	state.ResourceGroupName = resourceGroupName[0]
+	state.Action = action.(string)
+	return nil, nil
 }
 
-// Start is called to start the action
-// You can mutate the state here.
-// You can use the result to return messages/errors/metrics or artifacts
-func (l *logAction) Start(_ context.Context, state *LogActionState) (*action_kit_api.StartResult, error) {
-	log.Info().Str("message", state.FormattedMessage).Msg("Logging in log action **start**")
+func (e *virtualMachineStateAction) Start(ctx context.Context, state *InstanceStateChangeState) (*action_kit_api.StartResult, error) {
+	client, err := e.clientProvider(state.SubscriptionId)
+	if err != nil {
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize azure client for subscription %s", state.SubscriptionId), err)
+	}
 
-	return &action_kit_api.StartResult{
-		//These messages will show up in agent log
-		Messages: extutil.Ptr([]action_kit_api.Message{
-			{
-				Level:   extutil.Ptr(action_kit_api.Info),
-				Message: fmt.Sprintf("Started logging '%s'", state.FormattedMessage),
-			},
-		})}, nil
+	if state.Action == "restart" {
+		_, err = client.BeginRestart(ctx, state.ResourceGroupName, state.VmName, nil)
+	} else if state.Action == "power-off" {
+		_, err = client.BeginPowerOff(ctx, state.ResourceGroupName, state.VmName, nil)
+	} else if state.Action == "start" {
+		_, err = client.BeginStart(ctx, state.ResourceGroupName, state.VmName, nil)
+	} else if state.Action == "delete" {
+		_, err = client.BeginDelete(ctx, state.ResourceGroupName, state.VmName, nil)
+	} else if state.Action == "deallocate" {
+		_, err = client.BeginDeallocate(ctx, state.ResourceGroupName, state.VmName, nil)
+	} else {
+		return nil, extension_kit.ToError(fmt.Sprintf("Unknown state change attack '%s'", state.Action), nil)
+	}
+
+	if err != nil {
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to execute state change attack '%s' on vm '%s'", state.Action, state.VmName), err)
+	}
+
+	return nil, nil
 }
 
-// Status is optional.
-// If you implement that it will be called periodically to check the status of the action.
-// You can use the result to signal that the action is done and to return messages/errors/metrics or artifacts
-func (l *logAction) Status(_ context.Context, state *LogActionState) (*action_kit_api.StatusResult, error) {
-	log.Info().Str("message", state.FormattedMessage).Msg("Logging in log action **status**")
-
-	return &action_kit_api.StatusResult{
-		//indicate that the action is still running
-		Completed: false,
-		//These messages will show up in agent log
-		Messages: extutil.Ptr([]action_kit_api.Message{
-			{
-				Level:   extutil.Ptr(action_kit_api.Info),
-				Message: fmt.Sprintf("Status for logging '%s'", state.FormattedMessage),
-			},
-		})}, nil
-}
-
-// Stop is called to stop the action
-// It will be called even if the start method did not complete successfully.
-// It should be implemented in a immutable way, as the agent might to retries if the stop method timeouts.
-// You can use the result to return messages/errors/metrics or artifacts
-func (l *logAction) Stop(_ context.Context, state *LogActionState) (*action_kit_api.StopResult, error) {
-	log.Info().Str("message", state.FormattedMessage).Msg("Logging in log action **status**")
-
-	return &action_kit_api.StopResult{
-		//These messages will show up in agent log
-		Messages: extutil.Ptr([]action_kit_api.Message{
-			{
-				Level:   extutil.Ptr(action_kit_api.Info),
-				Message: fmt.Sprintf("Stopped logging '%s'", state.FormattedMessage),
-			},
-		})}, nil
+func defaultClientProvider(subscriptionId string) (virtualMachineStateChangeApi, error) {
+	return utils.GetVirtualMachinesClient(subscriptionId)
 }

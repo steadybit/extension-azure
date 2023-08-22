@@ -27,18 +27,20 @@ func GetClientByCredentials() *armresourcegraph.Client {
 }
 
 
-func GetVirtualMachinesClient() *armcompute.VirtualMachinesClient {
+func GetVirtualMachinesClient(subscriptionId string) (*armcompute.VirtualMachinesClient, error) {
   conn, err := connectionAzure()
   if err != nil {
     log.Fatal().Err(err).Msgf("Failed to create Azure connection.")
+    return nil, err
   }
-  subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
+  //subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
   computeClientFactory, err := armcompute.NewClientFactory(subscriptionId, conn, nil)
   if err != nil {
     log.Fatal().Err(err).Msgf("Failed to create Azure compute client.")
+    return nil, err
   }
   virtualMachinesClient := computeClientFactory.NewVirtualMachinesClient()
-  return virtualMachinesClient
+  return virtualMachinesClient, nil
 }
 
 func connectionAzure() (azcore.TokenCredential, error) {

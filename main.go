@@ -49,7 +49,7 @@ func main() {
 	// for your extension. You might want to change these because the names do not fit, or because
 	// you do not have a need for all of them.
 	extvm.RegisterDiscoveryHandlers()
-	action_kit_sdk.RegisterAction(extvm.NewLogAction())
+	action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
 
 	//This will install a signal handlder, that will stop active actions when receiving a SIGURS1, SIGTERM or SIGINT
 	action_kit_sdk.InstallSignalHandler()

@@ -168,6 +168,27 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
           Other: "VM sizes",
         },
       },
+      {
+        Attribute: "azure-vm.vm.name",
+        Label: discovery_kit_api.PluralLabel{
+          One:   "VM name",
+          Other: "VM names",
+        },
+      },
+      {
+        Attribute: "azure-vm.subscription.id",
+        Label: discovery_kit_api.PluralLabel{
+          One:   "Subscription ID",
+          Other: "Subscription IDs",
+        },
+      },
+      {
+        Attribute: "azure-vm.resource-group.name",
+        Label: discovery_kit_api.PluralLabel{
+          One:   "Resource group name",
+          Other: "Resource group names",
+        },
+      },
     },
   }
 }
@@ -180,7 +201,7 @@ func getDiscoveredTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
   client := utils.GetClientByCredentials()
   results, err := client.Resources(ctx,
     armresourcegraph.QueryRequest{
-      Query: to.Ptr("Resources | where type =~ 'Microsoft.Compute/virtualMachines' | project name, type, resourceGroup, location, tags, properties | limit 10"),
+      Query: to.Ptr("Resources | where type =~ 'Microsoft.Compute/virtualMachines' | project name, type, resourceGroup, location, tags, properties, subscriptionId | limit 10"),
       Options: &armresourcegraph.QueryRequestOptions{
         ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
       },
@@ -208,6 +229,8 @@ func getDiscoveredTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
         storageProfile := getMapValue(properties, "storageProfile")
         osDisk := getMapValue(storageProfile, "osDisk")
 
+        attributes["azure-vm.vm.name"] = []string{items["name"].(string)}
+        attributes["azure-vm.subscription.id"] = []string{items["subscriptionId"].(string)}
         attributes["azure-vm.vm.id"] = []string{getPropertyValue(properties, "vmId")}
         attributes["azure-vm.vm.size"] = []string{getPropertyValue(hardwareProfile, "vmSize")}
         attributes["azure-vm.os.name"] = []string{getPropertyValue(instanceView, "osName")}
@@ -217,7 +240,7 @@ func getDiscoveredTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
         attributes["azure-vm.power.state"] = []string{getPropertyValue(powerState, "code")}
         attributes["azure-vm.network.id"] = []string{getPropertyValue(networkInterfaces, "id")}
         attributes["azure-vm.location"] = []string{getPropertyValue(items, "location")}
-        attributes["azure-vm.resourceGroup"] = []string{getPropertyValue(items, "resourceGroup")}
+        attributes["azure-vm.resource-group.name"] = []string{getPropertyValue(items, "resourceGroup")}
         attributes["azure-vm.tags"] = parseTags(getMapValue(items, "tags"))
 
         targets = append(targets, discovery_kit_api.Target{
