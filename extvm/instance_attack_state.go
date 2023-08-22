@@ -22,9 +22,9 @@ type virtualMachineStateAction struct {
 }
 
 // Make sure lambdaAction implements all required interfaces
-var _ action_kit_sdk.Action[InstanceStateChangeState] = (*virtualMachineStateAction)(nil)
+var _ action_kit_sdk.Action[VirtualMachineStateChangeState] = (*virtualMachineStateAction)(nil)
 
-type InstanceStateChangeState struct {
+type VirtualMachineStateChangeState struct {
 	SubscriptionId    string
 	VmName            string
 	ResourceGroupName string
@@ -39,12 +39,12 @@ type virtualMachineStateChangeApi interface {
 	BeginDeallocate(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginDeallocateOptions) (*runtime.Poller[armcompute.VirtualMachinesClientDeallocateResponse], error)
 }
 
-func NewVirtualMachineStateAction() action_kit_sdk.Action[InstanceStateChangeState] {
+func NewVirtualMachineStateAction() action_kit_sdk.Action[VirtualMachineStateChangeState] {
 	return &virtualMachineStateAction{defaultClientProvider}
 }
 
-func (e *virtualMachineStateAction) NewEmptyState() InstanceStateChangeState {
-	return InstanceStateChangeState{}
+func (e *virtualMachineStateAction) NewEmptyState() VirtualMachineStateChangeState {
+	return VirtualMachineStateChangeState{}
 }
 
 func (e *virtualMachineStateAction) Describe() action_kit_api.ActionDescription {
@@ -106,7 +106,7 @@ func (e *virtualMachineStateAction) Describe() action_kit_api.ActionDescription 
 	}
 }
 
-func (e *virtualMachineStateAction) Prepare(_ context.Context, state *InstanceStateChangeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (e *virtualMachineStateAction) Prepare(_ context.Context, state *VirtualMachineStateChangeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	vmName := request.Target.Attributes["azure-vm.vm.name"]
 	if len(vmName) == 0 {
 		return nil, extension_kit.ToError("Target is missing the 'azure-vm.vm.name' attribute.", nil)
@@ -134,7 +134,7 @@ func (e *virtualMachineStateAction) Prepare(_ context.Context, state *InstanceSt
 	return nil, nil
 }
 
-func (e *virtualMachineStateAction) Start(ctx context.Context, state *InstanceStateChangeState) (*action_kit_api.StartResult, error) {
+func (e *virtualMachineStateAction) Start(ctx context.Context, state *VirtualMachineStateChangeState) (*action_kit_api.StartResult, error) {
 	client, err := e.clientProvider(state.SubscriptionId)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize azure client for subscription %s", state.SubscriptionId), err)
