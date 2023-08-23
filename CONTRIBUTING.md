@@ -60,7 +60,7 @@ openssl req -in server.csr -text -noout | grep -i "Signature.*SHA256" && echo "A
 # reformat to pkcs12 because azure lib needs that
 openssl pkcs12 -certpbe PBE-SHA1-3DES -keypbe PBE-SHA1-3DES -export -macalg sha1 -out cert.p12 -in server.pem -inkey private_key.pem
 
-# use the cert.p12 in the config as STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+# use the cert.p12 in the config as STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
 ```
 
 ## Contributor License Agreement (CLA)

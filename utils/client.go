@@ -50,7 +50,7 @@ func connectionAzure() (azcore.TokenCredential, error) {
 	clientSecret := os.Getenv("AZURE_CLIENT_SECRET")
 	userAssertionString := config.Config.AzureUserAssertionString
 
-	certificateLocation := config.Config.AzureCertificateLocation
+	certificateLocation := config.Config.AzureCertificatePath
 	certificatePassphrase := config.Config.AzureCertificatePassword
 	if certificateLocation != "" {
 		if userAssertionString != "" {

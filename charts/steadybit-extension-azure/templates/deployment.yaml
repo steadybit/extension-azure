@@ -42,17 +42,40 @@ spec:
               cpu: {{ .Values.resources.limits.cpu }}
           env:
             - name: AZURE_CLIENT_ID
-              value: {{ .Values.azure.clientID | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "azure.secret.name" . }}
+                  key: clientID
             - name: AZURE_TENANT_ID
-              value: {{ .Values.azure.tenantID | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "azure.secret.name" . }}
+                  key: tenantID
             - name: AZURE_CLIENT_SECRET
-              value: {{ .Values.azure.clientSecret | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "azure.secret.name" . }}
+                  key: clientSecret
             - name: AZURE_SUBSCRIPTION_ID
-              value: {{ .Values.azure.subscriptionID | quote }}
-            - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-              value: {{ .Values.azure.certificatePath | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "azure.secret.name" . }}
+                  key: subscriptionID
+            - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "azure.secret.name" . }}
+                  key: certificatePath
             - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-              value: {{ .Values.azure.certificatePassword | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "azure.secret.name" . }}
+                  key: certificatePassword
+            - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "azure.secret.name" . }}
+                  key: userAssertionString
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             {{- with .Values.extraEnv }}
               {{- toYaml . | nindent 12 }}

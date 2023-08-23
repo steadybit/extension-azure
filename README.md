@@ -8,14 +8,14 @@ Learn about the capabilities of this extension in our [Reliability Hub](https://
 
 ## Configuration
 
-| Environment Variable                             | Helm value | Meaning                                                      | Required | Default |
-|--------------------------------------------------|------------|--------------------------------------------------------------|----------|---------|
-| `AZURE_CLIENT_ID`                                |            | Azure Client Id                                              | true     |         |
-| `AZURE_TENANT_ID`                                |            | Azure Tenant ID                                              | true     |         |
-| `AZURE_CLIENT_SECRET`                            |            | Azure Client Secret                                          | false    |         |
-| `AZURE_SUBSCRIPTION_ID`                          |            | Azure Subscription ID                                        | false    |         |
-| `STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION` |            | Location of a certificate used to authenticate to azure      | false    |         |
-| `STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD` |            | Passphrase for the certificate used to authenticate to azure | false    |         |
+| Environment Variable                             | Helm value                | Meaning                                                      | Required | Default |
+|--------------------------------------------------|---------------------------|--------------------------------------------------------------|----------|---------|
+| `AZURE_CLIENT_ID`                                | azure.clientID            | Azure Client Id                                              | true     |         |
+| `AZURE_TENANT_ID`                                | azure.tenantID            | Azure Tenant ID                                              | true     |         |
+| `AZURE_CLIENT_SECRET`                            | azure.clientSecret        | Azure Client Secret                                          | false    |         |
+| `AZURE_SUBSCRIPTION_ID`                          | azure.subscriptionID      | Azure Subscription ID                                        | false    |         |
+| `STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH` | azure.certificatePath     | Location of a certificate used to authenticate to azure      | false    |         |
+| `STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD` | azure.certificatePassword | Passphrase for the certificate used to authenticate to azure | false    |         |
 
 
 The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).

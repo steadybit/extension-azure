@@ -24,17 +24,40 @@ manifest should match snapshot using podAnnotations and Labels:
           containers:
             - env:
                 - name: AZURE_CLIENT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
                 - name: AZURE_TENANT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
                 - name: AZURE_CLIENT_SECRET
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
                 - name: AZURE_SUBSCRIPTION_ID
-                  value: ""
-                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -93,17 +116,40 @@ manifest should match snapshot with TLS:
           containers:
             - env:
                 - name: AZURE_CLIENT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
                 - name: AZURE_TENANT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
                 - name: AZURE_CLIENT_SECRET
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
                 - name: AZURE_SUBSCRIPTION_ID
-                  value: ""
-                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -173,17 +219,40 @@ manifest should match snapshot with azure certificates vars:
           containers:
             - env:
                 - name: AZURE_CLIENT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
                 - name: AZURE_TENANT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
                 - name: AZURE_CLIENT_SECRET
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
                 - name: AZURE_SUBSCRIPTION_ID
-                  value: ""
-                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-                  value: /tmp/certificatePath
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-                  value: certificatePassword
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -242,17 +311,40 @@ manifest should match snapshot with azure secrets vars:
           containers:
             - env:
                 - name: AZURE_CLIENT_ID
-                  value: clientId
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
                 - name: AZURE_TENANT_ID
-                  value: tenantId
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
                 - name: AZURE_CLIENT_SECRET
-                  value: clientSecret
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
                 - name: AZURE_SUBSCRIPTION_ID
-                  value: subscriptionId
-                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -311,17 +403,40 @@ manifest should match snapshot with extra env vars:
           containers:
             - env:
                 - name: AZURE_CLIENT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
                 - name: AZURE_TENANT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
                 - name: AZURE_CLIENT_SECRET
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
                 - name: AZURE_SUBSCRIPTION_ID
-                  value: ""
-                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -389,17 +504,40 @@ manifest should match snapshot with extra labels:
           containers:
             - env:
                 - name: AZURE_CLIENT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
                 - name: AZURE_TENANT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
                 - name: AZURE_CLIENT_SECRET
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
                 - name: AZURE_SUBSCRIPTION_ID
-                  value: ""
-                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -458,17 +596,40 @@ manifest should match snapshot with mutual TLS:
           containers:
             - env:
                 - name: AZURE_CLIENT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
                 - name: AZURE_TENANT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
                 - name: AZURE_CLIENT_SECRET
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
                 - name: AZURE_SUBSCRIPTION_ID
-                  value: ""
-                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -547,17 +708,40 @@ manifest should match snapshot with mutual TLS using containerPaths:
           containers:
             - env:
                 - name: AZURE_CLIENT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
                 - name: AZURE_TENANT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
                 - name: AZURE_CLIENT_SECRET
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
                 - name: AZURE_SUBSCRIPTION_ID
-                  value: ""
-                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -622,17 +806,40 @@ manifest should match snapshot without TLS:
           containers:
             - env:
                 - name: AZURE_CLIENT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
                 - name: AZURE_TENANT_ID
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
                 - name: AZURE_CLIENT_SECRET
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
                 - name: AZURE_SUBSCRIPTION_ID
-                  value: ""
-                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
-                  value: ""
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
