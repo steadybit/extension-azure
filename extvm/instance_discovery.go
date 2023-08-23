@@ -29,7 +29,7 @@ func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler(discoveryBasePath, exthttp.GetterAsHandler(getDiscoveryDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/target-description", exthttp.GetterAsHandler(getTargetDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/attribute-descriptions", exthttp.GetterAsHandler(getAttributeDescriptions))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredTargets)
+	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-enrichment-data", getDiscoveredVMs)
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-vm-to-container", exthttp.GetterAsHandler(getToContainerEnrichmentRule))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-vm-to-host", exthttp.GetterAsHandler(getToHostEnrichmentRule))
 }
@@ -63,6 +63,10 @@ func GetDiscoveryList() discovery_kit_api.DiscoveryList {
 				Method: "GET",
 				Path:   discoveryBasePath + "/rules/azure-vm-to-host",
 			},
+      {
+				Method: "GET",
+				Path:   discoveryBasePath + "/rules/azure-vm-to-container",
+			},
 		},
 	}
 }
@@ -73,7 +77,7 @@ func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
-			Path:         discoveryBasePath + "/discovered-targets",
+			Path:         discoveryBasePath + "/discovered-enrichment-data",
 			CallInterval: extutil.Ptr("1m"),
 		},
 	}
@@ -209,28 +213,25 @@ type ArmResourceGraphApi interface {
 	Resources(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error)
 }
 
-func getDiscoveredTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
-
-	//subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-
+func getDiscoveredVMs(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	ctx := context.Background()
 	client, err := utils.GetClientByCredentials()
 	if err != nil {
 		log.Error().Msgf("failed to get client: %v", err)
 		return
 	}
-	targets, err := GetAllVirtualMachines(ctx, client)
+  targets, err := GetAllVirtualMachines(ctx, client)
 	if err != nil {
 		log.Error().Msgf("failed to get all virtual machines: %v", err)
 		exthttp.WriteError(w, extension_kit.ToError("Failed to collect azure virtual machines information", err))
 		return
 	}
 
-	exthttp.WriteBody(w, discovery_kit_api.DiscoveredTargets{Targets: targets})
+  exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 }
 
 func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	targets := make([]discovery_kit_api.Target, 0)
+
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
 	if subscriptionId != "" {
@@ -247,10 +248,11 @@ func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]d
 		nil)
 	if err != nil {
 		log.Error().Msgf("failed to get results: %v", err)
-		return targets, err
+		return nil, err
 	} else {
 		// Print the obtained query results
 		log.Debug().Msgf("Resources found: " + strconv.FormatInt(*results.TotalRecords, 10))
+    targets := make([]discovery_kit_api.Target, 0)
 		if m, ok := results.Data.([]interface{}); ok {
 			for _, r := range m {
 				items := r.(map[string]interface{})
@@ -291,8 +293,8 @@ func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]d
 				})
 			}
 		}
+	  return targets, nil
 	}
-	return targets, nil
 }
 
 func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
