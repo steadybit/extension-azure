@@ -10,16 +10,11 @@ import (
 )
 
 func GetClientByCredentials() (*armresourcegraph.Client, error) {
-	clientID := os.Getenv("AZURE_CLIENT_ID")
-	clientSecret := os.Getenv("AZURE_CLIENT_SECRET")
-	tenantID := os.Getenv("AZURE_TENANT_ID")
-
-	// Constructs a ClientSecretCredential. Pass nil for options to accept defaults.
-	cred, err := azidentity.NewClientSecretCredential(tenantID, clientID, clientSecret, nil)
-	if err != nil {
-		log.Error().Msgf("failed to create credential: %v", err)
+  cred, err := connectionAzure()
+  if err != nil {
+    log.Fatal().Err(err).Msgf("Failed to create Azure connection.")
     return nil, err
-	}
+  }
 
 	// Create and authorize a ResourceGraph client
 	client, err := armresourcegraph.NewClient(cred, nil)

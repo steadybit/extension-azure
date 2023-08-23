@@ -122,3 +122,21 @@ func TestGetAllAvailabilityZonesError(t *testing.T) {
 	// Then
 	assert.Equal(t, err.Error(), "expected")
 }
+
+func TestGetAttributeDescriptions(t *testing.T) {
+  // just cover this static code
+  descriptions := getAttributeDescriptions()
+  assert.Greater(t, len(descriptions.Attributes),10 )
+}
+
+func TestGetToContainerEnrichmentRule(t *testing.T) {
+  // just cover this static code
+  enrichmentRule := getToContainerEnrichmentRule()
+  assert.Greater(t, len(enrichmentRule.Attributes),8 )
+}
+
+func TestGetToHostEnrichmentRule(t *testing.T) {
+  // just cover this static code
+  enrichmentRule := getToHostEnrichmentRule()
+  assert.Greater(t, len(enrichmentRule.Attributes),8 )
+}
