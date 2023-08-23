@@ -91,3 +91,11 @@ extraEnv: []
 #  - secretRef:
 #    name: env-secrets
 extraEnvFrom: []
+
+azure:
+  clientID: ""
+  clientSecret: ""
+  tenantID: ""
+  subscriptionID: ""
+  certificatePath: ""
+  certificatePassword: ""

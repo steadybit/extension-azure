@@ -29,7 +29,7 @@ func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler(discoveryBasePath, exthttp.GetterAsHandler(getDiscoveryDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/target-description", exthttp.GetterAsHandler(getTargetDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/attribute-descriptions", exthttp.GetterAsHandler(getAttributeDescriptions))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-enrichment-data", getDiscoveredVMs)
+	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredVMs)
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-vm-to-container", exthttp.GetterAsHandler(getToContainerEnrichmentRule))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-vm-to-host", exthttp.GetterAsHandler(getToHostEnrichmentRule))
 }
@@ -77,7 +77,7 @@ func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			Method:       "GET",
-			Path:         discoveryBasePath + "/discovered-enrichment-data",
+			Path:         discoveryBasePath + "/discovered-targets",
 			CallInterval: extutil.Ptr("1m"),
 		},
 	}

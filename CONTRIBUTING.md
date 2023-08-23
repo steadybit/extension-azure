@@ -39,6 +39,30 @@ Changing the Helm chart without bumping the version will result in the following
     Error: error creating GitHub release steadybit-extension-azure-1.0.0: POST https://api.github.com/repos/steadybit/extension-azure/releases: 422 Validation Failed [{Resource:Release Field:tag_name Code:already_exists Message:}]
 ```
 
+## Generate self signed certificate for testing purposes
+
+```sh
+# install new OpenSSL
+brew install openssl
+
+# generate private key and enter pass phrase
+openssl genrsa -des3 -out private_key.pem 2048
+
+# create certificate signing request, enter "*.example.com" as a "Common Name", leave "challenge password" blank
+openssl req -new -sha256 -key private_key.pem -out server.csr
+
+# generate self-signed certificate for 1 year
+openssl req -x509 -sha256 -days 365 -key private_key.pem -in server.csr -out server.pem
+
+# validate the certificate
+openssl req -in server.csr -text -noout | grep -i "Signature.*SHA256" && echo "All is well" || echo "This certificate doesn't work in 2017! You must update OpenSSL to generate a widely-compatible certificate"
+
+# reformat to pkcs12 because azure lib needs that
+openssl pkcs12 -certpbe PBE-SHA1-3DES -keypbe PBE-SHA1-3DES -export -macalg sha1 -out cert.p12 -in server.pem -inkey private_key.pem
+
+# use the cert.p12 in the config as STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+```
+
 ## Contributor License Agreement (CLA)
 
 In order to accept your pull request, we need you to submit a CLA. You only need to do this once. If you are submitting a pull request for the first time, just submit a Pull Request and our CLA Bot will give you instructions on how to sign the CLA before merging your Pull Request.

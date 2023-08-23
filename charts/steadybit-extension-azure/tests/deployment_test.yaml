@@ -66,3 +66,19 @@ tests:
         tags.datadoghq.com/service: steadybit-extension
     asserts:
       - matchSnapshot: {}
+  - it: manifest should match snapshot with azure secrets vars
+    set:
+      azure:
+        subscriptionID: "subscriptionId"
+        clientID: "clientId"
+        clientSecret: "clientSecret"
+        tenantID: "tenantId"
+    asserts:
+      - matchSnapshot: { }
+  - it: manifest should match snapshot with azure certificates vars
+    set:
+      azure:
+        certificatePath: "/tmp/certificatePath"
+        certificatePassword: "certificatePassword"
+    asserts:
+      - matchSnapshot: { }

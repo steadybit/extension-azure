@@ -13,10 +13,9 @@ import (
 // through environment variables. Learn more through the documentation of the envconfig package.
 // https://github.com/kelseyhightower/envconfig
 type Specification struct {
-  //AzureClientId     string `json:"azureClientId" required:"true"`
-  //AzureClienSecret  string `json:"azureClienSecret" required:"true"`
-  //AzureTenantId     string `json:"azureTenantId" required:"true"`
-  //AzureSubscriptionId string `json:"azureSubscriptionId" required:"true"`
+	AzureCertificateLocation string `json:"azureCertificateLocation" required:"false" split_words:"true"`
+	AzureCertificatePassword string `json:"azureCertificatePassword" required:"false" split_words:"true"`
+	AzureUserAssertionString string `json:"azureUserAssertionString" required:"false" split_words:"true"`
 }
 
 var (

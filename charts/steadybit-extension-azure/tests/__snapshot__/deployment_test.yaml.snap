@@ -23,6 +23,18 @@ manifest should match snapshot using podAnnotations and Labels:
         spec:
           containers:
             - env:
+                - name: AZURE_CLIENT_ID
+                  value: ""
+                - name: AZURE_TENANT_ID
+                  value: ""
+                - name: AZURE_CLIENT_SECRET
+                  value: ""
+                - name: AZURE_SUBSCRIPTION_ID
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  value: ""
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -80,6 +92,18 @@ manifest should match snapshot with TLS:
         spec:
           containers:
             - env:
+                - name: AZURE_CLIENT_ID
+                  value: ""
+                - name: AZURE_TENANT_ID
+                  value: ""
+                - name: AZURE_CLIENT_SECRET
+                  value: ""
+                - name: AZURE_SUBSCRIPTION_ID
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  value: ""
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -125,6 +149,144 @@ manifest should match snapshot with TLS:
               secret:
                 optional: false
                 secretName: server-cert
+manifest should match snapshot with azure certificates vars:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        steadybit.com/discovery-disabled: "true"
+      name: RELEASE-NAME-steadybit-extension-azure
+      namespace: NAMESPACE
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: steadybit-extension-azure
+      template:
+        metadata:
+          annotations: null
+          labels:
+            app.kubernetes.io/name: steadybit-extension-azure
+            steadybit.com/discovery-disabled: "true"
+        spec:
+          containers:
+            - env:
+                - name: AZURE_CLIENT_ID
+                  value: ""
+                - name: AZURE_TENANT_ID
+                  value: ""
+                - name: AZURE_CLIENT_SECRET
+                  value: ""
+                - name: AZURE_SUBSCRIPTION_ID
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+                  value: /tmp/certificatePath
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  value: certificatePassword
+                - name: STEADYBIT_LOG_LEVEL
+                  value: INFO
+                - name: STEADYBIT_LOG_FORMAT
+                  value: text
+              image: ghcr.io/steadybit/extension-azure:latest
+              imagePullPolicy: Always
+              livenessProbe:
+                httpGet:
+                  path: /health/liveness
+                  port: 8081
+              name: extension
+              readinessProbe:
+                httpGet:
+                  path: /health/readiness
+                  port: 8081
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
+              volumeMounts: null
+          serviceAccountName: steadybit-extension-azure
+          volumes: null
+manifest should match snapshot with azure secrets vars:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        steadybit.com/discovery-disabled: "true"
+      name: RELEASE-NAME-steadybit-extension-azure
+      namespace: NAMESPACE
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: steadybit-extension-azure
+      template:
+        metadata:
+          annotations: null
+          labels:
+            app.kubernetes.io/name: steadybit-extension-azure
+            steadybit.com/discovery-disabled: "true"
+        spec:
+          containers:
+            - env:
+                - name: AZURE_CLIENT_ID
+                  value: clientId
+                - name: AZURE_TENANT_ID
+                  value: tenantId
+                - name: AZURE_CLIENT_SECRET
+                  value: clientSecret
+                - name: AZURE_SUBSCRIPTION_ID
+                  value: subscriptionId
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  value: ""
+                - name: STEADYBIT_LOG_LEVEL
+                  value: INFO
+                - name: STEADYBIT_LOG_FORMAT
+                  value: text
+              image: ghcr.io/steadybit/extension-azure:latest
+              imagePullPolicy: Always
+              livenessProbe:
+                httpGet:
+                  path: /health/liveness
+                  port: 8081
+              name: extension
+              readinessProbe:
+                httpGet:
+                  path: /health/readiness
+                  port: 8081
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
+              volumeMounts: null
+          serviceAccountName: steadybit-extension-azure
+          volumes: null
 manifest should match snapshot with extra env vars:
   1: |
     apiVersion: apps/v1
@@ -148,6 +310,18 @@ manifest should match snapshot with extra env vars:
         spec:
           containers:
             - env:
+                - name: AZURE_CLIENT_ID
+                  value: ""
+                - name: AZURE_TENANT_ID
+                  value: ""
+                - name: AZURE_CLIENT_SECRET
+                  value: ""
+                - name: AZURE_SUBSCRIPTION_ID
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  value: ""
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -214,6 +388,18 @@ manifest should match snapshot with extra labels:
         spec:
           containers:
             - env:
+                - name: AZURE_CLIENT_ID
+                  value: ""
+                - name: AZURE_TENANT_ID
+                  value: ""
+                - name: AZURE_CLIENT_SECRET
+                  value: ""
+                - name: AZURE_SUBSCRIPTION_ID
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  value: ""
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -271,6 +457,18 @@ manifest should match snapshot with mutual TLS:
         spec:
           containers:
             - env:
+                - name: AZURE_CLIENT_ID
+                  value: ""
+                - name: AZURE_TENANT_ID
+                  value: ""
+                - name: AZURE_CLIENT_SECRET
+                  value: ""
+                - name: AZURE_SUBSCRIPTION_ID
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  value: ""
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -348,6 +546,18 @@ manifest should match snapshot with mutual TLS using containerPaths:
         spec:
           containers:
             - env:
+                - name: AZURE_CLIENT_ID
+                  value: ""
+                - name: AZURE_TENANT_ID
+                  value: ""
+                - name: AZURE_CLIENT_SECRET
+                  value: ""
+                - name: AZURE_SUBSCRIPTION_ID
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  value: ""
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -411,6 +621,18 @@ manifest should match snapshot without TLS:
         spec:
           containers:
             - env:
+                - name: AZURE_CLIENT_ID
+                  value: ""
+                - name: AZURE_TENANT_ID
+                  value: ""
+                - name: AZURE_CLIENT_SECRET
+                  value: ""
+                - name: AZURE_SUBSCRIPTION_ID
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION
+                  value: ""
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  value: ""
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT

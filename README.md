@@ -8,18 +8,21 @@ Learn about the capabilities of this extension in our [Reliability Hub](https://
 
 ## Configuration
 
-| Environment Variable    | Helm value | Meaning               | Required | Default |
-|-------------------------|------------|-----------------------|----------|---------|
-| `AZURE_CLIENT_ID`       |            | Azure Client Id       | yes      |         |
-| `AZURE_CLIENT_SECRET`   |            | Azure Client Secret   | yes      |         |
-| `AZURE_SUBSCRIPTION_ID` |            | Azure Subscription ID | yes      |         |
-| `AZURE_TENANT_ID`       |            | Azure Tenant ID       | yes      |         |
+| Environment Variable                             | Helm value | Meaning                                                      | Required | Default |
+|--------------------------------------------------|------------|--------------------------------------------------------------|----------|---------|
+| `AZURE_CLIENT_ID`                                |            | Azure Client Id                                              | true     |         |
+| `AZURE_TENANT_ID`                                |            | Azure Tenant ID                                              | true     |         |
+| `AZURE_CLIENT_SECRET`                            |            | Azure Client Secret                                          | false    |         |
+| `AZURE_SUBSCRIPTION_ID`                          |            | Azure Subscription ID                                        | false    |         |
+| `STEADYBIT_EXTENSION_AZURE_CERTIFICATE_LOCATION` |            | Location of a certificate used to authenticate to azure      | false    |         |
+| `STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD` |            | Passphrase for the certificate used to authenticate to azure | false    |         |
 
 
 The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
 
-The obtain the needed azure keys, please refer to this documentation: https://github.com/Azure-Samples/azure-sdk-for-go-samples/tree/main and
+The obtain the needed azure keys, please refer to this documentation:
 https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#get-tenant-and-app-id-values-for-signing-in
+
 ## Installation
 
 ### Using Docker
