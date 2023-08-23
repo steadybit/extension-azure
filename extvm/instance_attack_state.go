@@ -112,14 +112,14 @@ func (e *virtualMachineStateAction) Prepare(_ context.Context, state *VirtualMac
 		return nil, extension_kit.ToError("Target is missing the 'azure-vm.vm.name' attribute.", nil)
 	}
 
-	subscriptionId := request.Target.Attributes["azure-vm.subscription.id"]
+	subscriptionId := request.Target.Attributes["azure.subscription.id"]
 	if len(subscriptionId) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'azure-vm.subscription.id' attribute.", nil)
+		return nil, extension_kit.ToError("Target is missing the 'azure.subscription.id' attribute.", nil)
 	}
 
-	resourceGroupName := request.Target.Attributes["azure-vm.resource-group.name"]
+	resourceGroupName := request.Target.Attributes["azure.resource-group.name"]
 	if len(resourceGroupName) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'azure-vm.resource-group.name' attribute.", nil)
+		return nil, extension_kit.ToError("Target is missing the 'azure.resource-group.name' attribute.", nil)
 	}
 
 	action := request.Config["action"]

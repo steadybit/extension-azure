@@ -38,6 +38,7 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
           "resourceGroup":  "rg-1",
 					"tags": map[string]any{
 						"tag1": "Value1",
+						"tag2": "Value2",
 					},
 					"properties": map[string]any{
 						"hardwareProfile": map[string]any{
@@ -92,18 +93,19 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	assert.Equal(t, TargetIDVM, target.TargetType)
 	assert.Equal(t, "myVm", target.Label)
 	assert.Equal(t, []string{"myVm"}, target.Attributes["azure-vm.vm.name"])
-	assert.Equal(t, []string{"42"}, target.Attributes["azure-vm.subscription.id"])
+	assert.Equal(t, []string{"42"}, target.Attributes["azure.subscription.id"])
 	assert.Equal(t, []string{"/subscriptions/42/resourceGroups/rg-1/providers/Microsoft.Compute/virtualMachines/i-0ef9adc9fbd3b19c5"}, target.Attributes["azure-vm.vm.id"])
 	assert.Equal(t, []string{"Standard_D2s_v3"}, target.Attributes["azure-vm.vm.size"])
 	assert.Equal(t, []string{"Ubuntu 18.04.5 LTS"}, target.Attributes["azure-vm.os.name"])
-	assert.Equal(t, []string{"dev-demo"}, target.Attributes["azure-vm.computer.name"])
+	assert.Equal(t, []string{"dev-demo"}, target.Attributes["azure-vm.hostname"])
 	assert.Equal(t, []string{"18.04.5 LTS"}, target.Attributes["azure-vm.os.version"])
 	assert.Equal(t, []string{"Linux"}, target.Attributes["azure-vm.os.type"])
 	assert.Equal(t, []string{"PowerState/running"}, target.Attributes["azure-vm.power.state"])
 	assert.Equal(t, []string{"/subscriptions/42/resourceGroups/rg-1/providers/Microsoft.Network/networkInterfaces/i-0ef9adc9fbd3b19c5"}, target.Attributes["azure-vm.network.id"])
-	assert.Equal(t, []string{"westeurope"}, target.Attributes["azure-vm.location"])
-	assert.Equal(t, []string{"rg-1"}, target.Attributes["azure-vm.resource-group.name"])
-	assert.Equal(t, []string{"tag1:Value1"}, target.Attributes["azure-vm.tags"])
+	assert.Equal(t, []string{"westeurope"}, target.Attributes["azure.location"])
+	assert.Equal(t, []string{"rg-1"}, target.Attributes["azure.resource-group.name"])
+	assert.Equal(t, []string{"Value1"}, target.Attributes["azure-vm.label.tag1"])
+	assert.Equal(t, []string{"Value2"}, target.Attributes["azure-vm.label.tag2"])
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
 }

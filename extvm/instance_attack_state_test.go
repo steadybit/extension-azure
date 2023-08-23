@@ -32,8 +32,8 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure-vm.vm.name":             {"my-vm"},
-						"azure-vm.subscription.id":     {"42"},
-						"azure-vm.resource-group.name": {"rg0815"},
+						"azure.subscription.id":     {"42"},
+						"azure.resource-group.name": {"rg0815"},
 					},
 				}),
 			}),
@@ -54,11 +54,11 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure-vm.vm.name":             {"my-vm"},
-						"azure-vm.resource-group.name": {"rg0815"},
+						"azure.resource-group.name": {"rg0815"},
 					},
 				}),
 			}),
-			wantedError: extension_kit.ToError("Target is missing the 'azure-vm.subscription.id' attribute.", nil),
+			wantedError: extension_kit.ToError("Target is missing the 'azure.subscription.id' attribute.", nil),
 		},
 		{
 			name: "Should return error if vm name is missing",
@@ -68,8 +68,8 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-vm.subscription.id":     {"42"},
-						"azure-vm.resource-group.name": {"rg0815"},
+						"azure.subscription.id":     {"42"},
+						"azure.resource-group.name": {"rg0815"},
 					},
 				}),
 			}),
@@ -84,11 +84,11 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure-vm.vm.name":         {"my-vm"},
-						"azure-vm.subscription.id": {"42"},
+						"azure.subscription.id": {"42"},
 					},
 				}),
 			}),
-			wantedError: extension_kit.ToError("Target is missing the 'azure-vm.resource-group.name' attribute.", nil),
+			wantedError: extension_kit.ToError("Target is missing the 'azure.resource-group.name' attribute.", nil),
 		},
 		{
 			name: "Should return error if action is missing",
@@ -97,8 +97,8 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure-vm.vm.name":             {"my-vm"},
-						"azure-vm.subscription.id":     {"42"},
-						"azure-vm.resource-group.name": {"rg0815"},
+						"azure.subscription.id":     {"42"},
+						"azure.resource-group.name": {"rg0815"},
 					},
 				}),
 			}),

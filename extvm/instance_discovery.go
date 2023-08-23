@@ -6,19 +6,21 @@ package extvm
 
 import (
 	"context"
+	"fmt"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/extension-azure/utils"
-  extension_kit "github.com/steadybit/extension-kit"
-  "github.com/steadybit/extension-kit/extbuild"
+	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
 	"net/http"
-  "os"
-  "strconv"
+	"os"
+	"strconv"
+	"strings"
 )
 
 const discoveryBasePath = "/" + TargetIDVM + "/discovery"
@@ -28,6 +30,8 @@ func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/target-description", exthttp.GetterAsHandler(getTargetDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/attribute-descriptions", exthttp.GetterAsHandler(getAttributeDescriptions))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredTargets)
+	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-vm-to-container", exthttp.GetterAsHandler(getToContainerEnrichmentRule))
+	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-vm-to-host", exthttp.GetterAsHandler(getToHostEnrichmentRule))
 }
 
 var (
@@ -52,6 +56,12 @@ func GetDiscoveryList() discovery_kit_api.DiscoveryList {
 			{
 				Method: "GET",
 				Path:   discoveryBasePath + "/attribute-descriptions",
+			},
+		},
+		TargetEnrichmentRules: []discovery_kit_api.DescribingEndpointReference{
+			{
+				Method: "GET",
+				Path:   discoveryBasePath + "/rules/azure-vm-to-host",
 			},
 		},
 	}
@@ -85,7 +95,7 @@ func getTargetDescription() discovery_kit_api.TargetDescription {
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
-				{Attribute: "azure-vm.location"},
+				{Attribute: "azure.location"},
 			},
 			OrderBy: []discovery_kit_api.OrderBy{
 				{
@@ -101,14 +111,14 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 	return discovery_kit_api.AttributeDescriptions{
 		Attributes: []discovery_kit_api.AttributeDescription{
 			{
-				Attribute: "azure-vm.computer.name",
+				Attribute: "azure-vm.hostname",
 				Label: discovery_kit_api.PluralLabel{
-					One:   "Computer name",
-					Other: "Computer names",
+					One:   "Host name",
+					Other: "Host names",
 				},
 			},
 			{
-				Attribute: "azure-vm.location",
+				Attribute: "azure.location",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Location",
 					Other: "Locations",
@@ -178,14 +188,14 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 				},
 			},
 			{
-				Attribute: "azure-vm.subscription.id",
+				Attribute: "azure.subscription.id",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Subscription ID",
 					Other: "Subscription IDs",
 				},
 			},
 			{
-				Attribute: "azure-vm.resource-group.name",
+				Attribute: "azure.resource-group.name",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Resource group name",
 					Other: "Resource group names",
@@ -210,22 +220,22 @@ func getDiscoveredTargets(w http.ResponseWriter, _ *http.Request, _ []byte) {
 		return
 	}
 	targets, err := GetAllVirtualMachines(ctx, client)
-  if err != nil {
-    log.Error().Msgf("failed to get all virtual machines: %v", err)
-    exthttp.WriteError(w, extension_kit.ToError("Failed to collect azure virtual machines information", err))
-    return
-  }
+	if err != nil {
+		log.Error().Msgf("failed to get all virtual machines: %v", err)
+		exthttp.WriteError(w, extension_kit.ToError("Failed to collect azure virtual machines information", err))
+		return
+	}
 
 	exthttp.WriteBody(w, discovery_kit_api.DiscoveredTargets{Targets: targets})
 }
 
 func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
 	targets := make([]discovery_kit_api.Target, 0)
-  subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-  var subscriptions []*string
-  if subscriptionId != "" {
-    subscriptions = []*string{to.Ptr(subscriptionId)}
-  }
+	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
+	var subscriptions []*string
+	if subscriptionId != "" {
+		subscriptions = []*string{to.Ptr(subscriptionId)}
+	}
 	results, err := client.Resources(ctx,
 		armresourcegraph.QueryRequest{
 			Query: to.Ptr("Resources | where type =~ 'Microsoft.Compute/virtualMachines' | project name, type, resourceGroup, location, tags, properties, subscriptionId | limit 10"),
@@ -237,7 +247,7 @@ func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]d
 		nil)
 	if err != nil {
 		log.Error().Msgf("failed to get results: %v", err)
-    return targets, err
+		return targets, err
 	} else {
 		// Print the obtained query results
 		log.Debug().Msgf("Resources found: " + strconv.FormatInt(*results.TotalRecords, 10))
@@ -257,18 +267,21 @@ func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]d
 				osDisk := getMapValue(storageProfile, "osDisk")
 
 				attributes["azure-vm.vm.name"] = []string{items["name"].(string)}
-				attributes["azure-vm.subscription.id"] = []string{items["subscriptionId"].(string)}
+				attributes["azure.subscription.id"] = []string{items["subscriptionId"].(string)}
 				attributes["azure-vm.vm.id"] = []string{getPropertyValue(properties, "vmId")}
 				attributes["azure-vm.vm.size"] = []string{getPropertyValue(hardwareProfile, "vmSize")}
 				attributes["azure-vm.os.name"] = []string{getPropertyValue(instanceView, "osName")}
-				attributes["azure-vm.computer.name"] = []string{getPropertyValue(instanceView, "computerName")}
+				attributes["azure-vm.hostname"] = []string{getPropertyValue(instanceView, "computerName")}
 				attributes["azure-vm.os.version"] = []string{getPropertyValue(instanceView, "osVersion")}
 				attributes["azure-vm.os.type"] = []string{getPropertyValue(osDisk, "osType")}
 				attributes["azure-vm.power.state"] = []string{getPropertyValue(powerState, "code")}
 				attributes["azure-vm.network.id"] = []string{getPropertyValue(networkInterfaces, "id")}
-				attributes["azure-vm.location"] = []string{getPropertyValue(items, "location")}
-				attributes["azure-vm.resource-group.name"] = []string{getPropertyValue(items, "resourceGroup")}
-				attributes["azure-vm.tags"] = parseTags(getMapValue(items, "tags"))
+				attributes["azure.location"] = []string{getPropertyValue(items, "location")}
+				attributes["azure.resource-group.name"] = []string{getPropertyValue(items, "resourceGroup")}
+
+				for k, v := range getMapValue(items, "tags") {
+					attributes[fmt.Sprintf("azure-vm.label.%s", strings.ToLower(k))] = []string{extutil.ToString(v)}
+				}
 
 				targets = append(targets, discovery_kit_api.Target{
 					Id:         properties["vmId"].(string),
@@ -282,12 +295,123 @@ func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]d
 	return targets, nil
 }
 
-func parseTags(value map[string]interface{}) []string {
-	tags := make([]string, 0)
-	for k, v := range value {
-		tags = append(tags, k+":"+v.(string))
+func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      "com.steadybit.extension_azure.azure-vm-to-host",
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: TargetIDVM,
+			Selector: map[string]string{
+				"azure-vm.hostname": "${dest.host.hostname}",
+			},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: "com.steadybit.extension_host.host",
+			Selector: map[string]string{
+				"host.hostname": "${src.azure-vm.hostname}",
+			},
+		},
+		Attributes: []discovery_kit_api.Attribute{
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.subscription.id",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.vm.id",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.vm.size",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.os.name",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.os.version",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.os.type",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.network.id",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.location",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.resource-group.name",
+			},
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "azure-vm.label.",
+			},
+		},
 	}
-	return tags
+}
+
+func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      "com.steadybit.extension_azure.azure-vm-to-container",
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: TargetIDVM,
+			Selector: map[string]string{
+				"azure-vm.hostname": "${dest.container.host}",
+			},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: "com.steadybit.extension_container.container",
+			Selector: map[string]string{
+				"container.host": "${src.azure-vm.hostname}",
+			},
+		},
+		Attributes: []discovery_kit_api.Attribute{
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.subscription.id",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.vm.id",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.vm.size",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.os.name",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.os.version",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.os.type",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-vm.network.id",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.location",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.resource-group.name",
+			},
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "azure-vm.label.",
+			},
+		},
+	}
 }
 
 func getPropertyValue(properties map[string]interface{}, key string) string {
