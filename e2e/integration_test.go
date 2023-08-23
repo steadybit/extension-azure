@@ -19,7 +19,10 @@ func TestWithMinikube(t *testing.T) {
     Name: "extension-azure",
     Port: 8092,
     ExtraArgs: func(m *e2e.Minikube) []string {
-      return []string{"--set", "logging.level=debug"}
+      return []string{
+        "--set", "logging.level=debug",
+        "--set", "azure.level=debug",
+      }
     },
   }
 

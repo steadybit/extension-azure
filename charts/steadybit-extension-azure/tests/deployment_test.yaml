@@ -78,6 +78,8 @@ tests:
   - it: manifest should match snapshot with azure certificates vars
     set:
       azure:
+        clientID: "clientId"
+        tenantID: "tenantId"
         certificatePath: "/tmp/certificatePath"
         certificatePassword: "certificatePassword"
     asserts:

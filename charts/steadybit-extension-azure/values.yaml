@@ -93,12 +93,12 @@ extraEnv: []
 extraEnvFrom: []
 
 azure:
-  clientID: null
-  clientSecret: null
-  tenantID: null
-  subscriptionID: null
-  certificatePath: null
-  certificatePassword: null
-  userAssertionString: null
+  clientID: ""
+  clientSecret: ""
+  tenantID: ""
+  subscriptionID: ""
+  certificatePath: ""
+  certificatePassword: ""
+  userAssertionString: ""
   # azure.existingSecret -- If defined, will skip secret creation and instead assume that the referenced secret contains the keys clientID, clientSecret, tenantID, subscriptionID, certificatePath, certificatePassword, userAssertionString
   existingSecret: null

@@ -14,7 +14,7 @@ Learn about the capabilities of this extension in our [Reliability Hub](https://
 | `AZURE_TENANT_ID`                                | azure.tenantID            | Azure Tenant ID                                              | true     |         |
 | `AZURE_CLIENT_SECRET`                            | azure.clientSecret        | Azure Client Secret                                          | false    |         |
 | `AZURE_SUBSCRIPTION_ID`                          | azure.subscriptionID      | Azure Subscription ID                                        | false    |         |
-| `STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH` | azure.certificatePath     | Location of a certificate used to authenticate to azure      | false    |         |
+| `STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH`     | azure.certificatePath     | Location of a certificate used to authenticate to azure      | false    |         |
 | `STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD` | azure.certificatePassword | Passphrase for the certificate used to authenticate to azure | false    |         |
 
 
@@ -46,6 +46,9 @@ helm upgrade steadybit-extension-azure \
     --timeout 5m0s \
     --create-namespace \
     --namespace steadybit-extension \
+    --set azure.clientID=YOUR_CLIENT_ID \
+    --set azure.clientSecret=YOUR_CLIENT_SECRET \
+    --set azure.tenantID=YOUR_TENANT_ID \
     steadybit-extension-azure/steadybit-extension-azure
 ```
 
