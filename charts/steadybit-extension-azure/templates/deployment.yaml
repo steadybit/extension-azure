@@ -56,26 +56,31 @@ spec:
                 secretKeyRef:
                   name: {{ include "azure.secret.name" . }}
                   key: clientSecret
+                  optional: true
             - name: AZURE_SUBSCRIPTION_ID
               valueFrom:
                 secretKeyRef:
                   name: {{ include "azure.secret.name" . }}
                   key: subscriptionID
+                  optional: true
             - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
               valueFrom:
                 secretKeyRef:
                   name: {{ include "azure.secret.name" . }}
                   key: certificatePath
+                  optional: true
             - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "azure.secret.name" . }}
                   key: certificatePassword
+                  optional: true
             - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
               valueFrom:
                 secretKeyRef:
                   name: {{ include "azure.secret.name" . }}
                   key: userAssertionString
+                  optional: true
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             {{- with .Values.extraEnv }}
               {{- toYaml . | nindent 12 }}

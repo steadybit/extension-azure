@@ -38,26 +38,31 @@ manifest should match snapshot using podAnnotations and Labels:
                     secretKeyRef:
                       key: clientSecret
                       name: steadybit-extension-azure
+                      optional: true
                 - name: AZURE_SUBSCRIPTION_ID
                   valueFrom:
                     secretKeyRef:
                       key: subscriptionID
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
                   valueFrom:
                     secretKeyRef:
                       key: certificatePath
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: certificatePassword
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
                   valueFrom:
                     secretKeyRef:
                       key: userAssertionString
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -130,26 +135,31 @@ manifest should match snapshot with TLS:
                     secretKeyRef:
                       key: clientSecret
                       name: steadybit-extension-azure
+                      optional: true
                 - name: AZURE_SUBSCRIPTION_ID
                   valueFrom:
                     secretKeyRef:
                       key: subscriptionID
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
                   valueFrom:
                     secretKeyRef:
                       key: certificatePath
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: certificatePassword
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
                   valueFrom:
                     secretKeyRef:
                       key: userAssertionString
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -233,26 +243,31 @@ manifest should match snapshot with azure certificates vars:
                     secretKeyRef:
                       key: clientSecret
                       name: steadybit-extension-azure
+                      optional: true
                 - name: AZURE_SUBSCRIPTION_ID
                   valueFrom:
                     secretKeyRef:
                       key: subscriptionID
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
                   valueFrom:
                     secretKeyRef:
                       key: certificatePath
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: certificatePassword
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
                   valueFrom:
                     secretKeyRef:
                       key: userAssertionString
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -325,26 +340,31 @@ manifest should match snapshot with azure secrets vars:
                     secretKeyRef:
                       key: clientSecret
                       name: steadybit-extension-azure
+                      optional: true
                 - name: AZURE_SUBSCRIPTION_ID
                   valueFrom:
                     secretKeyRef:
                       key: subscriptionID
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
                   valueFrom:
                     secretKeyRef:
                       key: certificatePath
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: certificatePassword
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
                   valueFrom:
                     secretKeyRef:
                       key: userAssertionString
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -417,26 +437,31 @@ manifest should match snapshot with extra env vars:
                     secretKeyRef:
                       key: clientSecret
                       name: steadybit-extension-azure
+                      optional: true
                 - name: AZURE_SUBSCRIPTION_ID
                   valueFrom:
                     secretKeyRef:
                       key: subscriptionID
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
                   valueFrom:
                     secretKeyRef:
                       key: certificatePath
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: certificatePassword
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
                   valueFrom:
                     secretKeyRef:
                       key: userAssertionString
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -518,26 +543,31 @@ manifest should match snapshot with extra labels:
                     secretKeyRef:
                       key: clientSecret
                       name: steadybit-extension-azure
+                      optional: true
                 - name: AZURE_SUBSCRIPTION_ID
                   valueFrom:
                     secretKeyRef:
                       key: subscriptionID
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
                   valueFrom:
                     secretKeyRef:
                       key: certificatePath
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: certificatePassword
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
                   valueFrom:
                     secretKeyRef:
                       key: userAssertionString
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -610,26 +640,31 @@ manifest should match snapshot with mutual TLS:
                     secretKeyRef:
                       key: clientSecret
                       name: steadybit-extension-azure
+                      optional: true
                 - name: AZURE_SUBSCRIPTION_ID
                   valueFrom:
                     secretKeyRef:
                       key: subscriptionID
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
                   valueFrom:
                     secretKeyRef:
                       key: certificatePath
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: certificatePassword
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
                   valueFrom:
                     secretKeyRef:
                       key: userAssertionString
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -722,26 +757,31 @@ manifest should match snapshot with mutual TLS using containerPaths:
                     secretKeyRef:
                       key: clientSecret
                       name: steadybit-extension-azure
+                      optional: true
                 - name: AZURE_SUBSCRIPTION_ID
                   valueFrom:
                     secretKeyRef:
                       key: subscriptionID
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
                   valueFrom:
                     secretKeyRef:
                       key: certificatePath
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: certificatePassword
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
                   valueFrom:
                     secretKeyRef:
                       key: userAssertionString
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -820,26 +860,31 @@ manifest should match snapshot without TLS:
                     secretKeyRef:
                       key: clientSecret
                       name: steadybit-extension-azure
+                      optional: true
                 - name: AZURE_SUBSCRIPTION_ID
                   valueFrom:
                     secretKeyRef:
                       key: subscriptionID
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
                   valueFrom:
                     secretKeyRef:
                       key: certificatePath
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
                   valueFrom:
                     secretKeyRef:
                       key: certificatePassword
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
                   valueFrom:
                     secretKeyRef:
                       key: userAssertionString
                       name: steadybit-extension-azure
+                      optional: true
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
