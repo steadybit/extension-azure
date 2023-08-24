@@ -133,11 +133,6 @@ type ec2ClientApiMock struct {
 	mock.Mock
 }
 
-func (m *ec2ClientApiMock) BeginStart(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginStartOptions) (*runtime.Poller[armcompute.VirtualMachinesClientStartResponse], error) {
-	args := m.Called(ctx, resourceGroupName, vmName)
-	return nil, args.Error(1)
-}
-
 func (m *ec2ClientApiMock) BeginRestart(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginRestartOptions) (*runtime.Poller[armcompute.VirtualMachinesClientRestartResponse], error) {
 	args := m.Called(ctx, resourceGroupName, vmName)
 	return nil, args.Error(1)
@@ -157,35 +152,6 @@ func (m *ec2ClientApiMock) BeginDeallocate(ctx context.Context, resourceGroupNam
 	return nil, args.Error(1)
 }
 
-func TestAzureVirtualMachineStateAction_Start(t *testing.T) {
-	// Given
-	api := new(ec2ClientApiMock)
-	api.On("BeginStart", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
-		require.Equal(t, "rg-42", resourceGroupName)
-		return true
-	}), mock.MatchedBy(func(vmName string) bool {
-		require.Equal(t, "my-vm", vmName)
-		return true
-	})).Return(nil, nil)
-
-	action := virtualMachineStateAction{clientProvider: func(account string) (virtualMachineStateChangeApi, error) {
-		return api, nil
-	}}
-
-	// When
-	result, err := action.Start(context.Background(), &VirtualMachineStateChangeState{
-		SubscriptionId:    "42",
-		VmName:            "my-vm",
-		ResourceGroupName: "rg-42",
-		Action:            "start",
-	})
-
-	// Then
-	assert.NoError(t, err)
-	assert.Nil(t, result)
-
-	api.AssertExpectations(t)
-}
 
 func TestAzureVirtualMachineStateAction_ReStart(t *testing.T) {
 	// Given
@@ -310,7 +276,7 @@ func TestAzureVirtualMachineStateAction_Deallocate(t *testing.T) {
 func TestStartVirtualMachineStateChangeForwardsError(t *testing.T) {
 	// Given
 	api := new(ec2ClientApiMock)
-	api.On("BeginStart", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
+	api.On("BeginRestart", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
 	}), mock.MatchedBy(func(vmName string) bool {
@@ -326,7 +292,7 @@ func TestStartVirtualMachineStateChangeForwardsError(t *testing.T) {
 		SubscriptionId:    "42",
 		VmName:            "my-vm",
 		ResourceGroupName: "rg-42",
-		Action:            "start",
+		Action:            "restart",
 	})
 
 	// Then

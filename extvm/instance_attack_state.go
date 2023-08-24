@@ -32,7 +32,6 @@ type VirtualMachineStateChangeState struct {
 }
 
 type virtualMachineStateChangeApi interface {
-	BeginStart(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginStartOptions) (*runtime.Poller[armcompute.VirtualMachinesClientStartResponse], error)
 	BeginRestart(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginRestartOptions) (*runtime.Poller[armcompute.VirtualMachinesClientRestartResponse], error)
 	BeginDelete(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginDeleteOptions) (*runtime.Poller[armcompute.VirtualMachinesClientDeleteResponse], error)
 	BeginPowerOff(ctx context.Context, resourceGroupName string, vmName string, options *armcompute.VirtualMachinesClientBeginPowerOffOptions) (*runtime.Poller[armcompute.VirtualMachinesClientPowerOffResponse], error)
@@ -89,10 +88,6 @@ func (e *virtualMachineStateAction) Describe() action_kit_api.ActionDescription 
 						Value: "power-off",
 					},
 					action_kit_api.ExplicitParameterOption{
-						Label: "Start",
-						Value: "start",
-					},
-					action_kit_api.ExplicitParameterOption{
 						Label: "Delete",
 						Value: "delete",
 					},
@@ -144,8 +139,6 @@ func (e *virtualMachineStateAction) Start(ctx context.Context, state *VirtualMac
 		_, err = client.BeginRestart(ctx, state.ResourceGroupName, state.VmName, nil)
 	} else if state.Action == "power-off" {
 		_, err = client.BeginPowerOff(ctx, state.ResourceGroupName, state.VmName, nil)
-	} else if state.Action == "start" {
-		_, err = client.BeginStart(ctx, state.ResourceGroupName, state.VmName, nil)
 	} else if state.Action == "delete" {
 		_, err = client.BeginDelete(ctx, state.ResourceGroupName, state.VmName, nil)
 	} else if state.Action == "deallocate" {

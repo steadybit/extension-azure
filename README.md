@@ -32,6 +32,9 @@ docker run \
   --rm \
   -p 8092 \
   --name steadybit-extension-azure \
+  -e AZURE_CLIENT_ID='YOUR_CLIENT_ID' \
+  -e AZURE_CLIENT_SECRET='YOUR_CLIENT_SECRET' \
+  -e AZURE_TENANT_ID='YOUR_TENANT_ID' \
   ghcr.io/steadybit/extension-azure:latest
 ```
 
