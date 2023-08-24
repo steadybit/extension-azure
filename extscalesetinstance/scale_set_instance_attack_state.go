@@ -25,9 +25,9 @@ type scaleSetInstanceAction struct {
 var _ action_kit_sdk.Action[ScaleSetInstanceChangeState] = (*scaleSetInstanceAction)(nil)
 
 type ScaleSetInstanceChangeState struct {
-	SubscriptionId    string
-	InstanceName      string
-	InstanceID      string
+	SubscriptionId string
+  VmScaleSetName string
+	InstanceID     string
 	ResourceGroupName string
 	Action            string
 }
@@ -103,9 +103,9 @@ func (e *scaleSetInstanceAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (e *scaleSetInstanceAction) Prepare(_ context.Context, state *ScaleSetInstanceChangeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	vmScaleSetName := request.Target.Attributes["azure-scaleset-instance.vm.name"]
+	vmScaleSetName := request.Target.Attributes["azure-scaleset.name"]
 	if len(vmScaleSetName) == 0 {
-		return nil, extension_kit.ToError("Target is missing the 'azure-scaleset-instance.vm.name' attribute.", nil)
+		return nil, extension_kit.ToError("Target is missing the 'azure-scaleset.name' attribute.", nil)
 	}
 
   instanceId := request.Target.Attributes["azure-scaleset-instance.id"]
@@ -129,7 +129,7 @@ func (e *scaleSetInstanceAction) Prepare(_ context.Context, state *ScaleSetInsta
 	}
 
 	state.SubscriptionId = subscriptionId[0]
-	state.InstanceName = vmScaleSetName[0]
+	state.VmScaleSetName = vmScaleSetName[0]
 	state.InstanceID = instanceId[0]
 	state.ResourceGroupName = resourceGroupName[0]
 	state.Action = action.(string)
@@ -143,19 +143,19 @@ func (e *scaleSetInstanceAction) Start(ctx context.Context, state *ScaleSetInsta
 	}
 
 	if state.Action == "restart" {
-		_, err = client.BeginRestart(ctx, state.ResourceGroupName, state.InstanceName,state.InstanceID, nil)
+		_, err = client.BeginRestart(ctx, state.ResourceGroupName, state.VmScaleSetName,state.InstanceID, nil)
 	} else if state.Action == "power-off" {
-		_, err = client.BeginPowerOff(ctx, state.ResourceGroupName, state.InstanceName,state.InstanceID, nil)
+		_, err = client.BeginPowerOff(ctx, state.ResourceGroupName, state.VmScaleSetName,state.InstanceID, nil)
 	} else if state.Action == "delete" {
-		_, err = client.BeginDelete(ctx, state.ResourceGroupName, state.InstanceName, state.InstanceID,nil)
+		_, err = client.BeginDelete(ctx, state.ResourceGroupName, state.VmScaleSetName, state.InstanceID,nil)
 	} else if state.Action == "deallocate" {
-		_, err = client.BeginDeallocate(ctx, state.ResourceGroupName, state.InstanceName,state.InstanceID, nil)
+		_, err = client.BeginDeallocate(ctx, state.ResourceGroupName, state.VmScaleSetName,state.InstanceID, nil)
 	} else {
 		return nil, extension_kit.ToError(fmt.Sprintf("Unknown state change attack '%s'", state.Action), nil)
 	}
 
 	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to execute state change attack '%s' on vm '%s'", state.Action, state.InstanceName), err)
+		return nil, extension_kit.ToError(fmt.Sprintf("Failed to execute state change attack '%s' on vm '%s'", state.Action, state.VmScaleSetName), err)
 	}
 
 	return nil, nil

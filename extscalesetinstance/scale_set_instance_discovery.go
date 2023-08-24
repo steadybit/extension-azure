@@ -182,9 +182,12 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient *armcompute.
 		for _, instance := range page.Value {
 			attributes := make(map[string][]string)
 
+
+			attributes["azure-scaleset.name"] = []string{scaleSet.Name}
 			attributes["azure-scaleset-instance.vm.name"] = []string{*instance.Name}
 			attributes["azure.subscription.id"] = []string{scaleSet.SubscriptionId}
-			attributes["azure-scaleset-instance.id"] = []string{*instance.ID}
+			attributes["azure-scaleset-instance.resource.id"] = []string{*instance.ID}
+			attributes["azure-scaleset-instance.id"] = []string{*instance.InstanceID}
 
 			if instance.Properties != nil {
 				if instance.Properties.OSProfile != nil {

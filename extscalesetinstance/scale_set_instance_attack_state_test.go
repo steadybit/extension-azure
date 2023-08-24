@@ -31,7 +31,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset-instance.vm.name": {"my-vm"},
+						"azure-scaleset.name": {"my-scaleSet"},
 						"azure.subscription.id":           {"42"},
 						"azure.resource-group.name":       {"rg0815"},
 						"azure-scaleset-instance.id":      {"InstanceID0815"},
@@ -40,7 +40,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 			}),
 
 			wantedState: &ScaleSetInstanceChangeState{
-				InstanceName:      "my-vm",
+				VmScaleSetName:    "my-scaleSet",
 				Action:            "power-off",
 				SubscriptionId:    "42",
 				ResourceGroupName: "rg0815",
@@ -54,7 +54,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset-instance.vm.name": {"my-vm"},
+						"azure-scaleset.name": {"my-scaleSet"},
 						"azure-scaleset-instance.id":      {"InstanceID0815"},
 						"azure.resource-group.name":       {"rg0815"},
 					},
@@ -70,7 +70,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset-instance.vm.name": {"my-vm"},
+						"azure-scaleset.name": {"my-scaleSet"},
 						"azure.resource-group.name":       {"rg0815"},
 						"azure.subscription.id":           {"42"},
 					},
@@ -92,7 +92,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 					},
 				}),
 			}),
-			wantedError: extension_kit.ToError("Target is missing the 'azure-scaleset-instance.vm.name' attribute.", nil),
+			wantedError: extension_kit.ToError("Target is missing the 'azure-scaleset.name' attribute.", nil),
 		},
 		{
 			name: "Should return error if resource-group is missing",
@@ -102,7 +102,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset-instance.vm.name": {"my-vm"},
+						"azure-scaleset.name": {"my-scaleSet"},
 						"azure-scaleset-instance.id":      {"InstanceID0815"},
 						"azure.subscription.id":           {"42"},
 					},
@@ -116,7 +116,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				Config: map[string]interface{}{},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset-instance.vm.name": {"my-vm"},
+						"azure-scaleset.name": {"my-scaleSet"},
 						"azure-scaleset-instance.id":      {"InstanceID0815"},
 						"azure.subscription.id":           {"42"},
 						"azure.resource-group.name":       {"rg0815"},
@@ -142,7 +142,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 			if tt.wantedState != nil {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.wantedState.ResourceGroupName, state.ResourceGroupName)
-				assert.Equal(t, tt.wantedState.InstanceName, state.InstanceName)
+				assert.Equal(t, tt.wantedState.VmScaleSetName, state.VmScaleSetName)
 				assert.Equal(t, tt.wantedState.SubscriptionId, state.SubscriptionId)
 				assert.EqualValues(t, tt.wantedState.Action, state.Action)
 			}
@@ -180,7 +180,7 @@ func TestAzureScaleSetInstanceAction_ReStart(t *testing.T) {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
 	}), mock.MatchedBy(func(vmScaleSetName string) bool {
-		require.Equal(t, "my-vm", vmScaleSetName)
+		require.Equal(t, "my-scaleSet", vmScaleSetName)
 		return true
 	}), mock.MatchedBy(func(instanceId string) bool {
 		require.Equal(t, "InstanceID0815", instanceId)
@@ -194,7 +194,7 @@ func TestAzureScaleSetInstanceAction_ReStart(t *testing.T) {
 	// When
 	result, err := action.Start(context.Background(), &ScaleSetInstanceChangeState{
 		SubscriptionId:    "42",
-		InstanceName:      "my-vm",
+		VmScaleSetName:    "my-scaleSet",
 		InstanceID:        "InstanceID0815",
 		ResourceGroupName: "rg-42",
 		Action:            "restart",
@@ -214,7 +214,7 @@ func TestAzureScaleSetInstanceAction_Delete(t *testing.T) {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
 	}), mock.MatchedBy(func(vmScaleSetName string) bool {
-		require.Equal(t, "my-vm", vmScaleSetName)
+		require.Equal(t, "my-scaleSet", vmScaleSetName)
 		return true
 	}), mock.MatchedBy(func(instanceId string) bool {
 		require.Equal(t, "InstanceID0815", instanceId)
@@ -228,7 +228,7 @@ func TestAzureScaleSetInstanceAction_Delete(t *testing.T) {
 	// When
 	result, err := action.Start(context.Background(), &ScaleSetInstanceChangeState{
 		SubscriptionId:    "42",
-		InstanceName:      "my-vm",
+		VmScaleSetName:    "my-scaleSet",
 		InstanceID:        "InstanceID0815",
 		ResourceGroupName: "rg-42",
 		Action:            "delete",
@@ -248,7 +248,7 @@ func TestAzureScaleSetInstanceAction_PowerOff(t *testing.T) {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
 	}), mock.MatchedBy(func(vmScaleSetName string) bool {
-		require.Equal(t, "my-vm", vmScaleSetName)
+		require.Equal(t, "my-scaleSet", vmScaleSetName)
 		return true
 	}), mock.MatchedBy(func(instanceId string) bool {
 		require.Equal(t, "InstanceID0815", instanceId)
@@ -262,7 +262,7 @@ func TestAzureScaleSetInstanceAction_PowerOff(t *testing.T) {
 	// When
 	result, err := action.Start(context.Background(), &ScaleSetInstanceChangeState{
 		SubscriptionId:    "42",
-		InstanceName:      "my-vm",
+		VmScaleSetName:    "my-scaleSet",
 		InstanceID:        "InstanceID0815",
 		ResourceGroupName: "rg-42",
 		Action:            "power-off",
@@ -282,7 +282,7 @@ func TestAzureScaleSetInstanceAction_Deallocate(t *testing.T) {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
 	}), mock.MatchedBy(func(vmScaleSetName string) bool {
-		require.Equal(t, "my-vm", vmScaleSetName)
+		require.Equal(t, "my-scaleSet", vmScaleSetName)
 		return true
 	}), mock.MatchedBy(func(instanceId string) bool {
 		require.Equal(t, "InstanceID0815", instanceId)
@@ -296,7 +296,7 @@ func TestAzureScaleSetInstanceAction_Deallocate(t *testing.T) {
 	// When
 	result, err := action.Start(context.Background(), &ScaleSetInstanceChangeState{
 		SubscriptionId:    "42",
-		InstanceName:      "my-vm",
+		VmScaleSetName:    "my-scaleSet",
 		InstanceID:        "InstanceID0815",
 		ResourceGroupName: "rg-42",
 		Action:            "deallocate",
@@ -316,7 +316,7 @@ func TestStartScaleSetInstanceChangeForwardsError(t *testing.T) {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
 	}), mock.MatchedBy(func(vmScaleSetName string) bool {
-		require.Equal(t, "my-vm", vmScaleSetName)
+		require.Equal(t, "my-scaleSet", vmScaleSetName)
 		return true
 	}), mock.MatchedBy(func(instanceId string) bool {
 		require.Equal(t, "InstanceID0815", instanceId)
@@ -329,7 +329,7 @@ func TestStartScaleSetInstanceChangeForwardsError(t *testing.T) {
 	// When
 	result, err := action.Start(context.Background(), &ScaleSetInstanceChangeState{
 		SubscriptionId:    "42",
-		InstanceName:      "my-vm",
+		VmScaleSetName:    "my-scaleSet",
 		InstanceID:        "InstanceID0815",
 		ResourceGroupName: "rg-42",
 		Action:            "restart",
