@@ -12,7 +12,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	"github.com/steadybit/extension-azure/utils"
+	"github.com/steadybit/extension-azure/common"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthttp"
@@ -209,13 +209,11 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 	}
 }
 
-type ArmResourceGraphApi interface {
-	Resources(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error)
-}
+
 
 func getDiscoveredVMs(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	ctx := context.Background()
-	client, err := utils.GetClientByCredentials()
+	client, err := common.GetClientByCredentials()
 	if err != nil {
 		log.Error().Msgf("failed to get client: %v", err)
 		return
@@ -230,7 +228,7 @@ func getDiscoveredVMs(w http.ResponseWriter, _ *http.Request, _ []byte) {
   exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 }
 
-func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
+func GetAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
 
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
@@ -239,7 +237,7 @@ func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]d
 	}
 	results, err := client.Resources(ctx,
 		armresourcegraph.QueryRequest{
-			Query: to.Ptr("Resources | where type =~ 'Microsoft.Compute/virtualMachines' | project name, type, resourceGroup, location, tags, properties, subscriptionId | limit 10"),
+			Query: to.Ptr("Resources | where type =~ 'Microsoft.Compute/virtualMachines' | project name, type, resourceGroup, location, tags, properties, subscriptionId"),
 			Options: &armresourcegraph.QueryRequestOptions{
 				ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 			},
@@ -251,7 +249,7 @@ func GetAllVirtualMachines(ctx context.Context, client ArmResourceGraphApi) ([]d
 		return nil, err
 	} else {
 		// Print the obtained query results
-		log.Debug().Msgf("Resources found: " + strconv.FormatInt(*results.TotalRecords, 10))
+		log.Debug().Msgf("Virtual Machines found: " + strconv.FormatInt(*results.TotalRecords, 10))
     targets := make([]discovery_kit_api.Target, 0)
 		if m, ok := results.Data.([]interface{}); ok {
 			for _, r := range m {

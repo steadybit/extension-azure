@@ -1,4 +1,4 @@
-package utils
+package common
 
 import (
 	"crypto"
@@ -41,6 +41,21 @@ func GetVirtualMachinesClient(subscriptionId string) (*armcompute.VirtualMachine
 		return nil, err
 	}
 	virtualMachinesClient := computeClientFactory.NewVirtualMachinesClient()
+	return virtualMachinesClient, nil
+}
+
+func GetVirtualMachineScaleSetVMsClient(subscriptionId string) (*armcompute.VirtualMachineScaleSetVMsClient, error) {
+	conn, err := connectionAzure()
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to create Azure connection.")
+		return nil, err
+	}
+	computeClientFactory, err := armcompute.NewClientFactory(subscriptionId, conn, nil)
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to create Azure compute client.")
+		return nil, err
+	}
+	virtualMachinesClient := computeClientFactory.NewVirtualMachineScaleSetVMsClient()
 	return virtualMachinesClient, nil
 }
 
@@ -113,7 +128,7 @@ func credsByCertificate(certificateLocation string, passphrase string, tenantID 
 }
 
 func getCertsAndKey(certificateLocation string, passphrase string) ([]*x509.Certificate, crypto.PrivateKey, error) {
-	log.Info().Msgf("Using certificate authentication.")
+	log.Debug().Msgf("Using certificate authentication.")
 	certData, err := os.ReadFile(certificateLocation)
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to read certificate file.")

@@ -11,7 +11,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
-	"github.com/steadybit/extension-azure/utils"
+	"github.com/steadybit/extension-azure/common"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
@@ -155,5 +155,5 @@ func (e *virtualMachineStateAction) Start(ctx context.Context, state *VirtualMac
 }
 
 func defaultClientProvider(subscriptionId string) (virtualMachineStateChangeApi, error) {
-	return utils.GetVirtualMachinesClient(subscriptionId)
+	return common.GetVirtualMachinesClient(subscriptionId)
 }

@@ -10,7 +10,8 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/event-kit/go/event_kit_api"
 	"github.com/steadybit/extension-azure/config"
-	"github.com/steadybit/extension-azure/extvm"
+  "github.com/steadybit/extension-azure/extscalesetinstance"
+  "github.com/steadybit/extension-azure/extvm"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthealth"
 	"github.com/steadybit/extension-kit/exthttp"
@@ -49,7 +50,9 @@ func main() {
 	// for your extension. You might want to change these because the names do not fit, or because
 	// you do not have a need for all of them.
 	extvm.RegisterDiscoveryHandlers()
+	extscalesetinstance.RegisterDiscoveryHandlers()
 	action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
+	action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
 
 	//This will install a signal handlder, that will stop active actions when receiving a SIGURS1, SIGTERM or SIGINT
 	action_kit_sdk.InstallSignalHandler()
@@ -78,16 +81,29 @@ type ExtensionListResponse struct {
 }
 
 func getExtensionList() ExtensionListResponse {
-	return ExtensionListResponse{
-		// See this document to learn more about the action list:
-		// https://github.com/steadybit/action-kit/blob/main/docs/action-api.md#action-list
+  discoveries := make([]discovery_kit_api.DescribingEndpointReference, 0)
+  discoveries = append(discoveries, extvm.GetDiscoveryList().Discoveries...)
+  discoveries = append(discoveries, extscalesetinstance.GetDiscoveryList().Discoveries...)
+  targetAttributes := make([]discovery_kit_api.DescribingEndpointReference, 0)
+  targetAttributes = append(targetAttributes, extvm.GetDiscoveryList().TargetAttributes...)
+  targetAttributes = append(targetAttributes, extscalesetinstance.GetDiscoveryList().TargetAttributes...)
+  targetEnrichmentRukles := make([]discovery_kit_api.DescribingEndpointReference, 0)
+  targetEnrichmentRukles = append(targetEnrichmentRukles, extvm.GetDiscoveryList().TargetEnrichmentRules...)
+  targetEnrichmentRukles = append(targetEnrichmentRukles, extscalesetinstance.GetDiscoveryList().TargetEnrichmentRules...)
+  targetTypes := make([]discovery_kit_api.DescribingEndpointReference, 0)
+  targetTypes = append(targetTypes, extvm.GetDiscoveryList().TargetTypes...)
+  targetTypes = append(targetTypes, extscalesetinstance.GetDiscoveryList().TargetTypes...)
+
+  return ExtensionListResponse{
 		ActionList: action_kit_sdk.GetActionList(),
 
-		// See this document to learn more about the discovery list:
-		// https://github.com/steadybit/discovery-kit/blob/main/docs/discovery-api.md#index-response
-		DiscoveryList: extvm.GetDiscoveryList(),
+		DiscoveryList: discovery_kit_api.DiscoveryList{
+      Discoveries: discoveries,
+      TargetAttributes: targetAttributes,
+      TargetEnrichmentRules: targetEnrichmentRukles,
+      TargetTypes: targetTypes,
+    },
 
-		// See this document to learn more about the event listener list:
-		// https://github.com/steadybit/event-kit/blob/main/docs/event-api.md#event-listeners-list
+
 	}
 }
