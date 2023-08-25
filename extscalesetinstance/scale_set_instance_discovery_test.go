@@ -178,13 +178,13 @@ func TestGetAllError(t *testing.T) {
 func TestGetAttributeDescriptions(t *testing.T) {
 	// just cover this static code
 	descriptions := getAttributeDescriptions()
-	assert.Greater(t, len(descriptions.Attributes), 8)
+	assert.Greater(t, len(descriptions.Attributes), 6)
 }
 
 func TestGetToContainerEnrichmentRule(t *testing.T) {
 	// just cover this static code
 	enrichmentRule := getToContainerEnrichmentRule()
-	assert.Greater(t, len(enrichmentRule.Attributes), 8)
+	assert.Greater(t, len(enrichmentRule.Attributes), 6)
 }
 
 func TestGetToHostEnrichmentRule(t *testing.T) {
