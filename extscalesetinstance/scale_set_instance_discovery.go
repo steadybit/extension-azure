@@ -469,6 +469,10 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure.resource-group.name",
 			},
+      {
+        Matcher: discovery_kit_api.Equals,
+        Name:    "azure-scale-set-instance.provisioning.state",
+      },
 			{
 				Matcher: discovery_kit_api.StartsWith,
 				Name:    "azure-scale-set-instance.label.",
