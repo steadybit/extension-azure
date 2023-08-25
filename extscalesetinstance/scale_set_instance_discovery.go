@@ -191,6 +191,7 @@ func getDiscoveredInstances(w http.ResponseWriter, _ *http.Request, _ []byte) {
 
 	scaleSetMap := make(map[string][]ScaleSet)
 	for _, scaleSet := range scaleSets {
+		appendKubernetesServiceAttributes(ctx, client, scaleSet)
 		if scaleSetMap[scaleSet.SubscriptionId] != nil {
 			scaleSetMap[scaleSet.SubscriptionId] = append(scaleSetMap[scaleSet.SubscriptionId], scaleSet)
 		} else {
@@ -218,6 +219,23 @@ func getDiscoveredInstances(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	}
 
 	exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
+}
+
+func appendKubernetesServiceAttributes(ctx context.Context, client *armresourcegraph.Client, scaleSet ScaleSet) {
+	clusters, err := getKubernetesManagedClusters(ctx, client, scaleSet.ResourceGroupName)
+	if err != nil {
+		log.Error().Msgf("failed to get kubernetes managed clusters: %v", err)
+		return
+	}
+	for _, cluster := range clusters {
+		common.AddAttribute(scaleSet.Attributes, "azure-containerservice-managed-cluster.name", cluster.Name)
+		common.AddAttribute(scaleSet.Attributes, "azure-containerservice-managed-cluster.location", cluster.Location)
+		common.AddAttribute(scaleSet.Attributes, "azure-containerservice-managed-cluster.resource-group.name", cluster.ResourceGroupName)
+		common.AddAttribute(scaleSet.Attributes, "azure-containerservice-managed-cluster.subscription.id", cluster.SubscriptionId)
+		for k, v := range cluster.Attributes {
+			common.AddAttribute(scaleSet.Attributes, k, v[0])
+		}
+	}
 }
 
 type AzureVirtualMachineScaleSetVMsClient interface {
@@ -299,6 +317,57 @@ type ScaleSet struct {
 	Attributes        map[string][]string
 }
 
+type KubernetesService struct {
+	Name              string
+	ResourceGroupName string
+	Location          string
+	SubscriptionId    string
+	Attributes        map[string][]string
+}
+
+func getKubernetesManagedClusters(ctx context.Context, client common.ArmResourceGraphApi, nodeResourceGroup string) ([]KubernetesService, error) {
+
+	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
+	var subscriptions []*string
+	if subscriptionId != "" {
+		subscriptions = []*string{to.Ptr(subscriptionId)}
+	}
+	results, err := client.Resources(ctx,
+		armresourcegraph.QueryRequest{
+			Query: to.Ptr("resources | where type =~ 'microsoft.containerservice/managedclusters' and tolower(properties.nodeResourceGroup) == \"" + nodeResourceGroup + "\" | project name, type, resourceGroup, location, tags, properties, subscriptionId"),
+			Options: &armresourcegraph.QueryRequestOptions{
+				ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
+			},
+			Subscriptions: subscriptions,
+		},
+		nil)
+	if err != nil {
+		log.Error().Msgf("failed to get results: %v", err)
+		return nil, err
+	} else {
+		log.Debug().Msgf("Kubernetes Services found: " + strconv.FormatInt(*results.TotalRecords, 10))
+		kubernetesServices := make([]KubernetesService, 0)
+		if m, ok := results.Data.([]interface{}); ok {
+			for _, r := range m {
+				items := r.(map[string]interface{})
+				attributes := make(map[string][]string)
+
+				for k, v := range common.GetMapValue(items, "tags") {
+					attributes[fmt.Sprintf("azure-containerservice-managed-cluster.label.%s", strings.ToLower(k))] = []string{extutil.ToString(v)}
+				}
+
+				kubernetesServices = append(kubernetesServices, KubernetesService{
+					Name:              items["name"].(string),
+					Location:          items["location"].(string),
+					ResourceGroupName: items["resourceGroup"].(string),
+					SubscriptionId:    items["subscriptionId"].(string),
+					Attributes:        attributes,
+				})
+			}
+		}
+		return kubernetesServices, nil
+	}
+}
 func GetAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]ScaleSet, error) {
 
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
@@ -319,7 +388,6 @@ func GetAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]
 		log.Error().Msgf("failed to get results: %v", err)
 		return nil, err
 	} else {
-		// Print the obtained query results
 		log.Debug().Msgf("ScaleSets found: " + strconv.FormatInt(*results.TotalRecords, 10))
 		scaleSets := make([]ScaleSet, 0)
 		if m, ok := results.Data.([]interface{}); ok {
@@ -396,7 +464,7 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure-scale-set.name",
 			},
-      {
+			{
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure-scale-set-instance.provisioning.state",
 			},
@@ -404,10 +472,10 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				Matcher: discovery_kit_api.StartsWith,
 				Name:    "azure-scale-set-instance.label.",
 			},
-      {
-        Matcher: discovery_kit_api.StartsWith,
-        Name:    "azure-scale-set.label.",
-      },
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "azure-scale-set.label.",
+			},
 		},
 	}
 }
@@ -461,19 +529,19 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure.resource-group.name",
 			},
-      {
-        Matcher: discovery_kit_api.Equals,
-        Name:    "azure-scale-set-instance.provisioning.state",
-      },
-      {
-        Matcher: discovery_kit_api.Equals,
-        Name:    "azure-scale-set.name",
-      },
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-scale-set-instance.provisioning.state",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-scale-set.name",
+			},
 			{
 				Matcher: discovery_kit_api.StartsWith,
 				Name:    "azure-scale-set-instance.label.",
 			},
-      {
+			{
 				Matcher: discovery_kit_api.StartsWith,
 				Name:    "azure-scale-set.label.",
 			},
