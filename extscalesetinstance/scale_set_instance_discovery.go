@@ -101,6 +101,7 @@ func getTargetDescription() discovery_kit_api.TargetDescription {
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
 				{Attribute: "azure.location"},
+				{Attribute: "azure-containerservice-managed-cluster.name"},
 			},
 			OrderBy: []discovery_kit_api.OrderBy{
 				{
@@ -116,6 +117,13 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 	return discovery_kit_api.AttributeDescriptions{
 		Attributes: []discovery_kit_api.AttributeDescription{
 			{
+				Attribute: "azure-containerservice-managed-cluster.name",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "Cluster name",
+					Other: "Cluster names",
+				},
+			},
+      {
 				Attribute: "azure-scale-set-instance.hostname",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Host name",
