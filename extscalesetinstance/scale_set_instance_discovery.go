@@ -123,13 +123,6 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 				},
 			},
 			{
-				Attribute: "azure-scale-set-instance.network.id",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Network ID",
-					Other: "Network IDs",
-				},
-			},
-			{
 				Attribute: "azure-scale-set-instance.os.name",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "OS name",
@@ -151,7 +144,7 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 				},
 			},
 			{
-				Attribute: "azure-scale-set-instance.vm.id",
+				Attribute: "azure-scale-set-instance.id",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "VM ID",
 					Other: "VM IDs",
@@ -374,7 +367,7 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				Name:    "azure.subscription.id",
 			}, {
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.vm.id",
+				Name:    "azure-scale-set-instance.id",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
@@ -394,9 +387,6 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.network.id",
-			}, {
-				Matcher: discovery_kit_api.Equals,
 				Name:    "azure.location",
 			},
 			{
@@ -405,7 +395,8 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 			}, {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure-scale-set.name",
-			}, {
+			},
+      {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure-scale-set-instance.provisioning.state",
 			},
@@ -413,6 +404,10 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				Matcher: discovery_kit_api.StartsWith,
 				Name:    "azure-scale-set-instance.label.",
 			},
+      {
+        Matcher: discovery_kit_api.StartsWith,
+        Name:    "azure-scale-set.label.",
+      },
 		},
 	}
 }
@@ -440,7 +435,7 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				Name:    "azure.subscription.id",
 			}, {
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.vm.id",
+				Name:    "azure-scale-set-instance.id",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
@@ -460,9 +455,6 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.network.id",
-			}, {
-				Matcher: discovery_kit_api.Equals,
 				Name:    "azure.location",
 			},
 			{
@@ -473,9 +465,17 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
         Matcher: discovery_kit_api.Equals,
         Name:    "azure-scale-set-instance.provisioning.state",
       },
+      {
+        Matcher: discovery_kit_api.Equals,
+        Name:    "azure-scale-set.name",
+      },
 			{
 				Matcher: discovery_kit_api.StartsWith,
 				Name:    "azure-scale-set-instance.label.",
+			},
+      {
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "azure-scale-set.label.",
 			},
 		},
 	}

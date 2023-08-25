@@ -65,7 +65,7 @@ func (e *scaleSetInstanceAction) Describe() action_kit_api.ActionDescription {
         {
           Label:       "by scale-set-instance-id",
           Description: extutil.Ptr("Find azure scale set instance by id"),
-          Query:       "azure-scale-set-instance.vm.id=\"\"",
+          Query:       "azure-scale-set-instance.id=\"\"",
         },
         {
           Label:       "by scale-set-name",
