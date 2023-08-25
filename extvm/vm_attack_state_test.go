@@ -129,25 +129,25 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 	}
 }
 
-type ec2ClientApiMock struct {
+type azureClientApiMock struct {
 	mock.Mock
 }
 
-func (m *ec2ClientApiMock) BeginRestart(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginRestartOptions) (*runtime.Poller[armcompute.VirtualMachinesClientRestartResponse], error) {
+func (m *azureClientApiMock) BeginRestart(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginRestartOptions) (*runtime.Poller[armcompute.VirtualMachinesClientRestartResponse], error) {
 	args := m.Called(ctx, resourceGroupName, vmName)
 	return nil, args.Error(1)
 }
 
-func (m *ec2ClientApiMock) BeginDelete(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginDeleteOptions) (*runtime.Poller[armcompute.VirtualMachinesClientDeleteResponse], error) {
+func (m *azureClientApiMock) BeginDelete(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginDeleteOptions) (*runtime.Poller[armcompute.VirtualMachinesClientDeleteResponse], error) {
 	args := m.Called(ctx, resourceGroupName, vmName)
 	return nil, args.Error(1)
 }
 
-func (m *ec2ClientApiMock) BeginPowerOff(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginPowerOffOptions) (*runtime.Poller[armcompute.VirtualMachinesClientPowerOffResponse], error) {
+func (m *azureClientApiMock) BeginPowerOff(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginPowerOffOptions) (*runtime.Poller[armcompute.VirtualMachinesClientPowerOffResponse], error) {
 	args := m.Called(ctx, resourceGroupName, vmName)
 	return nil, args.Error(1)
 }
-func (m *ec2ClientApiMock) BeginDeallocate(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginDeallocateOptions) (*runtime.Poller[armcompute.VirtualMachinesClientDeallocateResponse], error) {
+func (m *azureClientApiMock) BeginDeallocate(ctx context.Context, resourceGroupName string, vmName string, _ *armcompute.VirtualMachinesClientBeginDeallocateOptions) (*runtime.Poller[armcompute.VirtualMachinesClientDeallocateResponse], error) {
 	args := m.Called(ctx, resourceGroupName, vmName)
 	return nil, args.Error(1)
 }
@@ -155,7 +155,7 @@ func (m *ec2ClientApiMock) BeginDeallocate(ctx context.Context, resourceGroupNam
 
 func TestAzureVirtualMachineStateAction_ReStart(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginRestart", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
@@ -185,7 +185,7 @@ func TestAzureVirtualMachineStateAction_ReStart(t *testing.T) {
 
 func TestAzureVirtualMachineStateAction_Delete(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginDelete", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
@@ -215,7 +215,7 @@ func TestAzureVirtualMachineStateAction_Delete(t *testing.T) {
 
 func TestAzureVirtualMachineStateAction_PowerOff(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginPowerOff", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
@@ -245,7 +245,7 @@ func TestAzureVirtualMachineStateAction_PowerOff(t *testing.T) {
 
 func TestAzureVirtualMachineStateAction_Deallocate(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginDeallocate", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
@@ -275,7 +275,7 @@ func TestAzureVirtualMachineStateAction_Deallocate(t *testing.T) {
 
 func TestStartVirtualMachineStateChangeForwardsError(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginRestart", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true

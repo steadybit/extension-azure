@@ -60,12 +60,12 @@ func (e *scaleSetInstanceAction) Describe() action_kit_api.ActionDescription {
 				{
 					Label:       "by vm-name",
 					Description: extutil.Ptr("Find azure scale set instance by name"),
-					Query:       "azure-scaleset-instance.vm.name=\"\"",
+					Query:       "azure-scale-set-instance.name=\"\"",
 				},
         {
           Label:       "by vm-id",
           Description: extutil.Ptr("Find azure scale set instance by vm-id"),
-          Query:       "azure-scaleset-instance.vm.id=\"\"",
+          Query:       "azure-scale-set-instance.vm.id=\"\"",
         },
 			}),
 		}),
@@ -103,12 +103,12 @@ func (e *scaleSetInstanceAction) Describe() action_kit_api.ActionDescription {
 }
 
 func (e *scaleSetInstanceAction) Prepare(_ context.Context, state *ScaleSetInstanceChangeState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	vmScaleSetName := request.Target.Attributes["azure-scaleset.name"]
+	vmScaleSetName := request.Target.Attributes["azure-scale-set.name"]
 	if len(vmScaleSetName) == 0 {
 		return nil, extension_kit.ToError("Target is missing the 'azure-scaleset.name' attribute.", nil)
 	}
 
-  instanceId := request.Target.Attributes["azure-scaleset-instance.id"]
+  instanceId := request.Target.Attributes["azure-scale-set-instance.id"]
 	if len(instanceId) == 0 {
 		return nil, extension_kit.ToError("Target is missing the 'azure-scaleset-instance.id' attribute.", nil)
 	}

@@ -10,11 +10,11 @@ import (
 	"testing"
 )
 
-type azureVirtualMachineClientMock struct {
+type azureResourceGraphClientMock struct {
 	mock.Mock
 }
 
-func (m *azureVirtualMachineClientMock) Resources(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
+func (m *azureResourceGraphClientMock) Resources(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
 	args := m.Called(ctx, query, options)
 	if args.Get(0) == nil {
 		return armresourcegraph.ClientResourcesResponse{}, args.Error(1)
@@ -24,7 +24,7 @@ func (m *azureVirtualMachineClientMock) Resources(ctx context.Context, query arm
 
 func TestGetAllAzureVirtualMachines(t *testing.T) {
 	// Given
-	mockedApi := new(azureVirtualMachineClientMock)
+	mockedApi := new(azureResourceGraphClientMock)
 	var totalRecords int64 = 1
 	mockedReturnValue := armresourcegraph.ClientResourcesResponse{
 		QueryResponse: armresourcegraph.QueryResponse{
@@ -110,9 +110,9 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	assert.False(t, present)
 }
 
-func TestGetAllAvailabilityZonesError(t *testing.T) {
+func TestGetAllError(t *testing.T) {
 	// Given
-	mockedApi := new(azureVirtualMachineClientMock)
+	mockedApi := new(azureResourceGraphClientMock)
 
 	mockedApi.On("Resources", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 

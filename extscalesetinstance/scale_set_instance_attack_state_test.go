@@ -31,10 +31,10 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset.name": {"my-scaleSet"},
+						"azure-scale-set.name": {"my-scaleSet"},
 						"azure.subscription.id":           {"42"},
 						"azure.resource-group.name":       {"rg0815"},
-						"azure-scaleset-instance.id":      {"InstanceID0815"},
+						"azure-scale-set-instance.id":      {"InstanceID0815"},
 					},
 				}),
 			}),
@@ -54,8 +54,8 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset.name": {"my-scaleSet"},
-						"azure-scaleset-instance.id":      {"InstanceID0815"},
+						"azure-scale-set.name": {"my-scaleSet"},
+						"azure-scale-set-instance.id":      {"InstanceID0815"},
 						"azure.resource-group.name":       {"rg0815"},
 					},
 				}),
@@ -70,7 +70,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset.name": {"my-scaleSet"},
+						"azure-scale-set.name": {"my-scaleSet"},
 						"azure.resource-group.name":       {"rg0815"},
 						"azure.subscription.id":           {"42"},
 					},
@@ -87,7 +87,7 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure.subscription.id":      {"42"},
-						"azure-scaleset-instance.id": {"InstanceID0815"},
+						"azure-scale-set-instance.id": {"InstanceID0815"},
 						"azure.resource-group.name":  {"rg0815"},
 					},
 				}),
@@ -102,8 +102,8 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset.name": {"my-scaleSet"},
-						"azure-scaleset-instance.id":      {"InstanceID0815"},
+						"azure-scale-set.name": {"my-scaleSet"},
+						"azure-scale-set-instance.id":      {"InstanceID0815"},
 						"azure.subscription.id":           {"42"},
 					},
 				}),
@@ -116,8 +116,8 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				Config: map[string]interface{}{},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scaleset.name": {"my-scaleSet"},
-						"azure-scaleset-instance.id":      {"InstanceID0815"},
+						"azure-scale-set.name": {"my-scaleSet"},
+						"azure-scale-set-instance.id":      {"InstanceID0815"},
 						"azure.subscription.id":           {"42"},
 						"azure.resource-group.name":       {"rg0815"},
 					},
@@ -150,32 +150,32 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 	}
 }
 
-type ec2ClientApiMock struct {
+type azureClientApiMock struct {
 	mock.Mock
 }
 
-func (m *ec2ClientApiMock) BeginRestart(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, _ *armcompute.VirtualMachineScaleSetVMsClientBeginRestartOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientRestartResponse], error) {
+func (m *azureClientApiMock) BeginRestart(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, _ *armcompute.VirtualMachineScaleSetVMsClientBeginRestartOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientRestartResponse], error) {
 	args := m.Called(ctx, resourceGroupName, vmScaleSetName, instanceID)
 	return nil, args.Error(1)
 }
 
-func (m *ec2ClientApiMock) BeginDelete(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, _ *armcompute.VirtualMachineScaleSetVMsClientBeginDeleteOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientDeleteResponse], error) {
+func (m *azureClientApiMock) BeginDelete(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, _ *armcompute.VirtualMachineScaleSetVMsClientBeginDeleteOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientDeleteResponse], error) {
 	args := m.Called(ctx, resourceGroupName, vmScaleSetName, instanceID)
 	return nil, args.Error(1)
 }
 
-func (m *ec2ClientApiMock) BeginPowerOff(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, _ *armcompute.VirtualMachineScaleSetVMsClientBeginPowerOffOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientPowerOffResponse], error) {
+func (m *azureClientApiMock) BeginPowerOff(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, _ *armcompute.VirtualMachineScaleSetVMsClientBeginPowerOffOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientPowerOffResponse], error) {
 	args := m.Called(ctx, resourceGroupName, vmScaleSetName, instanceID)
 	return nil, args.Error(1)
 }
-func (m *ec2ClientApiMock) BeginDeallocate(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, _ *armcompute.VirtualMachineScaleSetVMsClientBeginDeallocateOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientDeallocateResponse], error) {
+func (m *azureClientApiMock) BeginDeallocate(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, _ *armcompute.VirtualMachineScaleSetVMsClientBeginDeallocateOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientDeallocateResponse], error) {
 	args := m.Called(ctx, resourceGroupName, vmScaleSetName, instanceID)
 	return nil, args.Error(1)
 }
 
 func TestAzureScaleSetInstanceAction_ReStart(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginRestart", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
@@ -209,7 +209,7 @@ func TestAzureScaleSetInstanceAction_ReStart(t *testing.T) {
 
 func TestAzureScaleSetInstanceAction_Delete(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginDelete", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
@@ -243,7 +243,7 @@ func TestAzureScaleSetInstanceAction_Delete(t *testing.T) {
 
 func TestAzureScaleSetInstanceAction_PowerOff(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginPowerOff", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
@@ -277,7 +277,7 @@ func TestAzureScaleSetInstanceAction_PowerOff(t *testing.T) {
 
 func TestAzureScaleSetInstanceAction_Deallocate(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginDeallocate", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
@@ -311,7 +311,7 @@ func TestAzureScaleSetInstanceAction_Deallocate(t *testing.T) {
 
 func TestStartScaleSetInstanceChangeForwardsError(t *testing.T) {
 	// Given
-	api := new(ec2ClientApiMock)
+	api := new(azureClientApiMock)
 	api.On("BeginRestart", mock.Anything, mock.MatchedBy(func(resourceGroupName string) bool {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true

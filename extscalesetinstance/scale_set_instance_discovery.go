@@ -7,7 +7,8 @@ package extscalesetinstance
 import (
 	"context"
 	"fmt"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+  "github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+  "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
@@ -115,10 +116,66 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 	return discovery_kit_api.AttributeDescriptions{
 		Attributes: []discovery_kit_api.AttributeDescription{
 			{
-				Attribute: "azure.location",
+				Attribute: "azure-scale-set-instance.hostname",
 				Label: discovery_kit_api.PluralLabel{
-					One:   "Location",
-					Other: "Locations",
+					One:   "Host name",
+					Other: "Host names",
+				},
+			},
+			{
+				Attribute: "azure-scale-set-instance.network.id",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "Network ID",
+					Other: "Network IDs",
+				},
+			},
+			{
+				Attribute: "azure-scale-set-instance.os.name",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "OS name",
+					Other: "OS names",
+				},
+			},
+			{
+				Attribute: "azure-scale-set-instance.os.type",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "OS type",
+					Other: "OS types",
+				},
+			},
+			{
+				Attribute: "azure-scale-set-instance.os.version",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "OS version",
+					Other: "OS versions",
+				},
+			},
+			{
+				Attribute: "azure-scale-set-instance.vm.id",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "VM ID",
+					Other: "VM IDs",
+				},
+			},
+			{
+				Attribute: "azure-scale-set-instance.vm.size",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "VM size",
+					Other: "VM sizes",
+				},
+			},
+			{
+				Attribute: "azure-scale-set-instance.name",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "VM name",
+					Other: "VM names",
+				},
+			},
+      {
+				Attribute: "azure-scale-set-instance.provisioning.state",
+				Label: discovery_kit_api.PluralLabel{
+					One:   "Provisioning state",
+					Other: "Provisioning states",
 				},
 			},
 		},
@@ -170,7 +227,11 @@ func getDiscoveredInstances(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 }
 
-func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient *armcompute.VirtualMachineScaleSetVMsClient, scaleSet ScaleSet) ([]discovery_kit_api.Target, error) {
+type AzureVirtualMachineScaleSetVMsClient interface {
+  NewListPager(resourceGroupName string, virtualMachineScaleSetName string, options *armcompute.VirtualMachineScaleSetVMsClientListOptions) *runtime.Pager[armcompute.VirtualMachineScaleSetVMsClientListResponse]
+}
+
+func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtualMachineScaleSetVMsClient, scaleSet ScaleSet) ([]discovery_kit_api.Target, error) {
 	pager := scaleSetVMsClient.NewListPager(scaleSet.ResourceGroupName, scaleSet.Name, nil)
 	targets := make([]discovery_kit_api.Target, 0)
 	for pager.More() {
@@ -182,50 +243,43 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient *armcompute.
 		for _, instance := range page.Value {
 			attributes := make(map[string][]string)
 
-
-			attributes["azure-scaleset.name"] = []string{scaleSet.Name}
-			attributes["azure-scaleset-instance.vm.name"] = []string{*instance.Name}
+			attributes["azure-scale-set.name"] = []string{scaleSet.Name}
+			attributes["azure-scale-set-instance.name"] = []string{*instance.Name}
 			attributes["azure.subscription.id"] = []string{scaleSet.SubscriptionId}
-			attributes["azure-scaleset-instance.resource.id"] = []string{*instance.ID}
-			attributes["azure-scaleset-instance.id"] = []string{*instance.InstanceID}
+			attributes["azure-scale-set-instance.resource.id"] = []string{*instance.ID}
+			attributes["azure-scale-set-instance.id"] = []string{*instance.InstanceID}
+      attributes["azure.location"] = []string{scaleSet.Location}
+      attributes["azure.resource-group.name"] = []string{scaleSet.ResourceGroupName}
+
+      zones := ""
+      if instance.Zones != nil {
+        for _, zone := range instance.Zones {
+          zones += getStringValue(zone) + ","
+        }
+      }
+      attributes["azure.zone"] = []string{zones}
 
 			if instance.Properties != nil {
 				if instance.Properties.OSProfile != nil {
-					attributes["azure-scaleset-instance.hostname"] = []string{getStringValue(instance.Properties.OSProfile.ComputerName)}
+					attributes["azure-scale-set-instance.hostname"] = []string{getStringValue(instance.Properties.OSProfile.ComputerName)}
 				}
 				if instance.Properties.HardwareProfile != nil {
 					if instance.Properties.HardwareProfile.VMSize != nil {
-						attributes["azure-scaleset-instance.vm.size"] = []string{fmt.Sprint(*instance.Properties.HardwareProfile.VMSize)}
+						attributes["azure-scale-set-instance.vm.size"] = []string{fmt.Sprint(*instance.Properties.HardwareProfile.VMSize)}
 					}
 				}
 				if instance.Properties.InstanceView != nil {
-					attributes["azure-scaleset-instance.os.name"] = []string{getStringValue(instance.Properties.InstanceView.OSName)}
-					attributes["azure-scaleset-instance.os.version"] = []string{getStringValue(instance.Properties.InstanceView.OSVersion)}
+					attributes["azure-scale-set-instance.os.name"] = []string{getStringValue(instance.Properties.InstanceView.OSName)}
+					attributes["azure-scale-set-instance.os.version"] = []string{getStringValue(instance.Properties.InstanceView.OSVersion)}
 				}
 				if instance.Properties.StorageProfile != nil && instance.Properties.StorageProfile.OSDisk != nil && instance.Properties.StorageProfile.OSDisk.OSType != nil {
-					attributes["azure-scaleset-instance.os.type"] = []string{fmt.Sprint(*instance.Properties.StorageProfile.OSDisk.OSType)}
+					attributes["azure-scale-set-instance.os.type"] = []string{fmt.Sprint(*instance.Properties.StorageProfile.OSDisk.OSType)}
 				}
-				if instance.Properties.InstanceView != nil && instance.Properties.InstanceView.Statuses != nil {
-					for _, status := range instance.Properties.InstanceView.Statuses {
-						log.Info().Msgf("Status: %v", status)
-					}
-					//attributes["azure-scaleset-instance.power.state"] = []string{instance.Properties.InstanceView.Statuses}
-				}
-				attributes["azure-scaleset-instance.provisioning.state"] = []string{getStringValue(instance.Properties.ProvisioningState)}
+				attributes["azure-scale-set-instance.provisioning.state"] = []string{getStringValue(instance.Properties.ProvisioningState)}
 			}
-
-			attributes["azure.location"] = []string{scaleSet.Location}
-			zones := ""
-			if instance.Zones != nil {
-				for _, zone := range instance.Zones {
-					zones += getStringValue(zone) + ","
-				}
-			}
-			attributes["azure.zone"] = []string{zones}
-			attributes["azure.resource-group.name"] = []string{scaleSet.ResourceGroupName}
 
 			for k, v := range instance.Tags {
-				attributes[fmt.Sprintf("azure-scaleset-instance.label.%s", strings.ToLower(k))] = []string{getStringValue(v)}
+				attributes[fmt.Sprintf("azure-scale-set-instance.label.%s", strings.ToLower(k))] = []string{getStringValue(v)}
 			}
 			//scaleSet.Attributes
 			for k, v := range scaleSet.Attributes {
@@ -281,7 +335,7 @@ func GetAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]
 				attributes := make(map[string][]string)
 
 				for k, v := range getMapValue(items, "tags") {
-					attributes[fmt.Sprintf("azure-scaleset.label.%s", strings.ToLower(k))] = []string{extutil.ToString(v)}
+					attributes[fmt.Sprintf("azure-scale-set.label.%s", strings.ToLower(k))] = []string{extutil.ToString(v)}
 				}
 
 				scaleSets = append(scaleSets, ScaleSet{
@@ -305,7 +359,7 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: TargetIDScaleSetInstance,
 			Selector: map[string]string{
-				"azure-scaleset-instance.hostname": "${dest.host.hostname}",
+				"azure-scale-set-instance.hostname": "${dest.host.hostname}",
 			},
 		},
 		Dest: discovery_kit_api.SourceOrDestination{
@@ -320,27 +374,27 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				Name:    "azure.subscription.id",
 			}, {
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.vm.id",
+				Name:    "azure-scale-set-instance.vm.id",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.vm.size",
+				Name:    "azure-scale-set-instance.vm.size",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.os.name",
+				Name:    "azure-scale-set-instance.os.name",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.os.version",
+				Name:    "azure-scale-set-instance.os.version",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.os.type",
+				Name:    "azure-scale-set-instance.os.type",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.network.id",
+				Name:    "azure-scale-set-instance.network.id",
 			}, {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure.location",
@@ -348,10 +402,16 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 			{
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure.resource-group.name",
+			},{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-scale-set.name",
+			},{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-scale-set-instance.provisioning.state",
 			},
 			{
 				Matcher: discovery_kit_api.StartsWith,
-				Name:    "azure-scaleset-instance.label.",
+				Name:    "azure-scale-set-instance.label.",
 			},
 		},
 	}
@@ -365,7 +425,7 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: TargetIDScaleSetInstance,
 			Selector: map[string]string{
-				"azure-scaleset-instance.hostname": "${dest.container.host}",
+				"azure-scale-set-instance.hostname": "${dest.container.host}",
 			},
 		},
 		Dest: discovery_kit_api.SourceOrDestination{
@@ -380,27 +440,27 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				Name:    "azure.subscription.id",
 			}, {
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.vm.id",
+				Name:    "azure-scale-set-instance.vm.id",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.vm.size",
+				Name:    "azure-scale-set-instance.vm.size",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.os.name",
+				Name:    "azure-scale-set-instance.os.name",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.os.version",
+				Name:    "azure-scale-set-instance.os.version",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.os.type",
+				Name:    "azure-scale-set-instance.os.type",
 			},
 			{
 				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scaleset-instance.network.id",
+				Name:    "azure-scale-set-instance.network.id",
 			}, {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure.location",
@@ -411,7 +471,7 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 			},
 			{
 				Matcher: discovery_kit_api.StartsWith,
-				Name:    "azure-scaleset-instance.label.",
+				Name:    "azure-scale-set-instance.label.",
 			},
 		},
 	}
