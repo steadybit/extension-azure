@@ -1,4 +1,4 @@
-<img src="./logo.svg" height="130" align="right" alt="JVM logo">
+<img src="./logo.svg" height="130" align="right" alt="Azure logo">
 
 # Steadybit extension-azure
 
