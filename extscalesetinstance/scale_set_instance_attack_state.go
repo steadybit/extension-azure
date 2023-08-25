@@ -58,14 +58,19 @@ func (e *scaleSetInstanceAction) Describe() action_kit_api.ActionDescription {
 			TargetType: TargetIDScaleSetInstance,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "by vm-name",
+					Label:       "by scale-set-instance-name",
 					Description: extutil.Ptr("Find azure scale set instance by name"),
 					Query:       "azure-scale-set-instance.name=\"\"",
 				},
         {
-          Label:       "by vm-id",
-          Description: extutil.Ptr("Find azure scale set instance by vm-id"),
+          Label:       "by scale-set-instance-id",
+          Description: extutil.Ptr("Find azure scale set instance by id"),
           Query:       "azure-scale-set-instance.vm.id=\"\"",
+        },
+        {
+          Label:       "by scale-set-name",
+          Description: extutil.Ptr("Find azure scale set instance by scale set name"),
+          Query:       "azure-scale-set.name=\"\"",
         },
 			}),
 		}),

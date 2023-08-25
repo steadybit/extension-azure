@@ -12,8 +12,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	"github.com/steadybit/extension-azure/common"
-	extension_kit "github.com/steadybit/extension-kit"
+  "github.com/steadybit/extension-azure/common"
+  extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
@@ -256,15 +256,15 @@ func GetAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 				items := r.(map[string]interface{})
 				attributes := make(map[string][]string)
 
-				properties := getMapValue(items, "properties")
-				extended := getMapValue(properties, "extended")
-				networkProfile := getMapValue(properties, "networkProfile")
-				networkInterfaces := getMapValue(networkProfile, "networkInterfaces")
-				instanceView := getMapValue(extended, "instanceView")
-				hardwareProfile := getMapValue(properties, "hardwareProfile")
-				powerState := getMapValue(instanceView, "powerState")
-				storageProfile := getMapValue(properties, "storageProfile")
-				osDisk := getMapValue(storageProfile, "osDisk")
+				properties := common.GetMapValue(items, "properties")
+				extended := common.GetMapValue(properties, "extended")
+				networkProfile := common.GetMapValue(properties, "networkProfile")
+				networkInterfaces := common.GetMapValue(networkProfile, "networkInterfaces")
+				instanceView := common.GetMapValue(extended, "instanceView")
+				hardwareProfile := common.GetMapValue(properties, "hardwareProfile")
+				powerState := common.GetMapValue(instanceView, "powerState")
+				storageProfile := common.GetMapValue(properties, "storageProfile")
+				osDisk := common.GetMapValue(storageProfile, "osDisk")
 
 				attributes["azure-vm.vm.name"] = []string{items["name"].(string)}
 				attributes["azure.subscription.id"] = []string{items["subscriptionId"].(string)}
@@ -279,7 +279,7 @@ func GetAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 				attributes["azure.location"] = []string{getPropertyValue(items, "location")}
 				attributes["azure.resource-group.name"] = []string{getPropertyValue(items, "resourceGroup")}
 
-				for k, v := range getMapValue(items, "tags") {
+				for k, v := range common.GetMapValue(items, "tags") {
 					attributes[fmt.Sprintf("azure-vm.label.%s", strings.ToLower(k))] = []string{extutil.ToString(v)}
 				}
 
@@ -421,17 +421,3 @@ func getPropertyValue(properties map[string]interface{}, key string) string {
 	return ""
 }
 
-func getMapValue(properties map[string]interface{}, key string) map[string]interface{} {
-	if value, ok := properties[key]; ok {
-		if m, ok := value.(map[string]interface{}); ok {
-			return m
-		} else if n, ok := value.([]interface{}); ok {
-			if len(n) > 0 {
-				if o, ok := n[0].(map[string]interface{}); ok {
-					return o
-				}
-			}
-		}
-	}
-	return make(map[string]interface{})
-}

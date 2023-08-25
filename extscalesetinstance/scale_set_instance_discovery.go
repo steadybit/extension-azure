@@ -7,8 +7,8 @@ package extscalesetinstance
 import (
 	"context"
 	"fmt"
-  "github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
-  "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
@@ -171,7 +171,7 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 					Other: "VM names",
 				},
 			},
-      {
+			{
 				Attribute: "azure-scale-set-instance.provisioning.state",
 				Label: discovery_kit_api.PluralLabel{
 					One:   "Provisioning state",
@@ -228,7 +228,7 @@ func getDiscoveredInstances(w http.ResponseWriter, _ *http.Request, _ []byte) {
 }
 
 type AzureVirtualMachineScaleSetVMsClient interface {
-  NewListPager(resourceGroupName string, virtualMachineScaleSetName string, options *armcompute.VirtualMachineScaleSetVMsClientListOptions) *runtime.Pager[armcompute.VirtualMachineScaleSetVMsClientListResponse]
+	NewListPager(resourceGroupName string, virtualMachineScaleSetName string, options *armcompute.VirtualMachineScaleSetVMsClientListOptions) *runtime.Pager[armcompute.VirtualMachineScaleSetVMsClientListResponse]
 }
 
 func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtualMachineScaleSetVMsClient, scaleSet ScaleSet) ([]discovery_kit_api.Target, error) {
@@ -248,20 +248,20 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtual
 			attributes["azure.subscription.id"] = []string{scaleSet.SubscriptionId}
 			attributes["azure-scale-set-instance.resource.id"] = []string{*instance.ID}
 			attributes["azure-scale-set-instance.id"] = []string{*instance.InstanceID}
-      attributes["azure.location"] = []string{scaleSet.Location}
-      attributes["azure.resource-group.name"] = []string{scaleSet.ResourceGroupName}
+			attributes["azure.location"] = []string{scaleSet.Location}
+			attributes["azure.resource-group.name"] = []string{scaleSet.ResourceGroupName}
 
-      zones := ""
-      if instance.Zones != nil {
-        for _, zone := range instance.Zones {
-          zones += getStringValue(zone) + ","
-        }
-      }
-      attributes["azure.zone"] = []string{zones}
+			zones := ""
+			if instance.Zones != nil {
+				for _, zone := range instance.Zones {
+					zones += common.GetStringValue(zone) + ","
+				}
+			}
+			attributes["azure.zone"] = []string{zones}
 
 			if instance.Properties != nil {
 				if instance.Properties.OSProfile != nil {
-					attributes["azure-scale-set-instance.hostname"] = []string{getStringValue(instance.Properties.OSProfile.ComputerName)}
+					attributes["azure-scale-set-instance.hostname"] = []string{common.GetStringValue(instance.Properties.OSProfile.ComputerName)}
 				}
 				if instance.Properties.HardwareProfile != nil {
 					if instance.Properties.HardwareProfile.VMSize != nil {
@@ -269,17 +269,17 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtual
 					}
 				}
 				if instance.Properties.InstanceView != nil {
-					attributes["azure-scale-set-instance.os.name"] = []string{getStringValue(instance.Properties.InstanceView.OSName)}
-					attributes["azure-scale-set-instance.os.version"] = []string{getStringValue(instance.Properties.InstanceView.OSVersion)}
+					attributes["azure-scale-set-instance.os.name"] = []string{common.GetStringValue(instance.Properties.InstanceView.OSName)}
+					attributes["azure-scale-set-instance.os.version"] = []string{common.GetStringValue(instance.Properties.InstanceView.OSVersion)}
 				}
 				if instance.Properties.StorageProfile != nil && instance.Properties.StorageProfile.OSDisk != nil && instance.Properties.StorageProfile.OSDisk.OSType != nil {
 					attributes["azure-scale-set-instance.os.type"] = []string{fmt.Sprint(*instance.Properties.StorageProfile.OSDisk.OSType)}
 				}
-				attributes["azure-scale-set-instance.provisioning.state"] = []string{getStringValue(instance.Properties.ProvisioningState)}
+				attributes["azure-scale-set-instance.provisioning.state"] = []string{common.GetStringValue(instance.Properties.ProvisioningState)}
 			}
 
 			for k, v := range instance.Tags {
-				attributes[fmt.Sprintf("azure-scale-set-instance.label.%s", strings.ToLower(k))] = []string{getStringValue(v)}
+				attributes[fmt.Sprintf("azure-scale-set-instance.label.%s", strings.ToLower(k))] = []string{common.GetStringValue(v)}
 			}
 			//scaleSet.Attributes
 			for k, v := range scaleSet.Attributes {
@@ -287,9 +287,9 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtual
 			}
 
 			targets = append(targets, discovery_kit_api.Target{
-				Id:         getStringValue(instance.ID),
+				Id:         common.GetStringValue(instance.ID),
 				TargetType: TargetIDScaleSetInstance,
-				Label:      getStringValue(instance.Name),
+				Label:      common.GetStringValue(instance.Name),
 				Attributes: attributes,
 			})
 		}
@@ -334,7 +334,7 @@ func GetAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]
 				items := r.(map[string]interface{})
 				attributes := make(map[string][]string)
 
-				for k, v := range getMapValue(items, "tags") {
+				for k, v := range common.GetMapValue(items, "tags") {
 					attributes[fmt.Sprintf("azure-scale-set.label.%s", strings.ToLower(k))] = []string{extutil.ToString(v)}
 				}
 
@@ -402,10 +402,10 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 			{
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure.resource-group.name",
-			},{
+			}, {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure-scale-set.name",
-			},{
+			}, {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure-scale-set-instance.provisioning.state",
 			},
@@ -475,33 +475,4 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 			},
 		},
 	}
-}
-
-func getStringValue(val *string) string {
-	if val != nil {
-		return *val
-	}
-	return ""
-}
-
-func getPropertyValue(properties map[string]interface{}, key string) string {
-	if value, ok := properties[key]; ok {
-		return value.(string)
-	}
-	return ""
-}
-
-func getMapValue(properties map[string]interface{}, key string) map[string]interface{} {
-	if value, ok := properties[key]; ok {
-		if m, ok := value.(map[string]interface{}); ok {
-			return m
-		} else if n, ok := value.([]interface{}); ok {
-			if len(n) > 0 {
-				if o, ok := n[0].(map[string]interface{}); ok {
-					return o
-				}
-			}
-		}
-	}
-	return make(map[string]interface{})
 }
