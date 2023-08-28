@@ -58,7 +58,7 @@ func (e *scaleSetInstanceAction) Describe() action_kit_api.ActionDescription {
 			TargetType: TargetIDScaleSetInstance,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
 				{
-					Label:       "by clutser name",
+					Label:       "by cluster name",
 					Description: extutil.Ptr("Find azure scale set instance by cluster name"),
 					Query:       "azure-containerservice-managed-cluster.name=\"\"",
 				},
