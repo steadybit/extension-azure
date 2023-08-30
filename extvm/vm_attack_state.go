@@ -50,7 +50,7 @@ func (e *virtualMachineStateAction) Describe() action_kit_api.ActionDescription 
 	return action_kit_api.ActionDescription{
 		Id:          VirtualMachineStateActionId,
 		Label:       "Change Virtual Machine State",
-		Description: "Restart, start, stop, deallocate or delete Azure virtual machines",
+		Description: "Restart, stop, deallocate or delete Azure virtual machines",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(targetIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
