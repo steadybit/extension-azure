@@ -100,6 +100,7 @@ func getTargetDescription() discovery_kit_api.TargetDescription {
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
+				{Attribute: "azure-vm.power.state"},
 				{Attribute: "azure.location"},
 				{Attribute: "azure-containerservice-managed-cluster.name"},
 			},
