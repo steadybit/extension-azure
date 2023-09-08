@@ -17,6 +17,7 @@ manifest should match snapshot using podAnnotations and Labels:
           annotations:
             some-annotation: some-annotation-value
           labels:
+            app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/name: steadybit-extension-azure
             some-label: some-label-value
             steadybit.com/discovery-disabled: "true"
@@ -110,11 +111,13 @@ manifest should match snapshot with TLS:
       replicas: 1
       selector:
         matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: steadybit-extension-azure
       template:
         metadata:
           annotations: null
           labels:
+            app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/name: steadybit-extension-azure
             steadybit.com/discovery-disabled: "true"
         spec:
@@ -218,11 +221,13 @@ manifest should match snapshot with azure certificates vars:
       replicas: 1
       selector:
         matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: steadybit-extension-azure
       template:
         metadata:
           annotations: null
           labels:
+            app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/name: steadybit-extension-azure
             steadybit.com/discovery-disabled: "true"
         spec:
@@ -315,11 +320,13 @@ manifest should match snapshot with azure secrets vars:
       replicas: 1
       selector:
         matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: steadybit-extension-azure
       template:
         metadata:
           annotations: null
           labels:
+            app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/name: steadybit-extension-azure
             steadybit.com/discovery-disabled: "true"
         spec:
@@ -412,11 +419,13 @@ manifest should match snapshot with extra env vars:
       replicas: 1
       selector:
         matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: steadybit-extension-azure
       template:
         metadata:
           annotations: null
           labels:
+            app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/name: steadybit-extension-azure
             steadybit.com/discovery-disabled: "true"
         spec:
@@ -517,11 +526,13 @@ manifest should match snapshot with extra labels:
       replicas: 1
       selector:
         matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: steadybit-extension-azure
       template:
         metadata:
           annotations: null
           labels:
+            app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/name: steadybit-extension-azure
             steadybit.com/discovery-disabled: "true"
             tags.datadoghq.com/service: steadybit-extension
@@ -615,11 +626,13 @@ manifest should match snapshot with mutual TLS:
       replicas: 1
       selector:
         matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: steadybit-extension-azure
       template:
         metadata:
           annotations: null
           labels:
+            app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/name: steadybit-extension-azure
             steadybit.com/discovery-disabled: "true"
         spec:
@@ -732,11 +745,13 @@ manifest should match snapshot with mutual TLS using containerPaths:
       replicas: 1
       selector:
         matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: steadybit-extension-azure
       template:
         metadata:
           annotations: null
           labels:
+            app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/name: steadybit-extension-azure
             steadybit.com/discovery-disabled: "true"
         spec:
@@ -835,11 +850,13 @@ manifest should match snapshot without TLS:
       replicas: 1
       selector:
         matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: steadybit-extension-azure
       template:
         metadata:
           annotations: null
           labels:
+            app.kubernetes.io/instance: RELEASE-NAME
             app.kubernetes.io/name: steadybit-extension-azure
             steadybit.com/discovery-disabled: "true"
         spec:
