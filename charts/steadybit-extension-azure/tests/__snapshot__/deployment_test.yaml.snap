@@ -11,6 +11,7 @@ manifest should match snapshot using podAnnotations and Labels:
       replicas: 1
       selector:
         matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
           app.kubernetes.io/name: steadybit-extension-azure
       template:
         metadata:
