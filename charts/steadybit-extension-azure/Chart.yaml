@@ -1,6 +1,6 @@
 apiVersion: v2
 name: steadybit-extension-azure
-description: Steadybit scaffold extension Helm chart for Kubernetes.
+description: Steadybit azure extension Helm chart for Kubernetes.
 version: 1.0.8
 appVersion: latest
 home: https://www.steadybit.com/
