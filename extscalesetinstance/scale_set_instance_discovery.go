@@ -13,6 +13,7 @@ import (
   "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
   "github.com/rs/zerolog/log"
   "github.com/steadybit/discovery-kit/go/discovery_kit_api"
+  "github.com/steadybit/discovery-kit/go/discovery_kit_commons"
   "github.com/steadybit/extension-azure/common"
   "github.com/steadybit/extension-azure/config"
   extension_kit "github.com/steadybit/extension-kit"
@@ -315,7 +316,7 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtual
 			})
 		}
 	}
-	return discovery_kit_api.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesScaleSetInstance), nil
+	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesScaleSetInstance), nil
 }
 
 type ScaleSet struct {
