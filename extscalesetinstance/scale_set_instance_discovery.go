@@ -5,23 +5,24 @@
 package extscalesetinstance
 
 import (
-	"context"
-	"fmt"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-	"github.com/rs/zerolog/log"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	"github.com/steadybit/extension-azure/common"
-	extension_kit "github.com/steadybit/extension-kit"
-	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/exthttp"
-	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
+  "context"
+  "fmt"
+  "github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+  "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+  "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
+  "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+  "github.com/rs/zerolog/log"
+  "github.com/steadybit/discovery-kit/go/discovery_kit_api"
+  "github.com/steadybit/extension-azure/common"
+  "github.com/steadybit/extension-azure/config"
+  extension_kit "github.com/steadybit/extension-kit"
+  "github.com/steadybit/extension-kit/extbuild"
+  "github.com/steadybit/extension-kit/exthttp"
+  "github.com/steadybit/extension-kit/extutil"
+  "net/http"
+  "os"
+  "strconv"
+  "strings"
 )
 
 const discoveryBasePath = "/" + TargetIDScaleSetInstance + "/discovery"
@@ -314,7 +315,7 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtual
 			})
 		}
 	}
-	return targets, nil
+	return discovery_kit_api.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributeExcludesScaleSetInstance), nil
 }
 
 type ScaleSet struct {

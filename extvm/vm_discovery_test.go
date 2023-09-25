@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-	"github.com/steadybit/extension-kit/extutil"
+  "github.com/steadybit/extension-azure/config"
+  "github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -82,6 +83,8 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	}
 	mockedApi.On("Resources", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
+  config.Config.DiscoveryAttributeExcludesVM = []string{"azure-vm.label.tag1"}
+
 	// When
 	targets, err := GetAllVirtualMachines(context.Background(), mockedApi)
 
@@ -104,8 +107,8 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	assert.Equal(t, []string{"/subscriptions/42/resourceGroups/rg-1/providers/Microsoft.Network/networkInterfaces/i-0ef9adc9fbd3b19c5"}, target.Attributes["azure-vm.network.id"])
 	assert.Equal(t, []string{"westeurope"}, target.Attributes["azure.location"])
 	assert.Equal(t, []string{"rg-1"}, target.Attributes["azure.resource-group.name"])
-	assert.Equal(t, []string{"Value1"}, target.Attributes["azure-vm.label.tag1"])
 	assert.Equal(t, []string{"Value2"}, target.Attributes["azure-vm.label.tag2"])
+	assert.NotContains(t,target.Attributes, "azure-vm.label.tag1")
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
 }

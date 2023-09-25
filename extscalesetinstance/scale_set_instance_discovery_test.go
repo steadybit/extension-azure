@@ -1,15 +1,16 @@
 package extscalesetinstance
 
 import (
-	"context"
-	"errors"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-	"github.com/steadybit/extension-kit/extutil"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"testing"
+  "context"
+  "errors"
+  "github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+  "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
+  "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+  "github.com/steadybit/extension-azure/config"
+  "github.com/steadybit/extension-kit/extutil"
+  "github.com/stretchr/testify/assert"
+  "github.com/stretchr/testify/mock"
+  "testing"
 )
 
 type azureResourceGraphClientMock struct {
@@ -125,6 +126,8 @@ func TestGetAllAzureScaleSetInstances(t *testing.T) {
 	// Given
 	mockedApi.On("NewListPager", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
+  config.Config.DiscoveryAttributeExcludesScaleSetInstance = []string{"azure-scale-set-instance.label.tag2"}
+
 	var scaleSet ScaleSet
 	scaleSet.Name = "myScaleSet"
 	scaleSet.Location = "westeurope"
@@ -157,7 +160,7 @@ func TestGetAllAzureScaleSetInstances(t *testing.T) {
 	assert.Equal(t, []string{"Linux"}, target.Attributes["azure-scale-set-instance.os.type"])
 	assert.Equal(t, []string{"Succeeded"}, target.Attributes["azure-scale-set-instance.provisioning.state"])
 	assert.Equal(t, []string{"Value1"}, target.Attributes["azure-scale-set-instance.label.tag1"])
-	assert.Equal(t, []string{"Value2"}, target.Attributes["azure-scale-set-instance.label.tag2"])
+	assert.NotContains(t, target.Attributes, "azure-scale-set-instance.label.tag2")
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
 }

@@ -105,3 +105,11 @@ azure:
   userAssertionString: ""
   # azure.existingSecret -- If defined, will skip secret creation and instead assume that the referenced secret contains the keys clientID, clientSecret, tenantID, subscriptionID, certificatePath, certificatePassword, userAssertionString
   existingSecret: null
+
+discovery:
+  attributes:
+    excludes:
+      # discovery.attributes.excludes.vm -- List of attributes to exclude from VM discovery.
+      vm: []
+      # discovery.attributes.excludes.scaleSetInstance -- List of attributes to exclude from scaleSetInstance discovery.
+      scaleSetInstance: []
