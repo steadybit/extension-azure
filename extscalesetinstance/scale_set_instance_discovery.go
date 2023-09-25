@@ -315,7 +315,7 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtual
 			})
 		}
 	}
-	return discovery_kit_api.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributeExcludesScaleSetInstance), nil
+	return discovery_kit_api.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesScaleSetInstance), nil
 }
 
 type ScaleSet struct {

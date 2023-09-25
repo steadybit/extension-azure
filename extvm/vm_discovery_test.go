@@ -83,7 +83,7 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	}
 	mockedApi.On("Resources", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
-  config.Config.DiscoveryAttributeExcludesVM = []string{"azure-vm.label.tag1"}
+  config.Config.DiscoveryAttributesExcludesVM = []string{"azure-vm.label.tag1"}
 
 	// When
 	targets, err := GetAllVirtualMachines(context.Background(), mockedApi)

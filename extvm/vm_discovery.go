@@ -293,7 +293,7 @@ func GetAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 				})
 			}
 		}
-	  return discovery_kit_api.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributeExcludesVM), nil
+	  return discovery_kit_api.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesVM), nil
 	}
 }
 

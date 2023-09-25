@@ -16,8 +16,8 @@ type Specification struct {
 	AzureCertificatePath                       string   `json:"azureCertificatePath" required:"false" split_words:"true"`
 	AzureCertificatePassword                   string   `json:"azureCertificatePassword" required:"false" split_words:"true"`
 	AzureUserAssertionString                   string   `json:"azureUserAssertionString" required:"false" split_words:"true"`
-	DiscoveryAttributeExcludesScaleSetInstance []string `json:"discoveryAttributeExcludesScaleSetInstance" required:"false" split_words:"true"`
-	DiscoveryAttributeExcludesVM               []string `json:"discoveryAttributeExcludesVM" required:"false" split_words:"true"`
+	DiscoveryAttributesExcludesScaleSetInstance []string `json:"discoveryAttributesExcludesScaleSetInstance" required:"false" split_words:"true"`
+	DiscoveryAttributesExcludesVM               []string `json:"discoveryAttributesExcludesVM" required:"false" split_words:"true"`
 }
 
 var (

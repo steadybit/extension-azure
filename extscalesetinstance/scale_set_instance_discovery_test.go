@@ -126,7 +126,7 @@ func TestGetAllAzureScaleSetInstances(t *testing.T) {
 	// Given
 	mockedApi.On("NewListPager", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
-  config.Config.DiscoveryAttributeExcludesScaleSetInstance = []string{"azure-scale-set-instance.label.tag2"}
+  config.Config.DiscoveryAttributesExcludesScaleSetInstance = []string{"azure-scale-set-instance.label.tag2"}
 
 	var scaleSet ScaleSet
 	scaleSet.Name = "myScaleSet"
