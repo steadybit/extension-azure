@@ -838,6 +838,207 @@ manifest should match snapshot with mutual TLS using containerPaths:
               volumeMounts: null
           serviceAccountName: steadybit-extension-azure
           volumes: null
+manifest should match snapshot with podSecurityContext:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        steadybit.com/discovery-disabled: "true"
+      name: RELEASE-NAME-steadybit-extension-azure
+      namespace: NAMESPACE
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: steadybit-extension-azure
+      template:
+        metadata:
+          annotations: null
+          labels:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: steadybit-extension-azure
+            steadybit.com/discovery-disabled: "true"
+        spec:
+          containers:
+            - env:
+                - name: AZURE_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
+                - name: AZURE_TENANT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
+                - name: AZURE_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: AZURE_SUBSCRIPTION_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: STEADYBIT_LOG_LEVEL
+                  value: INFO
+                - name: STEADYBIT_LOG_FORMAT
+                  value: text
+              image: ghcr.io/steadybit/extension-azure:latest
+              imagePullPolicy: Always
+              livenessProbe:
+                httpGet:
+                  path: /health/liveness
+                  port: 8081
+              name: extension
+              readinessProbe:
+                httpGet:
+                  path: /health/readiness
+                  port: 8081
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
+              volumeMounts: null
+          securityContext:
+            runAsUser: 2222
+          serviceAccountName: steadybit-extension-azure
+          volumes: null
+manifest should match snapshot with priority class:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        steadybit.com/discovery-disabled: "true"
+      name: RELEASE-NAME-steadybit-extension-azure
+      namespace: NAMESPACE
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: RELEASE-NAME
+          app.kubernetes.io/name: steadybit-extension-azure
+      template:
+        metadata:
+          annotations: null
+          labels:
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/name: steadybit-extension-azure
+            steadybit.com/discovery-disabled: "true"
+        spec:
+          containers:
+            - env:
+                - name: AZURE_CLIENT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientID
+                      name: steadybit-extension-azure
+                - name: AZURE_TENANT_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: tenantID
+                      name: steadybit-extension-azure
+                - name: AZURE_CLIENT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      key: clientSecret
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: AZURE_SUBSCRIPTION_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: subscriptionID
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PATH
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePath
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: STEADYBIT_EXTENSION_AZURE_CERTIFICATE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: certificatePassword
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: STEADYBIT_EXTENSION_AZURE_USER_ASSERTION_STRING
+                  valueFrom:
+                    secretKeyRef:
+                      key: userAssertionString
+                      name: steadybit-extension-azure
+                      optional: true
+                - name: STEADYBIT_LOG_LEVEL
+                  value: INFO
+                - name: STEADYBIT_LOG_FORMAT
+                  value: text
+              image: ghcr.io/steadybit/extension-azure:latest
+              imagePullPolicy: Always
+              livenessProbe:
+                httpGet:
+                  path: /health/liveness
+                  port: 8081
+              name: extension
+              readinessProbe:
+                httpGet:
+                  path: /health/readiness
+                  port: 8081
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 128Mi
+                requests:
+                  cpu: 50m
+                  memory: 32Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: true
+                runAsGroup: 10000
+                runAsNonRoot: true
+                runAsUser: 10000
+              volumeMounts: null
+          priorityClassName: my-priority-class
+          serviceAccountName: steadybit-extension-azure
+          volumes: null
 manifest should match snapshot without TLS:
   1: |
     apiVersion: apps/v1
