@@ -10,12 +10,13 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/event-kit/go/event_kit_api"
 	"github.com/steadybit/extension-azure/config"
-  "github.com/steadybit/extension-azure/extscalesetinstance"
-  "github.com/steadybit/extension-azure/extvm"
+	"github.com/steadybit/extension-azure/extscalesetinstance"
+	"github.com/steadybit/extension-azure/extvm"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthealth"
 	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extlogging"
+	_ "net/http/pprof" //allow pprof
 )
 
 func main() {
@@ -81,29 +82,27 @@ type ExtensionListResponse struct {
 }
 
 func getExtensionList() ExtensionListResponse {
-  discoveries := make([]discovery_kit_api.DescribingEndpointReference, 0)
-  discoveries = append(discoveries, extvm.GetDiscoveryList().Discoveries...)
-  discoveries = append(discoveries, extscalesetinstance.GetDiscoveryList().Discoveries...)
-  targetAttributes := make([]discovery_kit_api.DescribingEndpointReference, 0)
-  targetAttributes = append(targetAttributes, extvm.GetDiscoveryList().TargetAttributes...)
-  targetAttributes = append(targetAttributes, extscalesetinstance.GetDiscoveryList().TargetAttributes...)
-  targetEnrichmentRukles := make([]discovery_kit_api.DescribingEndpointReference, 0)
-  targetEnrichmentRukles = append(targetEnrichmentRukles, extvm.GetDiscoveryList().TargetEnrichmentRules...)
-  targetEnrichmentRukles = append(targetEnrichmentRukles, extscalesetinstance.GetDiscoveryList().TargetEnrichmentRules...)
-  targetTypes := make([]discovery_kit_api.DescribingEndpointReference, 0)
-  targetTypes = append(targetTypes, extvm.GetDiscoveryList().TargetTypes...)
-  targetTypes = append(targetTypes, extscalesetinstance.GetDiscoveryList().TargetTypes...)
+	discoveries := make([]discovery_kit_api.DescribingEndpointReference, 0)
+	discoveries = append(discoveries, extvm.GetDiscoveryList().Discoveries...)
+	discoveries = append(discoveries, extscalesetinstance.GetDiscoveryList().Discoveries...)
+	targetAttributes := make([]discovery_kit_api.DescribingEndpointReference, 0)
+	targetAttributes = append(targetAttributes, extvm.GetDiscoveryList().TargetAttributes...)
+	targetAttributes = append(targetAttributes, extscalesetinstance.GetDiscoveryList().TargetAttributes...)
+	targetEnrichmentRukles := make([]discovery_kit_api.DescribingEndpointReference, 0)
+	targetEnrichmentRukles = append(targetEnrichmentRukles, extvm.GetDiscoveryList().TargetEnrichmentRules...)
+	targetEnrichmentRukles = append(targetEnrichmentRukles, extscalesetinstance.GetDiscoveryList().TargetEnrichmentRules...)
+	targetTypes := make([]discovery_kit_api.DescribingEndpointReference, 0)
+	targetTypes = append(targetTypes, extvm.GetDiscoveryList().TargetTypes...)
+	targetTypes = append(targetTypes, extscalesetinstance.GetDiscoveryList().TargetTypes...)
 
-  return ExtensionListResponse{
+	return ExtensionListResponse{
 		ActionList: action_kit_sdk.GetActionList(),
 
 		DiscoveryList: discovery_kit_api.DiscoveryList{
-      Discoveries: discoveries,
-      TargetAttributes: targetAttributes,
-      TargetEnrichmentRules: targetEnrichmentRukles,
-      TargetTypes: targetTypes,
-    },
-
-
+			Discoveries:           discoveries,
+			TargetAttributes:      targetAttributes,
+			TargetEnrichmentRules: targetEnrichmentRukles,
+			TargetTypes:           targetTypes,
+		},
 	}
 }
