@@ -61,11 +61,11 @@ func (e *virtualMachineStateAction) Describe() action_kit_api.ActionDescription 
 					Description: extutil.Ptr("Find azure virtual machine by name"),
 					Query:       "azure-vm.vm.name=\"\"",
 				},
-        {
-          Label:       "by vm-id",
-          Description: extutil.Ptr("Find azure virtual machine by vm-id"),
-          Query:       "azure-vm.vm.id=\"\"",
-        },
+				{
+					Label:       "by vm-id",
+					Description: extutil.Ptr("Find azure virtual machine by vm-id"),
+					Query:       "azure-vm.vm.id=\"\"",
+				},
 			}),
 		}),
 		Category:    extutil.Ptr("state"),

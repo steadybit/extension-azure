@@ -31,10 +31,10 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scale-set.name": {"my-scaleSet"},
-						"azure.subscription.id":           {"42"},
-						"azure.resource-group.name":       {"rg0815"},
-						"azure-scale-set-instance.id":      {"InstanceID0815"},
+						"azure-scale-set.name":        {"my-scaleSet"},
+						"azure.subscription.id":       {"42"},
+						"azure.resource-group.name":   {"rg0815"},
+						"azure-scale-set-instance.id": {"InstanceID0815"},
 					},
 				}),
 			}),
@@ -54,9 +54,9 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scale-set.name": {"my-scaleSet"},
-						"azure-scale-set-instance.id":      {"InstanceID0815"},
-						"azure.resource-group.name":       {"rg0815"},
+						"azure-scale-set.name":        {"my-scaleSet"},
+						"azure-scale-set-instance.id": {"InstanceID0815"},
+						"azure.resource-group.name":   {"rg0815"},
 					},
 				}),
 			}),
@@ -70,9 +70,9 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scale-set.name": {"my-scaleSet"},
-						"azure.resource-group.name":       {"rg0815"},
-						"azure.subscription.id":           {"42"},
+						"azure-scale-set.name":      {"my-scaleSet"},
+						"azure.resource-group.name": {"rg0815"},
+						"azure.subscription.id":     {"42"},
 					},
 				}),
 			}),
@@ -86,9 +86,9 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure.subscription.id":      {"42"},
+						"azure.subscription.id":       {"42"},
 						"azure-scale-set-instance.id": {"InstanceID0815"},
-						"azure.resource-group.name":  {"rg0815"},
+						"azure.resource-group.name":   {"rg0815"},
 					},
 				}),
 			}),
@@ -102,9 +102,9 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scale-set.name": {"my-scaleSet"},
-						"azure-scale-set-instance.id":      {"InstanceID0815"},
-						"azure.subscription.id":           {"42"},
+						"azure-scale-set.name":        {"my-scaleSet"},
+						"azure-scale-set-instance.id": {"InstanceID0815"},
+						"azure.subscription.id":       {"42"},
 					},
 				}),
 			}),
@@ -116,10 +116,10 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 				Config: map[string]interface{}{},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-scale-set.name": {"my-scaleSet"},
-						"azure-scale-set-instance.id":      {"InstanceID0815"},
-						"azure.subscription.id":           {"42"},
-						"azure.resource-group.name":       {"rg0815"},
+						"azure-scale-set.name":        {"my-scaleSet"},
+						"azure-scale-set-instance.id": {"InstanceID0815"},
+						"azure.subscription.id":       {"42"},
+						"azure.resource-group.name":   {"rg0815"},
 					},
 				}),
 			}),

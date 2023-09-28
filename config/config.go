@@ -13,9 +13,9 @@ import (
 // through environment variables. Learn more through the documentation of the envconfig package.
 // https://github.com/kelseyhightower/envconfig
 type Specification struct {
-	AzureCertificatePath                       string   `json:"azureCertificatePath" required:"false" split_words:"true"`
-	AzureCertificatePassword                   string   `json:"azureCertificatePassword" required:"false" split_words:"true"`
-	AzureUserAssertionString                   string   `json:"azureUserAssertionString" required:"false" split_words:"true"`
+	AzureCertificatePath                        string   `json:"azureCertificatePath" required:"false" split_words:"true"`
+	AzureCertificatePassword                    string   `json:"azureCertificatePassword" required:"false" split_words:"true"`
+	AzureUserAssertionString                    string   `json:"azureUserAssertionString" required:"false" split_words:"true"`
 	DiscoveryAttributesExcludesScaleSetInstance []string `json:"discoveryAttributesExcludesScaleSetInstance" required:"false" split_words:"true"`
 	DiscoveryAttributesExcludesVM               []string `json:"discoveryAttributesExcludesVM" required:"false" split_words:"true"`
 }

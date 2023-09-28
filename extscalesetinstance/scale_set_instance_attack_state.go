@@ -25,18 +25,18 @@ type scaleSetInstanceAction struct {
 var _ action_kit_sdk.Action[ScaleSetInstanceChangeState] = (*scaleSetInstanceAction)(nil)
 
 type ScaleSetInstanceChangeState struct {
-	SubscriptionId string
-  VmScaleSetName string
-	InstanceID     string
+	SubscriptionId    string
+	VmScaleSetName    string
+	InstanceID        string
 	ResourceGroupName string
 	Action            string
 }
 
 type scaleSetInstanceChangeApi interface {
-  BeginRestart(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, options *armcompute.VirtualMachineScaleSetVMsClientBeginRestartOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientRestartResponse], error)
-  BeginDelete(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, options *armcompute.VirtualMachineScaleSetVMsClientBeginDeleteOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientDeleteResponse], error)
-  BeginPowerOff(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, options *armcompute.VirtualMachineScaleSetVMsClientBeginPowerOffOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientPowerOffResponse], error)
-  BeginDeallocate(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, options *armcompute.VirtualMachineScaleSetVMsClientBeginDeallocateOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientDeallocateResponse], error)
+	BeginRestart(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, options *armcompute.VirtualMachineScaleSetVMsClientBeginRestartOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientRestartResponse], error)
+	BeginDelete(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, options *armcompute.VirtualMachineScaleSetVMsClientBeginDeleteOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientDeleteResponse], error)
+	BeginPowerOff(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, options *armcompute.VirtualMachineScaleSetVMsClientBeginPowerOffOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientPowerOffResponse], error)
+	BeginDeallocate(ctx context.Context, resourceGroupName string, vmScaleSetName string, instanceID string, options *armcompute.VirtualMachineScaleSetVMsClientBeginDeallocateOptions) (*runtime.Poller[armcompute.VirtualMachineScaleSetVMsClientDeallocateResponse], error)
 }
 
 func NewScaleSetInstanceStateAction() action_kit_sdk.Action[ScaleSetInstanceChangeState] {
@@ -62,16 +62,16 @@ func (e *scaleSetInstanceAction) Describe() action_kit_api.ActionDescription {
 					Description: extutil.Ptr("Find azure scale set instance by cluster name"),
 					Query:       "azure-containerservice-managed-cluster.name=\"\"",
 				},
-        {
+				{
 					Label:       "by instance name",
 					Description: extutil.Ptr("Find azure scale set instance by name"),
 					Query:       "azure-scale-set-instance.name=\"\"",
 				},
-        {
-          Label:       "by scaleset name",
-          Description: extutil.Ptr("Find azure scale set instance by scale set name"),
-          Query:       "azure-scale-set.name=\"\"",
-        },
+				{
+					Label:       "by scaleset name",
+					Description: extutil.Ptr("Find azure scale set instance by scale set name"),
+					Query:       "azure-scale-set.name=\"\"",
+				},
 			}),
 		}),
 		Category:    extutil.Ptr("state"),
@@ -113,7 +113,7 @@ func (e *scaleSetInstanceAction) Prepare(_ context.Context, state *ScaleSetInsta
 		return nil, extension_kit.ToError("Target is missing the 'azure-scaleset.name' attribute.", nil)
 	}
 
-  instanceId := request.Target.Attributes["azure-scale-set-instance.id"]
+	instanceId := request.Target.Attributes["azure-scale-set-instance.id"]
 	if len(instanceId) == 0 {
 		return nil, extension_kit.ToError("Target is missing the 'azure-scaleset-instance.id' attribute.", nil)
 	}
@@ -148,13 +148,13 @@ func (e *scaleSetInstanceAction) Start(ctx context.Context, state *ScaleSetInsta
 	}
 
 	if state.Action == "restart" {
-		_, err = client.BeginRestart(ctx, state.ResourceGroupName, state.VmScaleSetName,state.InstanceID, nil)
+		_, err = client.BeginRestart(ctx, state.ResourceGroupName, state.VmScaleSetName, state.InstanceID, nil)
 	} else if state.Action == "power-off" {
-		_, err = client.BeginPowerOff(ctx, state.ResourceGroupName, state.VmScaleSetName,state.InstanceID, nil)
+		_, err = client.BeginPowerOff(ctx, state.ResourceGroupName, state.VmScaleSetName, state.InstanceID, nil)
 	} else if state.Action == "delete" {
-		_, err = client.BeginDelete(ctx, state.ResourceGroupName, state.VmScaleSetName, state.InstanceID,nil)
+		_, err = client.BeginDelete(ctx, state.ResourceGroupName, state.VmScaleSetName, state.InstanceID, nil)
 	} else if state.Action == "deallocate" {
-		_, err = client.BeginDeallocate(ctx, state.ResourceGroupName, state.VmScaleSetName,state.InstanceID, nil)
+		_, err = client.BeginDeallocate(ctx, state.ResourceGroupName, state.VmScaleSetName, state.InstanceID, nil)
 	} else {
 		return nil, extension_kit.ToError(fmt.Sprintf("Unknown state change attack '%s'", state.Action), nil)
 	}

@@ -1,16 +1,16 @@
 package extscalesetinstance
 
 import (
-  "context"
-  "errors"
-  "github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
-  "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
-  "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-  "github.com/steadybit/extension-azure/config"
-  "github.com/steadybit/extension-kit/extutil"
-  "github.com/stretchr/testify/assert"
-  "github.com/stretchr/testify/mock"
-  "testing"
+	"context"
+	"errors"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+	"github.com/steadybit/extension-azure/config"
+	"github.com/steadybit/extension-kit/extutil"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"testing"
 )
 
 type azureResourceGraphClientMock struct {
@@ -126,7 +126,7 @@ func TestGetAllAzureScaleSetInstances(t *testing.T) {
 	// Given
 	mockedApi.On("NewListPager", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
-  config.Config.DiscoveryAttributesExcludesScaleSetInstance = []string{"azure-scale-set-instance.label.tag2"}
+	config.Config.DiscoveryAttributesExcludesScaleSetInstance = []string{"azure-scale-set-instance.label.tag2"}
 
 	var scaleSet ScaleSet
 	scaleSet.Name = "myScaleSet"

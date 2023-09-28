@@ -5,24 +5,24 @@
 package extvm
 
 import (
-  "context"
-  "fmt"
-  "github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-  "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
-  "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-  "github.com/rs/zerolog/log"
-  "github.com/steadybit/discovery-kit/go/discovery_kit_api"
-  "github.com/steadybit/discovery-kit/go/discovery_kit_commons"
-  "github.com/steadybit/extension-azure/common"
-  "github.com/steadybit/extension-azure/config"
-  extension_kit "github.com/steadybit/extension-kit"
-  "github.com/steadybit/extension-kit/extbuild"
-  "github.com/steadybit/extension-kit/exthttp"
-  "github.com/steadybit/extension-kit/extutil"
-  "net/http"
-  "os"
-  "strconv"
-  "strings"
+	"context"
+	"fmt"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+	"github.com/rs/zerolog/log"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
+	"github.com/steadybit/extension-azure/common"
+	"github.com/steadybit/extension-azure/config"
+	extension_kit "github.com/steadybit/extension-kit"
+	"github.com/steadybit/extension-kit/extbuild"
+	"github.com/steadybit/extension-kit/exthttp"
+	"github.com/steadybit/extension-kit/extutil"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
 )
 
 const discoveryBasePath = "/" + TargetIDVM + "/discovery"
@@ -65,7 +65,7 @@ func GetDiscoveryList() discovery_kit_api.DiscoveryList {
 				Method: "GET",
 				Path:   discoveryBasePath + "/rules/azure-vm-to-host",
 			},
-      {
+			{
 				Method: "GET",
 				Path:   discoveryBasePath + "/rules/azure-vm-to-container",
 			},
@@ -212,8 +212,6 @@ func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
 	}
 }
 
-
-
 func getDiscoveredVMs(w http.ResponseWriter, _ *http.Request, _ []byte) {
 	ctx := context.Background()
 	client, err := common.GetClientByCredentials()
@@ -221,14 +219,14 @@ func getDiscoveredVMs(w http.ResponseWriter, _ *http.Request, _ []byte) {
 		log.Error().Msgf("failed to get client: %v", err)
 		return
 	}
-  targets, err := GetAllVirtualMachines(ctx, client)
+	targets, err := GetAllVirtualMachines(ctx, client)
 	if err != nil {
 		log.Error().Msgf("failed to get all virtual machines: %v", err)
 		exthttp.WriteError(w, extension_kit.ToError("Failed to collect azure virtual machines information", err))
 		return
 	}
 
-  exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
+	exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
 }
 
 func GetAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
@@ -253,7 +251,7 @@ func GetAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 	} else {
 		// Print the obtained query results
 		log.Debug().Msgf("Virtual Machines found: " + strconv.FormatInt(*results.TotalRecords, 10))
-    targets := make([]discovery_kit_api.Target, 0)
+		targets := make([]discovery_kit_api.Target, 0)
 		if m, ok := results.Data.([]interface{}); ok {
 			for _, r := range m {
 				items := r.(map[string]interface{})
@@ -294,7 +292,7 @@ func GetAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 				})
 			}
 		}
-	  return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesVM), nil
+		return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesVM), nil
 	}
 }
 
@@ -423,4 +421,3 @@ func getPropertyValue(properties map[string]interface{}, key string) string {
 	}
 	return ""
 }
-

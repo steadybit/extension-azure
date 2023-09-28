@@ -23,8 +23,8 @@ func GetMapValue(properties map[string]interface{}, key string) map[string]inter
 }
 
 func AddAttribute(attribute map[string][]string, key string, value string) {
-  if attribute[key] == nil {
-    attribute[key] = make([]string, 0)
-  }
-  attribute[key] = append(attribute[key], value)
+	if attribute[key] == nil {
+		attribute[key] = make([]string, 0)
+	}
+	attribute[key] = append(attribute[key], value)
 }

@@ -31,7 +31,7 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-vm.vm.name":             {"my-vm"},
+						"azure-vm.vm.name":          {"my-vm"},
 						"azure.subscription.id":     {"42"},
 						"azure.resource-group.name": {"rg0815"},
 					},
@@ -53,7 +53,7 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-vm.vm.name":             {"my-vm"},
+						"azure-vm.vm.name":          {"my-vm"},
 						"azure.resource-group.name": {"rg0815"},
 					},
 				}),
@@ -83,7 +83,7 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 				},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-vm.vm.name":         {"my-vm"},
+						"azure-vm.vm.name":      {"my-vm"},
 						"azure.subscription.id": {"42"},
 					},
 				}),
@@ -96,7 +96,7 @@ func TestAzureVirtualMachineStateAction_Prepare(t *testing.T) {
 				Config: map[string]interface{}{},
 				Target: extutil.Ptr(action_kit_api.Target{
 					Attributes: map[string][]string{
-						"azure-vm.vm.name":             {"my-vm"},
+						"azure-vm.vm.name":          {"my-vm"},
 						"azure.subscription.id":     {"42"},
 						"azure.resource-group.name": {"rg0815"},
 					},
@@ -151,7 +151,6 @@ func (m *azureClientApiMock) BeginDeallocate(ctx context.Context, resourceGroupN
 	args := m.Called(ctx, resourceGroupName, vmName)
 	return nil, args.Error(1)
 }
-
 
 func TestAzureVirtualMachineStateAction_ReStart(t *testing.T) {
 	// Given
@@ -280,9 +279,9 @@ func TestStartVirtualMachineStateChangeForwardsError(t *testing.T) {
 		require.Equal(t, "rg-42", resourceGroupName)
 		return true
 	}), mock.MatchedBy(func(vmName string) bool {
-    require.Equal(t, "my-vm", vmName)
-    return true
-  })).Return(nil, errors.New("expected"))
+		require.Equal(t, "my-vm", vmName)
+		return true
+	})).Return(nil, errors.New("expected"))
 	action := virtualMachineStateAction{clientProvider: func(account string) (virtualMachineStateChangeApi, error) {
 		return api, nil
 	}}

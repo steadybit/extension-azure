@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-  "github.com/steadybit/extension-azure/config"
-  "github.com/steadybit/extension-kit/extutil"
+	"github.com/steadybit/extension-azure/config"
+	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -36,7 +36,7 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 					"type":           "Microsoft.Compute/virtualMachines",
 					"location":       "westeurope",
 					"subscriptionId": "42",
-          "resourceGroup":  "rg-1",
+					"resourceGroup":  "rg-1",
 					"tags": map[string]any{
 						"tag1": "Value1",
 						"tag2": "Value2",
@@ -47,9 +47,9 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 						},
 						"extended": map[string]any{
 							"instanceView": map[string]any{
-                "osVersion": "18.04.5 LTS",
-                "computerName": "dev-demo",
-                "osName": "Ubuntu 18.04.5 LTS",
+								"osVersion":    "18.04.5 LTS",
+								"computerName": "dev-demo",
+								"osName":       "Ubuntu 18.04.5 LTS",
 								"vmAgent": map[string]any{
 									"vmAgentVersion": "2.7.0",
 								},
@@ -83,7 +83,7 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	}
 	mockedApi.On("Resources", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
-  config.Config.DiscoveryAttributesExcludesVM = []string{"azure-vm.label.tag1"}
+	config.Config.DiscoveryAttributesExcludesVM = []string{"azure-vm.label.tag1"}
 
 	// When
 	targets, err := GetAllVirtualMachines(context.Background(), mockedApi)
@@ -108,7 +108,7 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	assert.Equal(t, []string{"westeurope"}, target.Attributes["azure.location"])
 	assert.Equal(t, []string{"rg-1"}, target.Attributes["azure.resource-group.name"])
 	assert.Equal(t, []string{"Value2"}, target.Attributes["azure-vm.label.tag2"])
-	assert.NotContains(t,target.Attributes, "azure-vm.label.tag1")
+	assert.NotContains(t, target.Attributes, "azure-vm.label.tag1")
 	_, present := target.Attributes["label.name"]
 	assert.False(t, present)
 }
@@ -127,19 +127,19 @@ func TestGetAllError(t *testing.T) {
 }
 
 func TestGetAttributeDescriptions(t *testing.T) {
-  // just cover this static code
-  descriptions := getAttributeDescriptions()
-  assert.Greater(t, len(descriptions.Attributes),10 )
+	// just cover this static code
+	descriptions := getAttributeDescriptions()
+	assert.Greater(t, len(descriptions.Attributes), 10)
 }
 
 func TestGetToContainerEnrichmentRule(t *testing.T) {
-  // just cover this static code
-  enrichmentRule := getToContainerEnrichmentRule()
-  assert.Greater(t, len(enrichmentRule.Attributes),8 )
+	// just cover this static code
+	enrichmentRule := getToContainerEnrichmentRule()
+	assert.Greater(t, len(enrichmentRule.Attributes), 8)
 }
 
 func TestGetToHostEnrichmentRule(t *testing.T) {
-  // just cover this static code
-  enrichmentRule := getToHostEnrichmentRule()
-  assert.Greater(t, len(enrichmentRule.Attributes),8 )
+	// just cover this static code
+	enrichmentRule := getToHostEnrichmentRule()
+	assert.Greater(t, len(enrichmentRule.Attributes), 8)
 }
