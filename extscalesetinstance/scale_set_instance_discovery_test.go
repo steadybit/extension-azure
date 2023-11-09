@@ -186,8 +186,8 @@ func TestGetAttributeDescriptions(t *testing.T) {
 
 func TestGetToContainerEnrichmentRule(t *testing.T) {
 	// just cover this static code
-	enrichmentRule := getToContainerEnrichmentRule()
-	assert.Greater(t, len(enrichmentRule.Attributes), 6)
+	enrichmentRule := getScaleSetVMToXEnrichmentRule("com.steadybit.extension_container.container")
+	assert.Greater(t, len(enrichmentRule().Attributes), 6)
 }
 
 func TestGetToHostEnrichmentRule(t *testing.T) {
