@@ -33,8 +33,11 @@ func RegisterDiscoveryHandlers() {
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/target-description", exthttp.GetterAsHandler(getTargetDescription))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/attribute-descriptions", exthttp.GetterAsHandler(getAttributeDescriptions))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredInstances)
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-scale_set-vm-to-container", exthttp.GetterAsHandler(getToContainerEnrichmentRule))
 	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-scale_set-vm-to-host", exthttp.GetterAsHandler(getToHostEnrichmentRule))
+	log.Info().Msgf("Enriching EC2 data for target types: %v", config.Config.EnrichScaleSetVMDataForTargetTypes)
+	for _, targetType := range config.Config.EnrichScaleSetVMDataForTargetTypes {
+		exthttp.RegisterHttpHandler(fmt.Sprintf("/rules/azure-scale_set-vm-to-%s", targetType), exthttp.GetterAsHandler(getScaleSetVMToXEnrichmentRule(targetType)))
+	}
 }
 
 var (
@@ -491,71 +494,53 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 	}
 }
 
-func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
-	return discovery_kit_api.TargetEnrichmentRule{
-		Id:      "com.steadybit.extension_azure.azure-scaleset-instance-to-container",
-		Version: extbuild.GetSemverVersionStringOrUnknown(),
-
-		Src: discovery_kit_api.SourceOrDestination{
-			Type: TargetIDScaleSetInstance,
-			Selector: map[string]string{
-				"azure-scale-set-instance.hostname": "${dest.container.host}",
+func getScaleSetVMToXEnrichmentRule(destTargetType string) func() discovery_kit_api.TargetEnrichmentRule {
+	id := fmt.Sprintf("com.steadybit.extension_azure.scale_set.instance-to-%s", destTargetType)
+	return func() discovery_kit_api.TargetEnrichmentRule {
+		return discovery_kit_api.TargetEnrichmentRule{
+			Id:      id,
+			Version: extbuild.GetSemverVersionStringOrUnknown(),
+			Src: discovery_kit_api.SourceOrDestination{
+				Type: TargetIDScaleSetInstance,
+				Selector: map[string]string{
+					"azure-scale-set-instance.hostname": "${dest.host.hostname}",
+				},
 			},
-		},
-		Dest: discovery_kit_api.SourceOrDestination{
-			Type: "com.steadybit.extension_container.container",
-			Selector: map[string]string{
-				"container.host": "${src.azure-scaleset-instance.hostname}",
+			Dest: discovery_kit_api.SourceOrDestination{
+				Type: destTargetType,
+				Selector: map[string]string{
+					"host.hostname": "${src.azure-scaleset-instance.hostname}",
+				},
 			},
-		},
-		Attributes: []discovery_kit_api.Attribute{
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.subscription.id",
-			}, {
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.id",
+			Attributes: []discovery_kit_api.Attribute{
+				{
+					Matcher: discovery_kit_api.Equals,
+					Name:    "azure.subscription.id",
+				}, {
+					Matcher: discovery_kit_api.Equals,
+					Name:    "azure-scale-set-instance.id",
+				},
+				{
+					Matcher: discovery_kit_api.Equals,
+					Name:    "azure.location",
+				},
+				{
+					Matcher: discovery_kit_api.Equals,
+					Name:    "azure.zone",
+				},
+				{
+					Matcher: discovery_kit_api.Equals,
+					Name:    "azure-scale-set.name",
+				},
+				{
+					Matcher: discovery_kit_api.StartsWith,
+					Name:    "azure-scale-set-instance.label.",
+				},
+				{
+					Matcher: discovery_kit_api.StartsWith,
+					Name:    "azure-scale-set.label.",
+				},
 			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.vm.size",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.os.name",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.os.version",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.os.type",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.location",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.resource-group.name",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.provisioning.state",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set.name",
-			},
-			{
-				Matcher: discovery_kit_api.StartsWith,
-				Name:    "azure-scale-set-instance.label.",
-			},
-			{
-				Matcher: discovery_kit_api.StartsWith,
-				Name:    "azure-scale-set.label.",
-			},
-		},
+		}
 	}
 }
