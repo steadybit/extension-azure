@@ -1,8 +1,14 @@
 # Changelog
 
 
-## v1.0.3
+## v1.0.4
 
+- Added `pprof` endpoints for debugging purposes
+- Update dependencies
+- Enrichment for kubernetes entities
+
+## v1.0.3
+-
 - Possibility to exclude attributes from discovery
 
 ## v1.0.2
