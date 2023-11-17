@@ -66,5 +66,5 @@ run: tidy build
 ## container: build the container image
 .PHONY: container
 container:
-	docker build --build-arg ADDITIONAL_BUILD_PARAMS="-cover" -t extension-azure:latest .
+	docker build --build-arg ADDITIONAL_BUILD_PARAMS="-cover -covermode=atomic" -t extension-azure:latest .
 
