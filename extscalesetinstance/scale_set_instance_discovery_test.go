@@ -71,7 +71,7 @@ func TestGetAllAzureScaleSets(t *testing.T) {
 	mockedApi.On("Resources", mock.Anything, mock.Anything, mock.Anything).Return(&mockedReturnValue, nil)
 
 	// When
-	scaleSets, err := GetAllScaleSets(context.Background(), mockedApi)
+	scaleSets, err := getAllScaleSets(context.Background(), mockedApi)
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -94,7 +94,7 @@ func TestGetAllAzureScaleSetInstances(t *testing.T) {
 
 	mockedReturnValue := armcompute.VirtualMachineScaleSetVMsClientListResponse{
 		VirtualMachineScaleSetVMListResult: armcompute.VirtualMachineScaleSetVMListResult{
-			Value: []*armcompute.VirtualMachineScaleSetVM{&armcompute.VirtualMachineScaleSetVM{
+			Value: []*armcompute.VirtualMachineScaleSetVM{{
 				Location:   extutil.Ptr("westeurope"),
 				Tags:       map[string]*string{"tag1": extutil.Ptr("Value1"), "tag2": extutil.Ptr("Value2")},
 				ID:         extutil.Ptr("/subscriptions/42/resourceGroups/rg-1/providers/Microsoft.Compute/virtualMachineScaleSets/myScaleSet/virtualMachines/myVm"),
@@ -172,26 +172,8 @@ func TestGetAllError(t *testing.T) {
 	mockedApi.On("Resources", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := GetAllScaleSets(context.Background(), mockedApi)
+	_, err := getAllScaleSets(context.Background(), mockedApi)
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")
-}
-
-func TestGetAttributeDescriptions(t *testing.T) {
-	// just cover this static code
-	descriptions := getAttributeDescriptions()
-	assert.Greater(t, len(descriptions.Attributes), 6)
-}
-
-func TestGetToContainerEnrichmentRule(t *testing.T) {
-	// just cover this static code
-	enrichmentRule := getScaleSetVMToXEnrichmentRule("com.steadybit.extension_container.container")
-	assert.Greater(t, len(enrichmentRule().Attributes), 6)
-}
-
-func TestGetToHostEnrichmentRule(t *testing.T) {
-	// just cover this static code
-	enrichmentRule := getToHostEnrichmentRule()
-	assert.Greater(t, len(enrichmentRule.Attributes), 8)
 }
