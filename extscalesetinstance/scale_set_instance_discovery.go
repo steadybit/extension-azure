@@ -14,82 +14,45 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-azure/common"
 	"github.com/steadybit/extension-azure/config"
-	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
-const discoveryBasePath = "/" + TargetIDScaleSetInstance + "/discovery"
-
-func RegisterDiscoveryHandlers() {
-	exthttp.RegisterHttpHandler(discoveryBasePath, exthttp.GetterAsHandler(getDiscoveryDescription))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/target-description", exthttp.GetterAsHandler(getTargetDescription))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/attribute-descriptions", exthttp.GetterAsHandler(getAttributeDescriptions))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredInstances)
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-scale_set-vm-to-host", exthttp.GetterAsHandler(getToHostEnrichmentRule))
-	log.Info().Msgf("Enriching EC2 data for target types: %v", config.Config.EnrichScaleSetVMDataForTargetTypes)
-	for _, targetType := range config.Config.EnrichScaleSetVMDataForTargetTypes {
-		exthttp.RegisterHttpHandler(fmt.Sprintf("/rules/azure-scale_set-vm-to-%s", targetType), exthttp.GetterAsHandler(getScaleSetVMToXEnrichmentRule(targetType)))
-	}
+type ssiDiscovery struct {
 }
 
 var (
-	instancesClient *armcompute.VirtualMachineScaleSetVMsClient
+	_ discovery_kit_sdk.TargetDescriber          = (*ssiDiscovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber       = (*ssiDiscovery)(nil)
+	_ discovery_kit_sdk.EnrichmentRulesDescriber = (*ssiDiscovery)(nil)
 )
 
-func GetDiscoveryList() discovery_kit_api.DiscoveryList {
-	return discovery_kit_api.DiscoveryList{
-		Discoveries: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath,
-			},
-		},
-		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/target-description",
-			},
-		},
-		TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/attribute-descriptions",
-			},
-		},
-		TargetEnrichmentRules: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/rules/azure-scale_set-vm-to-host",
-			},
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/rules/azure-scale_set-vm-to-container",
-			},
-		},
-	}
+func NewScaleSetInstanceDiscovery() discovery_kit_sdk.TargetDiscovery {
+	discovery := &ssiDiscovery{}
+	return discovery_kit_sdk.NewCachedTargetDiscovery(discovery,
+		discovery_kit_sdk.WithRefreshTargetsNow(),
+		discovery_kit_sdk.WithRefreshTargetsInterval(context.Background(), 30*time.Second),
+	)
 }
 
-func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
+func (d *ssiDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         TargetIDScaleSetInstance,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			Method:       "GET",
-			Path:         discoveryBasePath + "/discovered-targets",
-			CallInterval: extutil.Ptr("1m"),
+			CallInterval: extutil.Ptr("30s"),
 		},
 	}
 }
 
-func getTargetDescription() discovery_kit_api.TargetDescription {
+func (d *ssiDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:      TargetIDScaleSetInstance,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
@@ -119,88 +82,82 @@ func getTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
-	return discovery_kit_api.AttributeDescriptions{
-		Attributes: []discovery_kit_api.AttributeDescription{
-			{
-				Attribute: "azure-containerservice-managed-cluster.name",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Cluster name",
-					Other: "Cluster names",
-				},
+func (d *ssiDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
+	return []discovery_kit_api.AttributeDescription{
+		{
+			Attribute: "azure-containerservice-managed-cluster.name",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Cluster name",
+				Other: "Cluster names",
 			},
-			{
-				Attribute: "azure-scale-set-instance.hostname",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Host name",
-					Other: "Host names",
-				},
+		},
+		{
+			Attribute: "azure-scale-set-instance.hostname",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Host name",
+				Other: "Host names",
 			},
-			{
-				Attribute: "azure-scale-set-instance.os.name",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "OS name",
-					Other: "OS names",
-				},
+		},
+		{
+			Attribute: "azure-scale-set-instance.os.name",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "OS name",
+				Other: "OS names",
 			},
-			{
-				Attribute: "azure-scale-set-instance.os.type",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "OS type",
-					Other: "OS types",
-				},
+		},
+		{
+			Attribute: "azure-scale-set-instance.os.type",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "OS type",
+				Other: "OS types",
 			},
-			{
-				Attribute: "azure-scale-set-instance.os.version",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "OS version",
-					Other: "OS versions",
-				},
+		},
+		{
+			Attribute: "azure-scale-set-instance.os.version",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "OS version",
+				Other: "OS versions",
 			},
-			{
-				Attribute: "azure-scale-set-instance.id",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "VM ID",
-					Other: "VM IDs",
-				},
+		},
+		{
+			Attribute: "azure-scale-set-instance.id",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "VM ID",
+				Other: "VM IDs",
 			},
-			{
-				Attribute: "azure-scale-set-instance.vm.size",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "VM size",
-					Other: "VM sizes",
-				},
+		},
+		{
+			Attribute: "azure-scale-set-instance.vm.size",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "VM size",
+				Other: "VM sizes",
 			},
-			{
-				Attribute: "azure-scale-set-instance.name",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "VM name",
-					Other: "VM names",
-				},
+		},
+		{
+			Attribute: "azure-scale-set-instance.name",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "VM name",
+				Other: "VM names",
 			},
-			{
-				Attribute: "azure-scale-set-instance.provisioning.state",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Provisioning state",
-					Other: "Provisioning states",
-				},
+		},
+		{
+			Attribute: "azure-scale-set-instance.provisioning.state",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Provisioning state",
+				Other: "Provisioning states",
 			},
 		},
 	}
 }
 
-func getDiscoveredInstances(w http.ResponseWriter, _ *http.Request, _ []byte) {
-	ctx := context.Background()
+func (d *ssiDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client, err := common.GetClientByCredentials()
 	if err != nil {
-		log.Error().Msgf("failed to get client: %v", err)
-		return
+		return nil, fmt.Errorf("failed to get client: %w", err)
 	}
-	scaleSets, err := GetAllScaleSets(ctx, client)
+	scaleSets, err := getAllScaleSets(ctx, client)
 	if err != nil {
-		log.Error().Msgf("failed to get all scale-sets: %v", err)
-		exthttp.WriteError(w, extension_kit.ToError("Failed to collect azure scale set instances information", err))
-		return
+		return nil, fmt.Errorf("failed to get all scale sets: %w", err)
 	}
 
 	scaleSetMap := make(map[string][]ScaleSet)
@@ -224,15 +181,13 @@ func getDiscoveredInstances(w http.ResponseWriter, _ *http.Request, _ []byte) {
 		for _, scaleSet := range scaleSetList {
 			newTargets, err := GetAllScaleSetInstances(ctx, scaleSetVMsClient, scaleSet)
 			if err != nil {
-				log.Error().Msgf("failed to get all scale-sets instances: %v", err)
-				exthttp.WriteError(w, extension_kit.ToError("Failed to collect azure scale set instances information", err))
-				return
+				log.Error().Msgf("failed to get all scale instances: %v", err)
 			}
 			targets = append(targets, newTargets...)
 		}
 	}
 
-	exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
+	return targets, nil
 }
 
 func appendKubernetesServiceAttributes(ctx context.Context, client *armresourcegraph.Client, scaleSet ScaleSet) {
@@ -340,7 +295,6 @@ type KubernetesService struct {
 }
 
 func getKubernetesManagedClusters(ctx context.Context, client common.ArmResourceGraphApi, nodeResourceGroup string) ([]KubernetesService, error) {
-
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
 	if subscriptionId != "" {
@@ -382,8 +336,7 @@ func getKubernetesManagedClusters(ctx context.Context, client common.ArmResource
 		return kubernetesServices, nil
 	}
 }
-func GetAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]ScaleSet, error) {
-
+func getAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]ScaleSet, error) {
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
 	if subscriptionId != "" {
@@ -425,6 +378,16 @@ func GetAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]
 		}
 		return scaleSets, nil
 	}
+}
+
+func (d *ssiDiscovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
+	rules := []discovery_kit_api.TargetEnrichmentRule{
+		getToHostEnrichmentRule(),
+	}
+	for _, targetType := range config.Config.EnrichScaleSetVMDataForTargetTypes {
+		rules = append(rules, getScaleSetVMToXEnrichmentRule(targetType))
+	}
+	return rules
 }
 
 func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
@@ -494,53 +457,51 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 	}
 }
 
-func getScaleSetVMToXEnrichmentRule(destTargetType string) func() discovery_kit_api.TargetEnrichmentRule {
+func getScaleSetVMToXEnrichmentRule(destTargetType string) discovery_kit_api.TargetEnrichmentRule {
 	id := fmt.Sprintf("com.steadybit.extension_azure.scale_set.instance-to-%s", destTargetType)
-	return func() discovery_kit_api.TargetEnrichmentRule {
-		return discovery_kit_api.TargetEnrichmentRule{
-			Id:      id,
-			Version: extbuild.GetSemverVersionStringOrUnknown(),
-			Src: discovery_kit_api.SourceOrDestination{
-				Type: TargetIDScaleSetInstance,
-				Selector: map[string]string{
-					"azure-scale-set-instance.hostname": "${dest.host.hostname}",
-				},
+	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      id,
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: TargetIDScaleSetInstance,
+			Selector: map[string]string{
+				"azure-scale-set-instance.hostname": "${dest.host.hostname}",
 			},
-			Dest: discovery_kit_api.SourceOrDestination{
-				Type: destTargetType,
-				Selector: map[string]string{
-					"host.hostname": "${src.azure-scaleset-instance.hostname}",
-				},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: destTargetType,
+			Selector: map[string]string{
+				"host.hostname": "${src.azure-scaleset-instance.hostname}",
 			},
-			Attributes: []discovery_kit_api.Attribute{
-				{
-					Matcher: discovery_kit_api.Equals,
-					Name:    "azure.subscription.id",
-				}, {
-					Matcher: discovery_kit_api.Equals,
-					Name:    "azure-scale-set-instance.id",
-				},
-				{
-					Matcher: discovery_kit_api.Equals,
-					Name:    "azure.location",
-				},
-				{
-					Matcher: discovery_kit_api.Equals,
-					Name:    "azure.zone",
-				},
-				{
-					Matcher: discovery_kit_api.Equals,
-					Name:    "azure-scale-set.name",
-				},
-				{
-					Matcher: discovery_kit_api.StartsWith,
-					Name:    "azure-scale-set-instance.label.",
-				},
-				{
-					Matcher: discovery_kit_api.StartsWith,
-					Name:    "azure-scale-set.label.",
-				},
+		},
+		Attributes: []discovery_kit_api.Attribute{
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.subscription.id",
+			}, {
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-scale-set-instance.id",
 			},
-		}
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.location",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.zone",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure-scale-set.name",
+			},
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "azure-scale-set-instance.label.",
+			},
+			{
+				Matcher: discovery_kit_api.StartsWith,
+				Name:    "azure-scale-set.label.",
+			},
+		},
 	}
 }
