@@ -8,84 +8,49 @@ import (
 	"context"
 	"fmt"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-azure/common"
 	"github.com/steadybit/extension-azure/config"
-	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/exthttp"
 	"github.com/steadybit/extension-kit/extutil"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
-const discoveryBasePath = "/" + TargetIDVM + "/discovery"
-
-func RegisterDiscoveryHandlers() {
-	exthttp.RegisterHttpHandler(discoveryBasePath, exthttp.GetterAsHandler(getDiscoveryDescription))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/target-description", exthttp.GetterAsHandler(getTargetDescription))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/attribute-descriptions", exthttp.GetterAsHandler(getAttributeDescriptions))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/discovered-targets", getDiscoveredVMs)
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-vm-to-container", exthttp.GetterAsHandler(getToContainerEnrichmentRule))
-	exthttp.RegisterHttpHandler(discoveryBasePath+"/rules/azure-vm-to-host", exthttp.GetterAsHandler(getToHostEnrichmentRule))
+type vmDiscovery struct {
 }
 
 var (
-	virtualMachinesClient *armcompute.VirtualMachinesClient
+	_ discovery_kit_sdk.TargetDescriber          = (*vmDiscovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber       = (*vmDiscovery)(nil)
+	_ discovery_kit_sdk.EnrichmentRulesDescriber = (*vmDiscovery)(nil)
 )
 
-func GetDiscoveryList() discovery_kit_api.DiscoveryList {
-	return discovery_kit_api.DiscoveryList{
-		Discoveries: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath,
-			},
-		},
-		TargetTypes: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/target-description",
-			},
-		},
-		TargetAttributes: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/attribute-descriptions",
-			},
-		},
-		TargetEnrichmentRules: []discovery_kit_api.DescribingEndpointReference{
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/rules/azure-vm-to-host",
-			},
-			{
-				Method: "GET",
-				Path:   discoveryBasePath + "/rules/azure-vm-to-container",
-			},
-		},
-	}
+func NewVirtualMachineDiscovery() discovery_kit_sdk.TargetDiscovery {
+	discovery := &vmDiscovery{}
+	return discovery_kit_sdk.NewCachedTargetDiscovery(discovery,
+		discovery_kit_sdk.WithRefreshTargetsNow(),
+		discovery_kit_sdk.WithRefreshTargetsInterval(context.Background(), 30*time.Second),
+	)
 }
 
-func getDiscoveryDescription() discovery_kit_api.DiscoveryDescription {
+func (d *vmDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:         TargetIDVM,
 		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			Method:       "GET",
-			Path:         discoveryBasePath + "/discovered-targets",
-			CallInterval: extutil.Ptr("1m"),
+			CallInterval: extutil.Ptr("30s"),
 		},
 	}
 }
 
-func getTargetDescription() discovery_kit_api.TargetDescription {
+func (d *vmDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:      TargetIDVM,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
@@ -114,123 +79,115 @@ func getTargetDescription() discovery_kit_api.TargetDescription {
 	}
 }
 
-func getAttributeDescriptions() discovery_kit_api.AttributeDescriptions {
-	return discovery_kit_api.AttributeDescriptions{
-		Attributes: []discovery_kit_api.AttributeDescription{
-			{
-				Attribute: "azure-vm.hostname",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Host name",
-					Other: "Host names",
-				},
+func (d *vmDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
+	return []discovery_kit_api.AttributeDescription{
+		{
+			Attribute: "azure-vm.hostname",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Host name",
+				Other: "Host names",
 			},
-			{
-				Attribute: "azure.location",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Location",
-					Other: "Locations",
-				},
+		},
+		{
+			Attribute: "azure.location",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Location",
+				Other: "Locations",
 			},
-			{
-				Attribute: "azure-vm.network.id",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Network ID",
-					Other: "Network IDs",
-				},
+		},
+		{
+			Attribute: "azure-vm.network.id",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Network ID",
+				Other: "Network IDs",
 			},
-			{
-				Attribute: "azure-vm.os.name",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "OS name",
-					Other: "OS names",
-				},
+		},
+		{
+			Attribute: "azure-vm.os.name",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "OS name",
+				Other: "OS names",
 			},
-			{
-				Attribute: "azure-vm.os.type",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "OS type",
-					Other: "OS types",
-				},
+		},
+		{
+			Attribute: "azure-vm.os.type",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "OS type",
+				Other: "OS types",
 			},
-			{
-				Attribute: "azure-vm.os.version",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "OS version",
-					Other: "OS versions",
-				},
+		},
+		{
+			Attribute: "azure-vm.os.version",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "OS version",
+				Other: "OS versions",
 			},
-			{
-				Attribute: "azure-vm.power.state",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Power state",
-					Other: "Power states",
-				},
+		},
+		{
+			Attribute: "azure-vm.power.state",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Power state",
+				Other: "Power states",
 			},
-			{
-				Attribute: "azure-vm.tags",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Tags",
-					Other: "Tags",
-				},
+		},
+		{
+			Attribute: "azure-vm.tags",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Tags",
+				Other: "Tags",
 			},
-			{
-				Attribute: "azure-vm.vm.id",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "VM ID",
-					Other: "VM IDs",
-				},
+		},
+		{
+			Attribute: "azure-vm.vm.id",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "VM ID",
+				Other: "VM IDs",
 			},
-			{
-				Attribute: "azure-vm.vm.size",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "VM size",
-					Other: "VM sizes",
-				},
+		},
+		{
+			Attribute: "azure-vm.vm.size",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "VM size",
+				Other: "VM sizes",
 			},
-			{
-				Attribute: "azure-vm.vm.name",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "VM name",
-					Other: "VM names",
-				},
+		},
+		{
+			Attribute: "azure-vm.vm.name",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "VM name",
+				Other: "VM names",
 			},
-			{
-				Attribute: "azure.subscription.id",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Subscription ID",
-					Other: "Subscription IDs",
-				},
+		},
+		{
+			Attribute: "azure.subscription.id",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Subscription ID",
+				Other: "Subscription IDs",
 			},
-			{
-				Attribute: "azure.resource-group.name",
-				Label: discovery_kit_api.PluralLabel{
-					One:   "Resource group name",
-					Other: "Resource group names",
-				},
+		},
+		{
+			Attribute: "azure.resource-group.name",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Resource group name",
+				Other: "Resource group names",
 			},
 		},
 	}
 }
 
-func getDiscoveredVMs(w http.ResponseWriter, _ *http.Request, _ []byte) {
-	ctx := context.Background()
+func (d *vmDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
 	client, err := common.GetClientByCredentials()
 	if err != nil {
-		log.Error().Msgf("failed to get client: %v", err)
-		return
+		return nil, fmt.Errorf("failed to get client: %w", err)
 	}
-	targets, err := GetAllVirtualMachines(ctx, client)
+	targets, err := getAllVirtualMachines(ctx, client)
 	if err != nil {
-		log.Error().Msgf("failed to get all virtual machines: %v", err)
-		exthttp.WriteError(w, extension_kit.ToError("Failed to collect azure virtual machines information", err))
-		return
+		return nil, fmt.Errorf("failed to get all virtual machines: %w", err)
 	}
-
-	exthttp.WriteBody(w, discovery_kit_api.DiscoveryData{Targets: &targets})
+	return targets, nil
 }
 
-func GetAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-
+func getAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
 	if subscriptionId != "" {
@@ -293,6 +250,13 @@ func GetAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 			}
 		}
 		return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesVM), nil
+	}
+}
+
+func (d *vmDiscovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
+	return []discovery_kit_api.TargetEnrichmentRule{
+		getToHostEnrichmentRule(),
+		getToContainerEnrichmentRule(),
 	}
 }
 

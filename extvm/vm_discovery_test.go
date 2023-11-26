@@ -86,7 +86,7 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	config.Config.DiscoveryAttributesExcludesVM = []string{"azure-vm.label.tag1"}
 
 	// When
-	targets, err := GetAllVirtualMachines(context.Background(), mockedApi)
+	targets, err := getAllVirtualMachines(context.Background(), mockedApi)
 
 	// Then
 	assert.Equal(t, nil, err)
@@ -120,26 +120,8 @@ func TestGetAllError(t *testing.T) {
 	mockedApi.On("Resources", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("expected"))
 
 	// When
-	_, err := GetAllVirtualMachines(context.Background(), mockedApi)
+	_, err := getAllVirtualMachines(context.Background(), mockedApi)
 
 	// Then
 	assert.Equal(t, err.Error(), "expected")
-}
-
-func TestGetAttributeDescriptions(t *testing.T) {
-	// just cover this static code
-	descriptions := getAttributeDescriptions()
-	assert.Greater(t, len(descriptions.Attributes), 10)
-}
-
-func TestGetToContainerEnrichmentRule(t *testing.T) {
-	// just cover this static code
-	enrichmentRule := getToContainerEnrichmentRule()
-	assert.Greater(t, len(enrichmentRule.Attributes), 8)
-}
-
-func TestGetToHostEnrichmentRule(t *testing.T) {
-	// just cover this static code
-	enrichmentRule := getToHostEnrichmentRule()
-	assert.Greater(t, len(enrichmentRule.Attributes), 8)
 }
