@@ -1,6 +1,11 @@
 # Changelog
 
 
+## v1.0.5
+
+- refactored to use discovery-kit-sdk
+- Update dependencies
+
 ## v1.0.4
 
 - Added `pprof` endpoints for debugging purposes
