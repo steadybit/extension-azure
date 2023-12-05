@@ -1,0 +1,12 @@
+STEADYBIT_LOG_LEVEL=info
+STEADYBIT_LOG_FORMAT=text
+STEADYBIT_EXTENSION_UNIX_SOCKET=/run/steadybit/extension-azure.sock
+#
+# TODO:
+# Please configure access for the extension to your Azure account.
+# For more information visit https://github.com/steadybit/extension-azure
+#
+AZURE_CLIENT_ID=
+AZURE_TENANT_ID=
+AZURE_CLIENT_SECRET=
+AZURE_SUBSCRIPTION_ID=

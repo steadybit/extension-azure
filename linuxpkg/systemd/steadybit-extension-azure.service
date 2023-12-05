@@ -1,0 +1,18 @@
+[Unit]
+Description="steadybit extension azure"
+After=syslog.target
+
+[Service]
+Type=simple
+ExecStart=/opt/steadybit/extension-azure/extension-azure
+EnvironmentFile=/etc/steadybit/extension-azure
+User=steadybit
+Group=steadybit
+SuccessExitStatus=0 143
+Restart=on-failure
+RestartSec=5s
+StandardOutput=append:/var/log/steadybit-extension-azure.log
+StandardError=append:/var/log/steadybit-extension-azure.log
+
+[Install]
+WantedBy=multi-user.target
