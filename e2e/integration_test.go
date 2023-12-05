@@ -43,8 +43,8 @@ func testDiscovery(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
 		errs := uw.Unwrap()
 		// we expect two errors, because we do not have a real azure vm running
 		assert.Len(t, errs, 2)
-		assert.Contains(t, errs[0].Error(), "failed to acquire a token")
-		assert.Contains(t, errs[1].Error(), "failed to acquire a token")
+		assert.Contains(t, errs[0].Error(), "GET /com.steadybit.extension_azure") // failed to get all virtual machines
+		assert.Contains(t, errs[1].Error(), "GET /com.steadybit.extension_azure") // failed to get all scale sets
 	} else {
 		assert.NoError(t, validationErr)
 	}
