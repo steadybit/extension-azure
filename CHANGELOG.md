@@ -1,6 +1,10 @@
 # Changelog
 
 
+## v1.0.6
+
+- Added linux package
+
 ## v1.0.5
 
 - refactored to use discovery-kit-sdk
