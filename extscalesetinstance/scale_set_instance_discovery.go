@@ -382,7 +382,8 @@ func getAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]
 
 func (d *ssiDiscovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
 	rules := []discovery_kit_api.TargetEnrichmentRule{
-		getToHostEnrichmentRule(),
+		getToEnrichmentRule("com.steadybit.extension_host.host"),
+		getToEnrichmentRule("com.steadybit.extension_kubernetes.kubernetes-node"),
 	}
 	for _, targetType := range config.Config.EnrichScaleSetVMDataForTargetTypes {
 		rules = append(rules, getScaleSetVMToXEnrichmentRule(targetType))
@@ -390,9 +391,9 @@ func (d *ssiDiscovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnric
 	return rules
 }
 
-func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+func getToEnrichmentRule(target string) discovery_kit_api.TargetEnrichmentRule {
 	return discovery_kit_api.TargetEnrichmentRule{
-		Id:      "com.steadybit.extension_azure.azure-scaleset-instance-to-host",
+		Id:      fmt.Sprintf("com.steadybit.extension_azure.azure-scaleset-instance-to-%s", target),
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: TargetIDScaleSetInstance,
@@ -452,6 +453,22 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 			{
 				Matcher: discovery_kit_api.StartsWith,
 				Name:    "azure-scale-set.label.",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.zone",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.location",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.subscription.id",
+			},
+			{
+				Matcher: discovery_kit_api.Equals,
+				Name:    "azure.resource-group.name",
 			},
 		},
 	}
