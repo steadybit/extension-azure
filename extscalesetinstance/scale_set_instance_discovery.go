@@ -458,14 +458,6 @@ func getToEnrichmentRule(target string) discovery_kit_api.TargetEnrichmentRule {
 				Matcher: discovery_kit_api.Equals,
 				Name:    "azure.zone",
 			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.location",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.subscription.id",
-			},
 		},
 	}
 }
