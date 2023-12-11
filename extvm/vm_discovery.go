@@ -235,7 +235,6 @@ func getAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 				attributes["azure-vm.power.state"] = []string{getPropertyValue(powerState, "code")}
 				attributes["azure-vm.network.id"] = []string{getPropertyValue(networkInterfaces, "id")}
 				attributes["azure.location"] = []string{getPropertyValue(items, "location")}
-				attributes["azure.zone"] = []string{getPropertySubValue(items, "extendedLocation", "name")}
 				attributes["azure.resource-group.name"] = []string{getPropertyValue(items, "resourceGroup")}
 
 				for k, v := range common.GetMapValue(items, "tags") {
@@ -383,15 +382,6 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 func getPropertyValue(properties map[string]interface{}, key string) string {
 	if value, ok := properties[key]; ok {
 		return value.(string)
-	}
-	return ""
-}
-
-func getPropertySubValue(properties map[string]interface{}, key string, subKey string) string {
-	if value, ok := properties[key]; ok {
-		if subValue, subOk := value.(map[string]interface{})[subKey]; subOk {
-			return subValue.(string)
-		}
 	}
 	return ""
 }

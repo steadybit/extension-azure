@@ -35,10 +35,6 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 					"name":           "myVm",
 					"type":           "Microsoft.Compute/virtualMachines",
 					"location":       "westeurope",
-					"extendedLocation": map[string]any{
-						"name": "westeurope-1",
-						"type": "EdgeZone",
-					},
 					"subscriptionId": "42",
 					"resourceGroup":  "rg-1",
 					"tags": map[string]any{
@@ -110,7 +106,6 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	assert.Equal(t, []string{"PowerState/running"}, target.Attributes["azure-vm.power.state"])
 	assert.Equal(t, []string{"/subscriptions/42/resourceGroups/rg-1/providers/Microsoft.Network/networkInterfaces/i-0ef9adc9fbd3b19c5"}, target.Attributes["azure-vm.network.id"])
 	assert.Equal(t, []string{"westeurope"}, target.Attributes["azure.location"])
-	assert.Equal(t, []string{"westeurope-1"}, target.Attributes["azure.zone"])
 	assert.Equal(t, []string{"rg-1"}, target.Attributes["azure.resource-group.name"])
 	assert.Equal(t, []string{"Value2"}, target.Attributes["azure-vm.label.tag2"])
 	assert.NotContains(t, target.Attributes, "azure-vm.label.tag1")
