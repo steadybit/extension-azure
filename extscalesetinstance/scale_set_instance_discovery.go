@@ -404,7 +404,7 @@ func getToEnrichmentRule(target string) discovery_kit_api.TargetEnrichmentRule {
 		Dest: discovery_kit_api.SourceOrDestination{
 			Type: "com.steadybit.extension_host.host",
 			Selector: map[string]string{
-				"host.hostname": "${src.azure-scaleset-instance.hostname}",
+				"host.hostname": "${src.azure-scale-set-instance.hostname}",
 			},
 		},
 		Attributes: []discovery_kit_api.Attribute{
@@ -476,7 +476,7 @@ func getScaleSetVMToXEnrichmentRule(destTargetType string) discovery_kit_api.Tar
 		Dest: discovery_kit_api.SourceOrDestination{
 			Type: destTargetType,
 			Selector: map[string]string{
-				"host.hostname": "${src.azure-scaleset-instance.hostname}",
+				"host.hostname": "${src.azure-scale-set-instance.hostname}",
 			},
 		},
 		Attributes: []discovery_kit_api.Attribute{
