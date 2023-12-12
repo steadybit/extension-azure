@@ -231,13 +231,13 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtual
 			attributes["azure.location"] = []string{scaleSet.Location}
 			attributes["azure.resource-group.name"] = []string{scaleSet.ResourceGroupName}
 
-			zones := ""
+			var zones []string
 			if instance.Zones != nil {
 				for _, zone := range instance.Zones {
-					zones += common.GetStringValue(zone) + ","
+					zones = append(zones, common.GetStringValue(zone))
 				}
 			}
-			attributes["azure.zone"] = []string{zones}
+			attributes["azure.zone"] = zones
 
 			if instance.Properties != nil {
 				if instance.Properties.OSProfile != nil {

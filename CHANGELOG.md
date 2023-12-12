@@ -1,6 +1,12 @@
 # Changelog
 
 
+## v1.0.7
+
+- fix for azure zone
+- Update dependencies
+- fix enrichments for kubernetes entities
+
 ## v1.0.6
 
 - Added linux package
