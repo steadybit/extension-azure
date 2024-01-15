@@ -1,6 +1,11 @@
 # Changelog
 
 
+## v1.0.8
+
+- Update dependencies
+- fixed enrichment for jvm instances
+
 ## v1.0.7
 
 - fix for azure zone
