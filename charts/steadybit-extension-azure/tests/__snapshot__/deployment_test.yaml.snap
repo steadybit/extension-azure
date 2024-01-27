@@ -72,8 +72,8 @@ manifest should match snapshot using podAnnotations and Labels:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -188,8 +188,8 @@ manifest should match snapshot with TLS:
                   value: /etc/extension/certificates/server-cert/tls.crt
                 - name: STEADYBIT_EXTENSION_TLS_SERVER_KEY
                   value: /etc/extension/certificates/server-cert/tls.key
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -307,8 +307,8 @@ manifest should match snapshot with azure certificates vars:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -419,8 +419,8 @@ manifest should match snapshot with azure secrets vars:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -538,8 +538,8 @@ manifest should match snapshot with extra env vars:
                   name: env-configmap
                 - name: env-secrets
                   secretRef: null
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -652,8 +652,8 @@ manifest should match snapshot with extra labels:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -770,8 +770,8 @@ manifest should match snapshot with mutual TLS:
                   value: /etc/extension/certificates/server-cert/tls.key
                 - name: STEADYBIT_EXTENSION_TLS_CLIENT_CAS
                   value: /etc/extension/certificates/client-cert-a/tls.crt,/etc/extension/certificates/client-cert-a/tls.crt
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -902,8 +902,8 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   value: /etc/tls/server.key
                 - name: STEADYBIT_EXTENSION_TLS_CLIENT_CAS
                   value: /etc/tls/ca.crt,/etc/tls/ca2.crt
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -1014,8 +1014,8 @@ manifest should match snapshot with podSecurityContext:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -1128,8 +1128,8 @@ manifest should match snapshot with priority class:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
@@ -1241,8 +1241,8 @@ manifest should match snapshot without TLS:
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
                   value: text
-              image: ghcr.io/steadybit/extension-azure:latest
-              imagePullPolicy: Always
+              image: ghcr.io/steadybit/extension-azure:v0.0.0
+              imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
                 httpGet:
