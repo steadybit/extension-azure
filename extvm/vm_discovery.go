@@ -42,8 +42,7 @@ func NewVirtualMachineDiscovery() discovery_kit_sdk.TargetDiscovery {
 
 func (d *vmDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
-		Id:         TargetIDVM,
-		RestrictTo: extutil.Ptr(discovery_kit_api.LEADER),
+		Id: TargetIDVM,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
 			CallInterval: extutil.Ptr("30s"),
 		},
