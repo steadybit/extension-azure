@@ -2,8 +2,6 @@ module github.com/steadybit/extension-azure
 
 go 1.21.0
 
-toolchain go1.22.0
-
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.10.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.5.1
