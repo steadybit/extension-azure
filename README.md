@@ -21,7 +21,7 @@ Learn about the capabilities of this extension in our [Reliability Hub](https://
 
 The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
 
-When installed as linux package this configuration is done in the file `/etc/steadybit/extension-azure`.
+When installed as linux package this configuration is in`/etc/steadybit/extension-azure`.
 
 To obtain the needed azure keys, please refer to this documentation:
 https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#get-tenant-and-app-id-values-for-signing-in
