@@ -19,10 +19,11 @@ Learn about the capabilities of this extension in our [Reliability Hub](https://
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_VM`                 | discovery.attributes.excludes.vm               | List of Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*" | false    |         |
 | `STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_SCALE_SET_INSTANCE` | discovery.attributes.excludes.scaleSetInstance | List of Target Attributes which will be excluded during discovery. Checked by key equality and supporting trailing "*" | false    |         |
 
-
 The extension supports all environment variables provided by [steadybit/extension-kit](https://github.com/steadybit/extension-kit#environment-variables).
 
-The obtain the needed azure keys, please refer to this documentation:
+When installed as linux package this configuration is done in the file `/etc/steadybit/extension-azure`.
+
+To obtain the needed azure keys, please refer to this documentation:
 https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#get-tenant-and-app-id-values-for-signing-in
 
 ## Installation
