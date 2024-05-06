@@ -51,7 +51,7 @@ helm upgrade steadybit-extension-azure \
     --wait \
     --timeout 5m0s \
     --create-namespace \
-    --namespace steadybit-extension \
+    --namespace steadybit-agent \
     --set azure.clientID=YOUR_CLIENT_ID \
     --set azure.clientSecret=YOUR_CLIENT_SECRET \
     --set azure.tenantID=YOUR_TENANT_ID \
