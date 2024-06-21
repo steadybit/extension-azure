@@ -7,8 +7,9 @@ import (
 	"context"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_test/e2e"
+	actValidate "github.com/steadybit/action-kit/go/action_kit_test/validate"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	"github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
+	disValidate "github.com/steadybit/discovery-kit/go/discovery_kit_test/validate"
 	"github.com/steadybit/extension-azure/extvm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,15 +31,19 @@ func TestWithMinikube(t *testing.T) {
 
 	e2e.WithMinikube(t, e2e.DefaultMinikubeOpts(), &extFactory, []e2e.WithMinikubeTestCase{
 		{
-			Name: "discovery",
-			Test: testDiscovery,
+			Name: "validate discovery",
+			Test: validateDiscovery,
+		},
+		{
+			Name: "valudate action",
+			Test: validateAction,
 		},
 	})
 }
 
 // test the installation of the extension in minikube
-func testDiscovery(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
-	validationErr := validate.ValidateEndpointReferences("/", e.Client)
+func validateDiscovery(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
+	validationErr := disValidate.ValidateEndpointReferences("/", e.Client)
 	if uw, ok := validationErr.(interface{ Unwrap() []error }); ok {
 		errs := uw.Unwrap()
 		// we expect two errors, because we do not have a real azure vm running
@@ -58,4 +63,8 @@ func testDiscovery(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
 	})
 	// we do not have a real azure vm running, so we expect an error
 	require.Error(t, err)
+}
+
+func validateAction(t *testing.T, _ *e2e.Minikube, e *e2e.Extension) {
+	assert.NoError(t, actValidate.ValidateEndpointReferences("/", e.Client))
 }
