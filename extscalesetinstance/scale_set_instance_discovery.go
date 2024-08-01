@@ -385,7 +385,11 @@ func (d *ssiDiscovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnric
 		getToEnrichmentRule("com.steadybit.extension_kubernetes.kubernetes-node"),
 	}
 	for _, targetType := range config.Config.EnrichScaleSetVMDataForTargetTypes {
-		rules = append(rules, getScaleSetVMToXEnrichmentRule(targetType))
+		if targetType == "com.steadybit.extension_host.host" || targetType == "com.steadybit.extension_kubernetes.kubernetes-node" {
+			log.Warn().Msgf("Target type %s is already covered by default rules. Omitting.", targetType)
+		} else {
+			rules = append(rules, getScaleSetVMToXEnrichmentRule(targetType))
+		}
 	}
 	return rules
 }
@@ -401,7 +405,7 @@ func getToEnrichmentRule(target string) discovery_kit_api.TargetEnrichmentRule {
 			},
 		},
 		Dest: discovery_kit_api.SourceOrDestination{
-			Type: "com.steadybit.extension_host.host",
+			Type: target,
 			Selector: map[string]string{
 				"host.hostname": "${src.azure-scale-set-instance.hostname}",
 			},

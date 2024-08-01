@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.13
+
+- fix: target enrichment rules from scale-set to node is incorrect
+
 ## v1.0.12
 
 - Update dependencies (go 1.22)
