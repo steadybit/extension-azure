@@ -10,7 +10,6 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
-	"github.com/steadybit/event-kit/go/event_kit_api"
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-azure/extscalesetinstance"
 	"github.com/steadybit/extension-azure/extvm"
@@ -81,7 +80,6 @@ func main() {
 type ExtensionListResponse struct {
 	action_kit_api.ActionList       `json:",inline"`
 	discovery_kit_api.DiscoveryList `json:",inline"`
-	event_kit_api.EventListenerList `json:",inline"`
 }
 
 func getExtensionList() ExtensionListResponse {
