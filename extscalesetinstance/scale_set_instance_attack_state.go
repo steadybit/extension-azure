@@ -74,7 +74,8 @@ func (e *scaleSetInstanceAction) Describe() action_kit_api.ActionDescription {
 				},
 			}),
 		}),
-		Category:    extutil.Ptr("state"),
+		Technology:  extutil.Ptr("Azure"),
+		Category:    extutil.Ptr("Virtual Machines"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
