@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.15
+
+- extend enrichment to more kubernetes types
+- update dependencies
+- Use uid instead of name for user statement in Dockerfile
+
+## v1.0.14
+
+- Set new `Technology` property in extension description
+- Update dependencies (go 1.23)
 ## v1.0.14
 
 - Set new `Technology` property in extension description
