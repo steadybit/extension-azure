@@ -206,7 +206,7 @@ func getAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 		return nil, err
 	} else {
 		// Print the obtained query results
-		log.Debug().Msgf("Virtual Machines found: " + strconv.FormatInt(*results.TotalRecords, 10))
+		log.Debug().Msgf("Virtual Machines found: %s", strconv.FormatInt(*results.TotalRecords, 10))
 		targets := make([]discovery_kit_api.Target, 0)
 		if m, ok := results.Data.([]interface{}); ok {
 			for _, r := range m {

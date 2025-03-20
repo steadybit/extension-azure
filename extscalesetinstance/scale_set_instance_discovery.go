@@ -312,7 +312,7 @@ func getKubernetesManagedClusters(ctx context.Context, client common.ArmResource
 		log.Error().Msgf("failed to get results: %v", err)
 		return nil, err
 	} else {
-		log.Debug().Msgf("Kubernetes Services found: " + strconv.FormatInt(*results.TotalRecords, 10))
+		log.Debug().Msgf("Kubernetes Services found: %s", strconv.FormatInt(*results.TotalRecords, 10))
 		kubernetesServices := make([]KubernetesService, 0)
 		if m, ok := results.Data.([]interface{}); ok {
 			for _, r := range m {
@@ -354,7 +354,7 @@ func getAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]
 		log.Error().Msgf("failed to get results: %v", err)
 		return nil, err
 	} else {
-		log.Debug().Msgf("ScaleSets found: " + strconv.FormatInt(*results.TotalRecords, 10))
+		log.Debug().Msgf("ScaleSets found: %s", strconv.FormatInt(*results.TotalRecords, 10))
 		scaleSets := make([]ScaleSet, 0)
 		if m, ok := results.Data.([]interface{}); ok {
 			for _, r := range m {
