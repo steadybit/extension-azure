@@ -255,6 +255,7 @@ func getAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 func (d *vmDiscovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
 	return []discovery_kit_api.TargetEnrichmentRule{
 		getToHostEnrichmentRule(),
+		getToHostWindowsEnrichmentRule(),
 		getToContainerEnrichmentRule(),
 	}
 }
@@ -275,46 +276,27 @@ func getToHostEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				"host.hostname": "${src.azure-vm.hostname}",
 			},
 		},
-		Attributes: []discovery_kit_api.Attribute{
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.subscription.id",
-			}, {
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.vm.id",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.vm.size",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.os.name",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.os.version",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.os.type",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.network.id",
-			}, {
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.location",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.resource-group.name",
-			},
-			{
-				Matcher: discovery_kit_api.StartsWith,
-				Name:    "azure-vm.label.",
+		Attributes: enrichmentAttributes,
+	}
+}
+
+func getToHostWindowsEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      "com.steadybit.extension_azure.azure-vm-to-host-windows",
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: TargetIDVM,
+			Selector: map[string]string{
+				"azure-vm.vm.id": "${dest.azure-vm.vm.id}",
 			},
 		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: "com.steadybit.extension_host_windows.host",
+			Selector: map[string]string{
+				"azure-vm.vm.id": "${src.azure-vm.vm.id}",
+			},
+		},
+		Attributes:enrichmentAttributes,
 	}
 }
 
@@ -322,7 +304,6 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 	return discovery_kit_api.TargetEnrichmentRule{
 		Id:      "com.steadybit.extension_azure.azure-vm-to-container",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-
 		Src: discovery_kit_api.SourceOrDestination{
 			Type: TargetIDVM,
 			Selector: map[string]string{
@@ -335,46 +316,7 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				"container.host": "${src.azure-vm.hostname}",
 			},
 		},
-		Attributes: []discovery_kit_api.Attribute{
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.subscription.id",
-			}, {
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.vm.id",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.vm.size",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.os.name",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.os.version",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.os.type",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-vm.network.id",
-			}, {
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.location",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.resource-group.name",
-			},
-			{
-				Matcher: discovery_kit_api.StartsWith,
-				Name:    "azure-vm.label.",
-			},
-		},
+		Attributes: enrichmentAttributes,
 	}
 }
 
@@ -383,4 +325,45 @@ func getPropertyValue(properties map[string]interface{}, key string) string {
 		return value.(string)
 	}
 	return ""
+}
+
+var enrichmentAttributes = []discovery_kit_api.Attribute{
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure.subscription.id",
+	}, {
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-vm.vm.id",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-vm.vm.size",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-vm.os.name",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-vm.os.version",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-vm.os.type",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-vm.network.id",
+	}, {
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure.location",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure.resource-group.name",
+	},
+	{
+		Matcher: discovery_kit_api.StartsWith,
+		Name:    "azure-vm.label.",
+	},
 }

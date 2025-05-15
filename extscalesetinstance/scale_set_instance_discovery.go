@@ -20,6 +20,7 @@ import (
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -380,12 +381,18 @@ func getAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]
 }
 
 func (d *ssiDiscovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
+	defaultEnrichmentTargetTypes := []string{
+		"com.steadybit.extension_host.host",
+		"com.steadybit.extension_host_windows.host",
+		"com.steadybit.extension_kubernetes.kubernetes-node",
+	}
 	rules := []discovery_kit_api.TargetEnrichmentRule{
 		getToEnrichmentRule("com.steadybit.extension_host.host"),
 		getToEnrichmentRule("com.steadybit.extension_kubernetes.kubernetes-node"),
+		getToHostWindowsEnrichmentRule(),
 	}
 	for _, targetType := range config.Config.EnrichScaleSetVMDataForTargetTypes {
-		if targetType == "com.steadybit.extension_host.host" || targetType == "com.steadybit.extension_kubernetes.kubernetes-node" {
+		if slices.Contains(defaultEnrichmentTargetTypes, targetType) {
 			log.Warn().Msgf("Target type %s is already covered by default rules. Omitting.", targetType)
 		} else {
 			rules = append(rules, getScaleSetVMToXEnrichmentRule(targetType))
@@ -410,59 +417,81 @@ func getToEnrichmentRule(target string) discovery_kit_api.TargetEnrichmentRule {
 				"host.hostname": "${src.azure-scale-set-instance.hostname}",
 			},
 		},
-		Attributes: []discovery_kit_api.Attribute{
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.subscription.id",
-			}, {
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.id",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.vm.size",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.os.name",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.os.version",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.os.type",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.location",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.resource-group.name",
-			}, {
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set.name",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure-scale-set-instance.provisioning.state",
-			},
-			{
-				Matcher: discovery_kit_api.StartsWith,
-				Name:    "azure-scale-set-instance.label.",
-			},
-			{
-				Matcher: discovery_kit_api.StartsWith,
-				Name:    "azure-scale-set.label.",
-			},
-			{
-				Matcher: discovery_kit_api.Equals,
-				Name:    "azure.zone",
+		Attributes: defaultAttributes,
+	}
+}
+
+func getToHostWindowsEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      "com.steadybit.extension_azure.azure-scaleset-instance-to-com.steadybit.extension_host_windows.host",
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: TargetIDScaleSetInstance,
+			Selector: map[string]string{
+				"azure-scale-set-instance.id": "${dest.azure-vm.vm.id}",
 			},
 		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: "com.steadybit.extension_host_windows.host",
+			Selector: map[string]string{
+				"azure-vm.vm.id": "${src.azure-scale-set-instance.id}",
+			},
+		},
+		Attributes: defaultAttributes,
 	}
+}
+
+var defaultAttributes = []discovery_kit_api.Attribute{
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure.subscription.id",
+	}, {
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-scale-set-instance.id",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-scale-set-instance.vm.size",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-scale-set-instance.os.name",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-scale-set-instance.os.version",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-scale-set-instance.os.type",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure.location",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure.resource-group.name",
+	}, {
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-scale-set.name",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure-scale-set-instance.provisioning.state",
+	},
+	{
+		Matcher: discovery_kit_api.StartsWith,
+		Name:    "azure-scale-set-instance.label.",
+	},
+	{
+		Matcher: discovery_kit_api.StartsWith,
+		Name:    "azure-scale-set.label.",
+	},
+	{
+		Matcher: discovery_kit_api.Equals,
+		Name:    "azure.zone",
+	},
 }
 
 func getScaleSetVMToXEnrichmentRule(destTargetType string) discovery_kit_api.TargetEnrichmentRule {
