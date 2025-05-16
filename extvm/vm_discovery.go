@@ -296,7 +296,7 @@ func getToHostWindowsEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 				"azure-vm.vm.id": "${src.azure-vm.vm.id}",
 			},
 		},
-		Attributes:enrichmentAttributes,
+		Attributes: enrichmentAttributes,
 	}
 }
 
