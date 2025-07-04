@@ -10,6 +10,7 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
+	"github.com/steadybit/extension-azure/azurefunctions"
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-azure/extscalesetinstance"
 	"github.com/steadybit/extension-azure/extvm"
@@ -54,6 +55,7 @@ func main() {
 	// you do not have a need for all of them.
 	discovery_kit_sdk.Register(extvm.NewVirtualMachineDiscovery())
 	discovery_kit_sdk.Register(extscalesetinstance.NewScaleSetInstanceDiscovery())
+	discovery_kit_sdk.Register(azurefunctions.NewAzureFunctionDiscovery())
 	action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
 	action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
 

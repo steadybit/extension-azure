@@ -3,13 +3,14 @@ package common
 import (
 	"crypto"
 	"crypto/x509"
+	"os"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/extension-azure/config"
-	"os"
 )
 
 func GetClientByCredentials() (*armresourcegraph.Client, error) {
