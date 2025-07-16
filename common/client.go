@@ -14,7 +14,7 @@ import (
 )
 
 func GetClientByCredentials() (*armresourcegraph.Client, error) {
-	cred, err := connectionAzure()
+	cred, err := ConnectionAzure()
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to create Azure connection.")
 		return nil, err
@@ -31,7 +31,7 @@ func GetClientByCredentials() (*armresourcegraph.Client, error) {
 }
 
 func GetVirtualMachinesClient(subscriptionId string) (*armcompute.VirtualMachinesClient, error) {
-	conn, err := connectionAzure()
+	conn, err := ConnectionAzure()
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to create Azure connection.")
 		return nil, err
@@ -46,7 +46,7 @@ func GetVirtualMachinesClient(subscriptionId string) (*armcompute.VirtualMachine
 }
 
 func GetVirtualMachineScaleSetVMsClient(subscriptionId string) (*armcompute.VirtualMachineScaleSetVMsClient, error) {
-	conn, err := connectionAzure()
+	conn, err := ConnectionAzure()
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to create Azure connection.")
 		return nil, err
@@ -60,7 +60,7 @@ func GetVirtualMachineScaleSetVMsClient(subscriptionId string) (*armcompute.Virt
 	return virtualMachinesClient, nil
 }
 
-func connectionAzure() (azcore.TokenCredential, error) {
+func ConnectionAzure() (azcore.TokenCredential, error) {
 	tenantID := os.Getenv("AZURE_TENANT_ID")
 	clientID := os.Getenv("AZURE_CLIENT_ID")
 	clientSecret := os.Getenv("AZURE_CLIENT_SECRET")

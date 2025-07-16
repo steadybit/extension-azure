@@ -58,6 +58,10 @@ func main() {
 	discovery_kit_sdk.Register(azurefunctions.NewAzureFunctionDiscovery())
 	action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
 	action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
+	action_kit_sdk.RegisterAction(azurefunctions.NewExceptionAction())
+	action_kit_sdk.RegisterAction(azurefunctions.NewStatusCodeAction())
+	action_kit_sdk.RegisterAction(azurefunctions.NewLatencyAction())
+	action_kit_sdk.RegisterAction(azurefunctions.NewFillDiskAction())
 
 	//This will install a signal handlder, that will stop active actions when receiving a SIGURS1, SIGTERM or SIGINT
 	extsignals.ActivateSignalHandlers()
