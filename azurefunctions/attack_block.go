@@ -306,7 +306,7 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 			destinationPrefix = to.Ptr(ip)
 		}
 
-		var priority int32 = 100 + int32(i)
+		priority := 100 + int32(i)
 		for usedPriorities[priority] {
 			priority++
 		}
