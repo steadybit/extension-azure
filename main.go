@@ -62,6 +62,7 @@ func main() {
 	action_kit_sdk.RegisterAction(azurefunctions.NewStatusCodeAction())
 	action_kit_sdk.RegisterAction(azurefunctions.NewLatencyAction())
 	action_kit_sdk.RegisterAction(azurefunctions.NewFillDiskAction())
+	action_kit_sdk.RegisterAction(azurefunctions.NewBlockAction())
 
 	//This will install a signal handlder, that will stop active actions when receiving a SIGURS1, SIGTERM or SIGINT
 	extsignals.ActivateSignalHandlers()
