@@ -14,6 +14,7 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-azure/extscalesetinstance"
 	"github.com/steadybit/extension-azure/extvm"
+	"github.com/steadybit/extension-azure/nsg"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthealth"
 	"github.com/steadybit/extension-kit/exthttp"
@@ -56,13 +57,14 @@ func main() {
 	discovery_kit_sdk.Register(extvm.NewVirtualMachineDiscovery())
 	discovery_kit_sdk.Register(extscalesetinstance.NewScaleSetInstanceDiscovery())
 	discovery_kit_sdk.Register(azurefunctions.NewAzureFunctionDiscovery())
+	discovery_kit_sdk.Register(nsg.NewNsgDiscovery())
 	action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
 	action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
 	action_kit_sdk.RegisterAction(azurefunctions.NewExceptionAction())
 	action_kit_sdk.RegisterAction(azurefunctions.NewStatusCodeAction())
 	action_kit_sdk.RegisterAction(azurefunctions.NewLatencyAction())
 	action_kit_sdk.RegisterAction(azurefunctions.NewFillDiskAction())
-	action_kit_sdk.RegisterAction(azurefunctions.NewBlockAction())
+	action_kit_sdk.RegisterAction(nsg.NewBlockAction())
 
 	//This will install a signal handlder, that will stop active actions when receiving a SIGURS1, SIGTERM or SIGINT
 	extsignals.ActivateSignalHandlers()

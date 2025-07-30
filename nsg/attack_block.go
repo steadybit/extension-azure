@@ -1,4 +1,4 @@
-package azurefunctions
+package nsg
 
 import (
 	"context"
@@ -10,9 +10,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/extension-azure/common"
@@ -39,7 +37,6 @@ type BlockActionState struct {
 	ResourceId               string            `json:"resourceId"`
 	Config                   *BlockHostsConfig `json:"config"`
 	ResourceGroupName        string            `json:"resourceGroupName"`
-	SubnetId                 string            `json:"subnetId"`
 	NetworkSecurityGroupName string            `json:"networkSecurityGroupName"`
 	NetworkSecurityRuleNames []string          `json:"networkSecurityRuleNames"`
 }
@@ -59,14 +56,14 @@ func NewBlockAction() action_kit_sdk.Action[BlockActionState] {
 
 func getInjectBlockDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:              fmt.Sprintf("%s.block", TargetIDAzureFunction),
+		Id:              fmt.Sprintf("%s.block", TargetIDNetworkSG),
 		Version:         extbuild.GetSemverVersionStringOrUnknown(),
 		Label:           "Inject Block Hosts",
-		Description:     "Block specific hosts from executing the function.",
+		Description:     "Block specific hosts inbound or outbound.",
 		Icon:            extutil.Ptr(string(targetIcon)),
-		TargetSelection: &azureFunctionTargetSelection,
+		TargetSelection: &networkSecurityGroupTargetSelection,
 		Technology:      extutil.Ptr("Azure"),
-		Category:        extutil.Ptr("Azure Functions"),
+		Category:        extutil.Ptr("Network Security Groups"),
 		Kind:            action_kit_api.Attack,
 		TimeControl:     action_kit_api.TimeControlExternal,
 		Parameters: []action_kit_api.ActionParameter{
@@ -177,10 +174,10 @@ func (b *blockAction) NewEmptyState() BlockActionState {
 
 // Prepare implements action_kit_sdk.Action.
 func (b *blockAction) Prepare(ctx context.Context, state *BlockActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
-	resourceId := request.Target.Attributes["azure-function.resource.id"]
+	resourceId := request.Target.Attributes["network-security-group.id"]
 
 	if len(resourceId) == 0 {
-		return nil, fmt.Errorf("target is missing 'azure-function.resource.id' attribute")
+		return nil, fmt.Errorf("target is missing 'network-security-group.id' attribute")
 	}
 
 	resource := resourceId[0]
@@ -192,7 +189,7 @@ func (b *blockAction) Prepare(ctx context.Context, state *BlockActionState, requ
 	}
 
 	resourceGroup := parts[3]
-	functionName := parts[7]
+	nsgName := parts[7]
 
 	config, err := b.configProvider(request)
 
@@ -200,33 +197,10 @@ func (b *blockAction) Prepare(ctx context.Context, state *BlockActionState, requ
 		return nil, err
 	}
 
-	cred, err := common.ConnectionAzure()
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to create azure credential: %s", err)
-	}
-
-	subscriptionId, found := os.LookupEnv("AZURE_SUBSCRIPTION_ID")
-
-	if !found {
-		return nil, fmt.Errorf("'AZURE_SUBSCRIPTION_ID' environment variable is missing")
-	}
-
-	appServiceClient, err := armappservice.NewWebAppsClient(subscriptionId, cred, nil)
-
-	if err != nil {
-		return nil, fmt.Errorf("unable to create app service client: %s", err)
-	}
-
-	functionApp, err := appServiceClient.Get(ctx, resourceGroup, functionName, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get function app: %s", err)
-	}
-
 	state.Config = config
 	state.ResourceId = resource
 	state.ResourceGroupName = resourceGroup
-	state.SubnetId = *functionApp.Properties.VirtualNetworkSubnetID
+	state.NetworkSecurityGroupName = nsgName
 
 	return nil, nil
 }
@@ -250,36 +224,11 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 		return nil, fmt.Errorf("unable to create security groups client: %s", err)
 	}
 
-	nsgPages := client.NewListPager(state.ResourceGroupName, nil)
-
-	if !nsgPages.More() {
-		return nil, fmt.Errorf("azure functions resource group does not have any network security groups")
-	}
-
-	page, err := nsgPages.NextPage(ctx)
+	securityGroup, err := client.Get(ctx, state.ResourceGroupName, state.NetworkSecurityGroupName, nil)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve network security groups: %s", err)
+		return nil, fmt.Errorf("unable to retrieve security group '%s' in the resource group '%s' with error %s", state.NetworkSecurityGroupName, state.ResourceGroupName, err)
 	}
-
-	securityGroups := page.Value
-
-	var securityGroup *armnetwork.SecurityGroup = nil
-
-	for _, sg := range securityGroups {
-		for _, snet := range sg.Properties.Subnets {
-			if *snet.ID == state.SubnetId {
-				securityGroup = sg
-				break
-			}
-		}
-	}
-
-	if securityGroup == nil {
-		return nil, fmt.Errorf("no security group is attached to the function app subnet")
-	}
-
-	state.NetworkSecurityGroupName = *securityGroup.Name
 
 	securityRulesClient, err := armnetwork.NewSecurityRulesClient(subscriptionId, cred, nil)
 
@@ -296,7 +245,6 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 	}
 
 	for i, ip := range *state.Config.BlockedIPs {
-		log.Info().Msgf("Processing IP: %s", ip)
 		var sourcePrefix, destinationPrefix *string
 		if state.Config.BlockDirection == armnetwork.SecurityRuleDirectionInbound {
 			sourcePrefix = to.Ptr(ip)
@@ -352,6 +300,7 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 			if err != nil {
 				return nil, fmt.Errorf("failed to create a security rule; additionally failed to clean up security rules: %s", err)
 			}
+
 			return nil, fmt.Errorf("failed to create a security rule (timeout): %s", err)
 		}
 	}
