@@ -39,7 +39,7 @@ func (a *nsgDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 		Id:       TargetIDNetworkSG,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(targetIcon),
-		Label:    discovery_kit_api.PluralLabel{One: "Network Security Group", Other: "Network Security Group"},
+		Label:    discovery_kit_api.PluralLabel{One: "Network Security Group", Other: "Network Security Groups"},
 		Category: extutil.Ptr("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
