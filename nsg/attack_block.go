@@ -42,7 +42,6 @@ type BlockActionState struct {
 }
 
 type BlockHostsConfig struct {
-	Rate           int                              `json:"rate"`
 	BlockedIPs     *[]string                        `json:"denylist,omitempty"`
 	BlockDirection armnetwork.SecurityRuleDirection `json:"direction"`
 }
@@ -58,8 +57,8 @@ func getInjectBlockDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:              fmt.Sprintf("%s.block", TargetIDNetworkSG),
 		Version:         extbuild.GetSemverVersionStringOrUnknown(),
-		Label:           "Inject Block Hosts",
-		Description:     "Block specific hosts inbound or outbound.",
+		Label:           "Block Hosts",
+		Description:     "Block specific inbound or outbound traffic for specific hosts.",
 		Icon:            extutil.Ptr(string(targetIcon)),
 		TargetSelection: &networkSecurityGroupTargetSelection,
 		Technology:      extutil.Ptr("Azure"),
@@ -76,15 +75,6 @@ func getInjectBlockDescription() action_kit_api.ActionDescription {
 				Required:     extutil.Ptr(true),
 				DefaultValue: extutil.Ptr("30s"),
 				Order:        extutil.Ptr(0),
-			},
-			{
-				Name:         "rate",
-				Label:        "Rate",
-				Description:  extutil.Ptr("The rate of invocations to affect."),
-				Type:         action_kit_api.ActionParameterTypePercentage,
-				DefaultValue: extutil.Ptr("100"),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(1),
 			},
 			{
 				Name:         "hosts",
@@ -156,7 +146,6 @@ func injectBlock(request action_kit_api.PrepareActionRequestBody) (*BlockHostsCo
 	}
 
 	return &BlockHostsConfig{
-		Rate:           int(request.Config["rate"].(float64)),
 		BlockedIPs:     extutil.Ptr(ipHosts),
 		BlockDirection: blockDirection,
 	}, nil

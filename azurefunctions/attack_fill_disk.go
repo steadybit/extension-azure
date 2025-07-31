@@ -20,8 +20,8 @@ func getInjectFillDiskDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:              fmt.Sprintf("%s.fill_disk", TargetIDAzureFunction),
 		Version:         extbuild.GetSemverVersionStringOrUnknown(),
-		Label:           "Inject Fill Disk",
-		Description:     "Fills disk by a certain amount of memory for each function execution.",
+		Label:           "Fill Diskspace",
+		Description:     "Fills tmp diskspace of the function.",
 		Icon:            extutil.Ptr(string(targetIcon)),
 		TargetSelection: &azureFunctionTargetSelection,
 		Technology:      extutil.Ptr("Azure"),
