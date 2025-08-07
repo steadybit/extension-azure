@@ -6,6 +6,7 @@ package main
 
 import (
 	_ "github.com/KimMachineGun/automemlimit" // By default, it sets `GOMEMLIMIT` to 90% of cgroup's memory limit.
+	"github.com/caarlos0/env/v11"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
@@ -54,17 +55,7 @@ func main() {
 	// This is a section you will most likely want to change: The registration of HTTP handlers
 	// for your extension. You might want to change these because the names do not fit, or because
 	// you do not have a need for all of them.
-	discovery_kit_sdk.Register(extvm.NewVirtualMachineDiscovery())
-	discovery_kit_sdk.Register(extscalesetinstance.NewScaleSetInstanceDiscovery())
-	discovery_kit_sdk.Register(azurefunctions.NewAzureFunctionDiscovery())
-	discovery_kit_sdk.Register(nsg.NewNsgDiscovery())
-	action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
-	action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
-	action_kit_sdk.RegisterAction(azurefunctions.NewExceptionAction())
-	action_kit_sdk.RegisterAction(azurefunctions.NewStatusCodeAction())
-	action_kit_sdk.RegisterAction(azurefunctions.NewLatencyAction())
-	action_kit_sdk.RegisterAction(azurefunctions.NewFillDiskAction())
-	action_kit_sdk.RegisterAction(nsg.NewBlockAction())
+	registerHandlers()
 
 	//This will install a signal handlder, that will stop active actions when receiving a SIGURS1, SIGTERM or SIGINT
 	extsignals.ActivateSignalHandlers()
@@ -96,4 +87,45 @@ func getExtensionList() ExtensionListResponse {
 		ActionList:    action_kit_sdk.GetActionList(),
 		DiscoveryList: discovery_kit_sdk.GetDiscoveryList(),
 	}
+}
+
+type Config struct {
+	EnableVirtualMachines       bool `env:"ENABLE_VM_DISCOVERY" envDefault:"true"`
+	EnableScaleInstances        bool `env:"ENABLE_SCALE_INSTANCE_DISCOVERY" envDefault:"true"`
+	EnableAzureFunctions        bool `env:"ENABLE_AZURE_FUNCTION_DISCOVERY" envDefault:"false"`
+	EnableNetworkSecurityGroups bool `env:"ENABLE_NETWORK_SECURITY_GROUP_DISCOVERY" envDefault:"false"`
+}
+
+func registerHandlers() error {
+	cfg := Config{}
+
+	if err := env.Parse(&cfg); err != nil {
+		return err
+	}
+
+	if cfg.EnableVirtualMachines {
+		discovery_kit_sdk.Register(extvm.NewVirtualMachineDiscovery())
+		action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
+	}
+
+	if cfg.EnableScaleInstances {
+		discovery_kit_sdk.Register(extscalesetinstance.NewScaleSetInstanceDiscovery())
+		action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
+
+	}
+
+	if cfg.EnableAzureFunctions {
+		discovery_kit_sdk.Register(azurefunctions.NewAzureFunctionDiscovery())
+		action_kit_sdk.RegisterAction(azurefunctions.NewExceptionAction())
+		action_kit_sdk.RegisterAction(azurefunctions.NewStatusCodeAction())
+		action_kit_sdk.RegisterAction(azurefunctions.NewLatencyAction())
+		action_kit_sdk.RegisterAction(azurefunctions.NewFillDiskAction())
+	}
+
+	if cfg.EnableNetworkSecurityGroups {
+		discovery_kit_sdk.Register(nsg.NewNsgDiscovery())
+		action_kit_sdk.RegisterAction(nsg.NewBlockAction())
+	}
+
+	return nil
 }
