@@ -89,32 +89,25 @@ func getExtensionList() ExtensionListResponse {
 	}
 }
 
-type Config struct {
-	EnableVirtualMachines       bool `env:"ENABLE_VM_DISCOVERY" envDefault:"true"`
-	EnableScaleInstances        bool `env:"ENABLE_SCALE_INSTANCE_DISCOVERY" envDefault:"true"`
-	EnableAzureFunctions        bool `env:"ENABLE_AZURE_FUNCTION_DISCOVERY" envDefault:"false"`
-	EnableNetworkSecurityGroups bool `env:"ENABLE_NETWORK_SECURITY_GROUP_DISCOVERY" envDefault:"false"`
-}
-
 func registerHandlers() error {
-	cfg := Config{}
+	config := config.Config
 
-	if err := env.Parse(&cfg); err != nil {
+	if err := env.Parse(&config); err != nil {
 		return err
 	}
 
-	if cfg.EnableVirtualMachines {
+	if config.DiscoveryEnableVirtualMachines {
 		discovery_kit_sdk.Register(extvm.NewVirtualMachineDiscovery())
 		action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
 	}
 
-	if cfg.EnableScaleInstances {
+	if config.DiscoveryEnableScaleInstances {
 		discovery_kit_sdk.Register(extscalesetinstance.NewScaleSetInstanceDiscovery())
 		action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
 
 	}
 
-	if cfg.EnableAzureFunctions {
+	if config.DiscoveryEnableAzureFunctions {
 		discovery_kit_sdk.Register(azurefunctions.NewAzureFunctionDiscovery())
 		action_kit_sdk.RegisterAction(azurefunctions.NewExceptionAction())
 		action_kit_sdk.RegisterAction(azurefunctions.NewStatusCodeAction())
@@ -122,7 +115,7 @@ func registerHandlers() error {
 		action_kit_sdk.RegisterAction(azurefunctions.NewFillDiskAction())
 	}
 
-	if cfg.EnableNetworkSecurityGroups {
+	if config.DiscoveryEnableNetworkSecurityGroups {
 		discovery_kit_sdk.Register(nsg.NewNsgDiscovery())
 		action_kit_sdk.RegisterAction(nsg.NewBlockAction())
 	}

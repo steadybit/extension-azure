@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -12,8 +11,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-azure/common"
+	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 )
@@ -120,7 +121,6 @@ func getAllAzureFunctions(ctx context.Context, client common.ArmResourceGraphApi
 		log.Error().Msgf("failed to get results: %v", err)
 		return nil, err
 	} else {
-		log.Debug().Msgf("Azure Functions found: %s", strconv.FormatInt(*results.TotalRecords, 10))
 		targets := make([]discovery_kit_api.Target, 0)
 		if m, ok := results.Data.([]interface{}); ok {
 			for _, r := range m {
@@ -155,6 +155,6 @@ func getAllAzureFunctions(ctx context.Context, client common.ArmResourceGraphApi
 				})
 			}
 		}
-		return targets, nil
+		return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesAzureFunction), nil
 	}
 }

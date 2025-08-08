@@ -13,8 +13,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
+	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-azure/common"
+	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 )
@@ -130,6 +132,6 @@ func getAllNSGs(ctx context.Context, client common.ArmResourceGraphApi) ([]disco
 				})
 			}
 		}
-		return targets, nil
+		return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesNetworkSecurityGroup), nil
 	}
 }

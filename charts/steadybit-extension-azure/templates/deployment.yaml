@@ -103,13 +103,21 @@ spec:
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_VM
               value: {{ join "," .Values.discovery.attributes.excludes.vm | quote }}
             {{- end }}
-            - name: ENABLE_VM_DISCOVERY
+            {{- if .Values.discovery.attributes.excludes.azureFunction }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_AZURE_FUNCTION
+              value: {{ join "," .Values.discovery.attributes.excludes.azureFunction | quote }}
+            {{- end }}
+            {{- if .Values.discovery.attributes.excludes.networkSecurityGroup }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_NETWORK_SECURITY_GROUP
+              value: {{ join "," .Values.discovery.attributes.excludes.networkSecurityGroup | quote }}
+            {{- end }}
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
               value: "{{ if .Values.discovery.enable.vm }}true{{ else }}false{{ end }}"
-            - name: ENABLE_SCALE_INSTANCE_DISCOVERY
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
               value: "{{ if .Values.discovery.enable.scaleSetInstance }}true{{ else }}false{{ end }}"
-            - name: ENABLE_AZURE_FUNCTION_DISCOVERY
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
               value: "{{ if .Values.discovery.enable.azureFunction }}true{{ else }}false{{ end }}"
-            - name: ENABLE_NETWORK_SECURITY_GROUP_DISCOVERY
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
               value: "{{ if .Values.discovery.enable.networkSecurityGroup }}true{{ else }}false{{ end }}"
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             {{- with .Values.extraEnv }}
