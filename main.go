@@ -11,8 +11,7 @@ import (
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
 	"github.com/steadybit/extension-azure/config"
-	"github.com/steadybit/extension-azure/extscalesetinstance"
-	"github.com/steadybit/extension-azure/extvm"
+	"github.com/steadybit/extension-azure/register"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthealth"
 	"github.com/steadybit/extension-kit/exthttp"
@@ -52,10 +51,7 @@ func main() {
 	// This is a section you will most likely want to change: The registration of HTTP handlers
 	// for your extension. You might want to change these because the names do not fit, or because
 	// you do not have a need for all of them.
-	discovery_kit_sdk.Register(extvm.NewVirtualMachineDiscovery())
-	discovery_kit_sdk.Register(extscalesetinstance.NewScaleSetInstanceDiscovery())
-	action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
-	action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
+	register.RegisterHandlers()
 
 	//This will install a signal handlder, that will stop active actions when receiving a SIGURS1, SIGTERM or SIGINT
 	extsignals.ActivateSignalHandlers()

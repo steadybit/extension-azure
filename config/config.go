@@ -13,12 +13,18 @@ import (
 // through environment variables. Learn more through the documentation of the envconfig package.
 // https://github.com/kelseyhightower/envconfig
 type Specification struct {
-	AzureCertificatePath                        string   `json:"azureCertificatePath" required:"false" split_words:"true"`
-	AzureCertificatePassword                    string   `json:"azureCertificatePassword" required:"false" split_words:"true"`
-	AzureUserAssertionString                    string   `json:"azureUserAssertionString" required:"false" split_words:"true"`
-	DiscoveryAttributesExcludesScaleSetInstance []string `json:"discoveryAttributesExcludesScaleSetInstance" required:"false" split_words:"true"`
-	DiscoveryAttributesExcludesVM               []string `json:"discoveryAttributesExcludesVM" required:"false" split_words:"true"`
-	EnrichScaleSetVMDataForTargetTypes          []string `json:"EnrichScaleSetVMDataForTargetTypes" split_words:"true" default:"com.steadybit.extension_jvm.jvm-instance,com.steadybit.extension_container.container,com.steadybit.extension_kubernetes.kubernetes-deployment,com.steadybit.extension_kubernetes.kubernetes-pod,com.steadybit.extension_kubernetes.kubernetes-daemonset,com.steadybit.extension_kubernetes.kubernetes-statefulset,com.steadybit.extension_http.client-location,com.steadybit.extension_jmeter.location,com.steadybit.extension_k6.location,com.steadybit.extension_gatling.location"`
+	AzureCertificatePath                            string   `json:"azureCertificatePath" required:"false" split_words:"true"`
+	AzureCertificatePassword                        string   `json:"azureCertificatePassword" required:"false" split_words:"true"`
+	AzureUserAssertionString                        string   `json:"azureUserAssertionString" required:"false" split_words:"true"`
+	DiscoveryAttributesExcludesScaleSetInstance     []string `json:"discoveryAttributesExcludesScaleSetInstance" required:"false" split_words:"true"`
+	DiscoveryAttributesExcludesVM                   []string `json:"discoveryAttributesExcludesVM" required:"false" split_words:"true"`
+	DiscoveryAttributesExcludesAzureFunction        []string `json:"discoveryAttributesExcludesAzureFunction" required:"false" split_words:"true"`
+	DiscoveryAttributesExcludesNetworkSecurityGroup []string `json:"discoveryAttributesExcludesNetworkSecurityGroup" required:"false" split_words:"true"`
+	EnrichScaleSetVMDataForTargetTypes              []string `json:"EnrichScaleSetVMDataForTargetTypes" split_words:"true" default:"com.steadybit.extension_jvm.jvm-instance,com.steadybit.extension_container.container,com.steadybit.extension_kubernetes.kubernetes-deployment,com.steadybit.extension_kubernetes.kubernetes-pod,com.steadybit.extension_kubernetes.kubernetes-daemonset,com.steadybit.extension_kubernetes.kubernetes-statefulset,com.steadybit.extension_http.client-location,com.steadybit.extension_jmeter.location,com.steadybit.extension_k6.location,com.steadybit.extension_gatling.location"`
+	DiscoveryEnableVirtualMachines                  bool     `json:"discoveryEnableVirtualMachines" split_words:"true" required:"false" default:"true"`
+	DiscoveryEnableScaleInstances                   bool     `json:"discoveryEnableScaleInstances" split_words:"true" required:"false" default:"true"`
+	DiscoveryEnableAzureFunctions                   bool     `json:"discoveryEnableAzureFunctions" split_words:"true" required:"false" default:"false"`
+	DiscoveryEnableNetworkSecurityGroups            bool     `json:"discoveryEnableNetworkSecurityGroups" split_words:"true" required:"false" default:"false"`
 }
 
 var (
