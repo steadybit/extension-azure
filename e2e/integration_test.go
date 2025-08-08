@@ -44,6 +44,10 @@ func TestWithMinikube(t *testing.T) {
 
 // test the installation of the extension in minikube
 func validateDiscovery(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
+	t.Setenv("ENABLE_VM_DISCOVERY", "true")
+	t.Setenv("ENABLE_SCALE_INSTANCE_DISCOVERY", "true")
+	t.Setenv("ENABLE_AZURE_FUNCTION_DISCOVERY", "true")
+	t.Setenv("ENABLE_NETWORK_SECURITY_GROUP_DISCOVERY", "true")
 	validationErr := disValidate.ValidateEndpointReferences("/", e.Client)
 	if uw, ok := validationErr.(interface{ Unwrap() []error }); ok {
 		errs := uw.Unwrap()
