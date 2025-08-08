@@ -6,7 +6,6 @@ package main
 
 import (
 	_ "github.com/KimMachineGun/automemlimit" // By default, it sets `GOMEMLIMIT` to 90% of cgroup's memory limit.
-	"github.com/caarlos0/env/v11"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
@@ -91,10 +90,6 @@ func getExtensionList() ExtensionListResponse {
 
 func registerHandlers() error {
 	config := config.Config
-
-	if err := env.Parse(&config); err != nil {
-		return err
-	}
 
 	if config.DiscoveryEnableVirtualMachines {
 		discovery_kit_sdk.Register(extvm.NewVirtualMachineDiscovery())
