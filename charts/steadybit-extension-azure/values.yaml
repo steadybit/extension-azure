@@ -140,6 +140,11 @@ azure:
   existingSecret: null
 
 discovery:
+  enable:
+    vm: true
+    scaleSetInstance: true
+    azureFunction: false 
+    networkSecurityGroup: false 
   attributes:
     excludes:
       # discovery.attributes.excludes.vm -- List of attributes to exclude from VM discovery.

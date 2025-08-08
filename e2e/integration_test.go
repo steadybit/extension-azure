@@ -19,11 +19,6 @@ import (
 )
 
 func TestWithMinikube(t *testing.T) {
-	t.Setenv("ENABLE_VM_DISCOVERY", "true")
-	t.Setenv("ENABLE_SCALE_INSTANCE_DISCOVERY", "true")
-	t.Setenv("ENABLE_AZURE_FUNCTION_DISCOVERY", "true")
-	t.Setenv("ENABLE_NETWORK_SECURITY_GROUP_DISCOVERY", "true")
-
 	extFactory := e2e.HelmExtensionFactory{
 		Name: "extension-azure",
 		Port: 8092,
@@ -31,6 +26,10 @@ func TestWithMinikube(t *testing.T) {
 			return []string{
 				"--set", "logging.level=debug",
 				"--set", "azure.level=debug",
+				"--set", "discovery.enable.vm=true",
+				"--set", "discovery.enable.scaleSetInstance=true",
+				"--set", "discovery.enable.azureFunction=true",
+				"--set", "discovery.enable.networkSecurityGroup=true",
 			}
 		},
 	}

@@ -103,6 +103,14 @@ spec:
             - name: STEADYBIT_EXTENSION_DISCOVERY_ATTRIBUTES_EXCLUDES_VM
               value: {{ join "," .Values.discovery.attributes.excludes.vm | quote }}
             {{- end }}
+            - name: ENABLE_VM_DISCOVERY
+              value: "{{ if .Values.discovery.enable.vm }}true{{ else }}false{{ end }}"
+            - name: ENABLE_SCALE_INSTANCE_DISCOVERY
+              value: "{{ if .Values.discovery.enable.scaleSetInstance }}true{{ else }}false{{ end }}"
+            - name: ENABLE_AZURE_FUNCTION_DISCOVERY
+              value: "{{ if .Values.discovery.enable.azureFunction }}true{{ else }}false{{ end }}"
+            - name: ENABLE_NETWORK_SECURITY_GROUP_DISCOVERY
+              value: "{{ if .Values.discovery.enable.networkSecurityGroup }}true{{ else }}false{{ end }}"
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             {{- with .Values.extraEnv }}
               {{- toYaml . | nindent 12 }}
