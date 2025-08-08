@@ -3,7 +3,6 @@ package azurefunctions
 import (
 	"context"
 	"os"
-	"strings"
 	"time"
 
 	"fmt"
@@ -44,7 +43,6 @@ type FaultInjectionConfig struct {
 	MinLatency   *time.Duration `json:"minLatency,omitempty"`
 	MaxLatency   *time.Duration `json:"maxLatency,omitempty"`
 	ExceptionMsg *string        `json:"exceptionMsg,omitempty"`
-	BlockedHosts *[]string      `json:"denylist,omitempty"`
 	DiskSpace    *int           `json:"diskSpace,omitempty"`
 }
 
@@ -60,22 +58,17 @@ func (config *FaultInjectionConfig) ToAppConfigKeyValuePairs() map[string]*strin
 	}
 
 	if config.MinLatency != nil {
-		log.Info().Msgf("Setting minimum latency to %d ms", config.MinLatency)
+		log.Debug().Msgf("Setting minimum latency to %d ms", config.MinLatency.Milliseconds())
 		appConfigMapping["Steadybit:FaultInjection:Delay:MinimumLatency"] = extutil.Ptr(fmt.Sprint(config.MinLatency.Milliseconds()))
 	}
 
 	if config.MaxLatency != nil {
-		log.Info().Msgf("Setting minimum latency to %d ms", config.MinLatency)
+		log.Debug().Msgf("Setting maximum latency to %d ms", config.MaxLatency.Milliseconds())
 		appConfigMapping["Steadybit:FaultInjection:Delay:MaximumLatency"] = extutil.Ptr(fmt.Sprint(config.MaxLatency.Milliseconds()))
 	}
 
 	if config.ExceptionMsg != nil {
 		appConfigMapping["Steadybit:FaultInjection:Exception:Message"] = config.ExceptionMsg
-	}
-
-	if config.BlockedHosts != nil && len(*config.BlockedHosts) > 0 {
-		denylistStr := strings.Join(*config.BlockedHosts, ",")
-		appConfigMapping["Steadybit:FaultInjection:Block:Hosts"] = &denylistStr
 	}
 
 	if config.DiskSpace != nil {
