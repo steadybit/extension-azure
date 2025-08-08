@@ -10,11 +10,8 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
-	"github.com/steadybit/extension-azure/azurefunctions"
 	"github.com/steadybit/extension-azure/config"
-	"github.com/steadybit/extension-azure/extscalesetinstance"
-	"github.com/steadybit/extension-azure/extvm"
-	"github.com/steadybit/extension-azure/nsg"
+	"github.com/steadybit/extension-azure/register"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/exthealth"
 	"github.com/steadybit/extension-kit/exthttp"
@@ -54,7 +51,7 @@ func main() {
 	// This is a section you will most likely want to change: The registration of HTTP handlers
 	// for your extension. You might want to change these because the names do not fit, or because
 	// you do not have a need for all of them.
-	registerHandlers()
+	register.RegisterHandlers()
 
 	//This will install a signal handlder, that will stop active actions when receiving a SIGURS1, SIGTERM or SIGINT
 	extsignals.ActivateSignalHandlers()
@@ -86,34 +83,4 @@ func getExtensionList() ExtensionListResponse {
 		ActionList:    action_kit_sdk.GetActionList(),
 		DiscoveryList: discovery_kit_sdk.GetDiscoveryList(),
 	}
-}
-
-func registerHandlers() error {
-	config := config.Config
-
-	if config.DiscoveryEnableVirtualMachines {
-		discovery_kit_sdk.Register(extvm.NewVirtualMachineDiscovery())
-		action_kit_sdk.RegisterAction(extvm.NewVirtualMachineStateAction())
-	}
-
-	if config.DiscoveryEnableScaleInstances {
-		discovery_kit_sdk.Register(extscalesetinstance.NewScaleSetInstanceDiscovery())
-		action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
-
-	}
-
-	if config.DiscoveryEnableAzureFunctions {
-		discovery_kit_sdk.Register(azurefunctions.NewAzureFunctionDiscovery())
-		action_kit_sdk.RegisterAction(azurefunctions.NewExceptionAction())
-		action_kit_sdk.RegisterAction(azurefunctions.NewStatusCodeAction())
-		action_kit_sdk.RegisterAction(azurefunctions.NewLatencyAction())
-		action_kit_sdk.RegisterAction(azurefunctions.NewFillDiskAction())
-	}
-
-	if config.DiscoveryEnableNetworkSecurityGroups {
-		discovery_kit_sdk.Register(nsg.NewNsgDiscovery())
-		action_kit_sdk.RegisterAction(nsg.NewBlockAction())
-	}
-
-	return nil
 }
