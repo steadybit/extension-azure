@@ -3,7 +3,7 @@ package register
 import (
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_sdk"
-	"github.com/steadybit/extension-azure/azurefunctions"
+	"github.com/steadybit/extension-azure/appconfig"
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-azure/extscalesetinstance"
 	"github.com/steadybit/extension-azure/extvm"
@@ -23,12 +23,12 @@ func RegisterHandlers() error {
 		action_kit_sdk.RegisterAction(extscalesetinstance.NewScaleSetInstanceStateAction())
 	}
 
-	if configSpec.DiscoveryEnableAzureFunctions {
-		discovery_kit_sdk.Register(azurefunctions.NewAzureFunctionDiscovery())
-		action_kit_sdk.RegisterAction(azurefunctions.NewExceptionAction())
-		action_kit_sdk.RegisterAction(azurefunctions.NewStatusCodeAction())
-		action_kit_sdk.RegisterAction(azurefunctions.NewLatencyAction())
-		action_kit_sdk.RegisterAction(azurefunctions.NewFillDiskAction())
+	if configSpec.DiscoveryEnableAppConfigurations {
+		discovery_kit_sdk.Register(appconfig.NewAppConfigurationDiscovery())
+		action_kit_sdk.RegisterAction(appconfig.NewExceptionAction())
+		action_kit_sdk.RegisterAction(appconfig.NewStatusCodeAction())
+		action_kit_sdk.RegisterAction(appconfig.NewLatencyAction())
+		action_kit_sdk.RegisterAction(appconfig.NewFillDiskAction())
 	}
 
 	if configSpec.DiscoveryEnableNetworkSecurityGroups {

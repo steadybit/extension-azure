@@ -1,8 +1,7 @@
-package azurefunctions
+package appconfig
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
@@ -10,23 +9,23 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-func NewLatencyAction() action_kit_sdk.Action[AzureFunctionActionState] {
+func NewFillDiskAction() action_kit_sdk.Action[AppConfigurationActionState] {
 	return &azureFunctionAction{
-		description:    getInjectLatencyDescription(),
-		configProvider: injectLatency,
+		description:    getInjectFillDiskDescription(),
+		configProvider: injectFillDisk,
 	}
 }
 
-func getInjectLatencyDescription() action_kit_api.ActionDescription {
+func getInjectFillDiskDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:              fmt.Sprintf("%s.latency", TargetIDAzureFunction),
+		Id:              fmt.Sprintf("%s.fill_disk", TargetIDAzureAppConfiguration),
 		Version:         extbuild.GetSemverVersionStringOrUnknown(),
-		Label:           "Inject Latency",
-		Description:     "Injects latency into the function.",
+		Label:           "Fill Diskspace",
+		Description:     "Fills tmp diskspace of the function.",
 		Icon:            extutil.Ptr(string(targetIcon)),
 		TargetSelection: &azureFunctionTargetSelection,
 		Technology:      extutil.Ptr("Azure"),
-		Category:        extutil.Ptr("Azure Functions"),
+		Category:        extutil.Ptr("Azure App Configuration"),
 		Kind:            action_kit_api.Attack,
 		TimeControl:     action_kit_api.TimeControlExternal,
 		Parameters: []action_kit_api.ActionParameter{
@@ -50,34 +49,24 @@ func getInjectLatencyDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(1),
 			},
 			{
-				Name:         "minimumLatency",
-				Label:        "Minimum Latency",
-				Description:  extutil.Ptr("Minimum latency to inject into the function in milliseconds."),
-				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("1s"),
+				Name:         "megabytes",
+				Label:        "Megabytes To Fill",
+				Description:  extutil.Ptr("Megabytes to fill the disk with for each function execution."),
+				Type:         action_kit_api.ActionParameterTypeInteger,
+				DefaultValue: extutil.Ptr("10"),
 				Required:     extutil.Ptr(true),
 				Order:        extutil.Ptr(2),
-			},
-			{
-				Name:         "maximumLatency",
-				Label:        "Maximum Latency",
-				Description:  extutil.Ptr("Maximum latency to inject into the function."),
-				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("2s"),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(3),
 			},
 		},
 		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
-func injectLatency(request action_kit_api.PrepareActionRequestBody) (*FaultInjectionConfig, error) {
+func injectFillDisk(request action_kit_api.PrepareActionRequestBody) (*FaultInjectionConfig, error) {
 	return &FaultInjectionConfig{
-		Injection:  "Delay",
-		Rate:       int(request.Config["rate"].(float64)),
-		MinLatency: extutil.Ptr(time.Duration(extutil.ToInt64(request.Config["minimumLatency"])) * time.Millisecond),
-		MaxLatency: extutil.Ptr(time.Duration(extutil.ToInt64(request.Config["maximumLatency"])) * time.Millisecond),
-		Enabled:    true,
+		Injection: "FillDisk",
+		Rate:      int(request.Config["rate"].(float64)),
+		DiskSpace: extutil.Ptr(int(request.Config["megabytes"].(float64))),
+		Enabled:   true,
 	}, nil
 }

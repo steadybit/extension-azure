@@ -1,8 +1,8 @@
-package azurefunctions
+package appconfig
 
 import (
 	"context"
-	"os"
+	"strings"
 	"time"
 
 	"fmt"
@@ -22,10 +22,10 @@ type azureFunctionAction struct {
 	configProvider func(request action_kit_api.PrepareActionRequestBody) (*FaultInjectionConfig, error)
 }
 
-var _ action_kit_sdk.Action[AzureFunctionActionState] = (*azureFunctionAction)(nil)
-var _ action_kit_sdk.ActionWithStop[AzureFunctionActionState] = (*azureFunctionAction)(nil)
+var _ action_kit_sdk.Action[AppConfigurationActionState] = (*azureFunctionAction)(nil)
+var _ action_kit_sdk.ActionWithStop[AppConfigurationActionState] = (*azureFunctionAction)(nil)
 
-type AzureFunctionActionState struct {
+type AppConfigurationActionState struct {
 	Account          string                `json:"account"`
 	Region           string                `json:"region"`
 	DiscoveredByRole *string               `json:"discoveredByRole"`
@@ -36,14 +36,16 @@ type AzureFunctionActionState struct {
 }
 
 type FaultInjectionConfig struct {
-	Injection    string         `json:"failureMode"`
-	Rate         int            `json:"rate"`
-	Enabled      bool           `json:"isEnabled"`
-	StatusCode   *int           `json:"statusCode,omitempty"`
-	MinLatency   *time.Duration `json:"minLatency,omitempty"`
-	MaxLatency   *time.Duration `json:"maxLatency,omitempty"`
-	ExceptionMsg *string        `json:"exceptionMsg,omitempty"`
-	DiskSpace    *int           `json:"diskSpace,omitempty"`
+	Injection           string         `json:"failureMode"`
+	Rate                int            `json:"rate"`
+	Enabled             bool           `json:"isEnabled"`
+	AppConfigurationId  string         `json:"Endpoint"`
+	StatusCode          *int           `json:"statusCode,omitempty"`
+	MinLatency          *time.Duration `json:"minLatency,omitempty"`
+	MaxLatency          *time.Duration `json:"maxLatency,omitempty"`
+	ExceptionMsg        *string        `json:"exceptionMsg,omitempty"`
+	DiskSpace           *int           `json:"diskSpace,omitempty"`
+	AppConfigurationUrl *string        `json:"appConfigurationUrl,omitempty"`
 }
 
 func (config *FaultInjectionConfig) ToAppConfigKeyValuePairs() map[string]*string {
@@ -82,11 +84,11 @@ func (a *azureFunctionAction) Describe() action_kit_api.ActionDescription {
 	return a.description
 }
 
-func (a *azureFunctionAction) NewEmptyState() AzureFunctionActionState {
-	return AzureFunctionActionState{}
+func (a *azureFunctionAction) NewEmptyState() AppConfigurationActionState {
+	return AppConfigurationActionState{}
 }
 
-func (a *azureFunctionAction) Prepare(ctx context.Context, state *AzureFunctionActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
+func (a *azureFunctionAction) Prepare(ctx context.Context, state *AppConfigurationActionState, request action_kit_api.PrepareActionRequestBody) (*action_kit_api.PrepareResult, error) {
 	config, err := a.configProvider(request)
 	if err != nil {
 		return nil, extension_kit.ToError("Failed to create config", err)
@@ -98,22 +100,26 @@ func (a *azureFunctionAction) Prepare(ctx context.Context, state *AzureFunctionA
 	return nil, nil
 }
 
-func GetAppConfigEndpoint() (string, error) {
-	appConfigEndpoint, exists := os.LookupEnv("AZURE_APP_CONFIG_ENDPOINT")
-	if !exists {
-		return "", fmt.Errorf("AZURE_APP_CONFIG_ENDPOINT environment variable is not set")
+func GetAppConfigEndpoint(appConfigurationId string) (string, error) {
+	splitId := strings.Split(appConfigurationId, "/")
+
+	if len(splitId) != 9 {
+		return "", fmt.Errorf("invalid app configuration id format")
 	}
-	return appConfigEndpoint, nil
+
+	appConfigurationName := splitId[len(splitId)-1]
+
+	return fmt.Sprintf("https://%s.azconfig.io", appConfigurationName), nil
 }
 
-func (a *azureFunctionAction) Start(ctx context.Context, state *AzureFunctionActionState) (*action_kit_api.StartResult, error) {
+func (a *azureFunctionAction) Start(ctx context.Context, state *AppConfigurationActionState) (*action_kit_api.StartResult, error) {
 	cred, err := common.ConnectionAzure()
 
 	if err != nil {
 		log.Error().Msgf("Failed to create Azure credential: %v", err)
 	}
 
-	appConfigEndpoint, err := GetAppConfigEndpoint()
+	appConfigEndpoint, err := GetAppConfigEndpoint(state.Config.AppConfigurationId)
 
 	if err != nil {
 		return nil, err
@@ -139,13 +145,13 @@ func (a *azureFunctionAction) Start(ctx context.Context, state *AzureFunctionAct
 	return nil, nil
 }
 
-func (a *azureFunctionAction) Stop(ctx context.Context, state *AzureFunctionActionState) (*action_kit_api.StopResult, error) {
+func (a *azureFunctionAction) Stop(ctx context.Context, state *AppConfigurationActionState) (*action_kit_api.StopResult, error) {
 	cred, err := common.ConnectionAzure()
 	if err != nil {
 		log.Error().Msgf("Failed to create Azure credential: %v", err)
 	}
 
-	appConfigEndpoint, err := GetAppConfigEndpoint()
+	appConfigEndpoint, err := GetAppConfigEndpoint(state.Config.AppConfigurationId)
 
 	if err != nil {
 		return nil, err

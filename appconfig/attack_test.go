@@ -1,8 +1,7 @@
-package azurefunctions
+package appconfig
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -127,56 +126,32 @@ func TestFaultInjectionConfig_ToAppConfigKeyValuePairs(t *testing.T) {
 
 func TestGetAppConfigEndpoint(t *testing.T) {
 	tests := []struct {
-		name        string
-		envValue    string
-		setEnv      bool
-		expected    string
-		expectError bool
+		name               string
+		appConfigurationId string
+		expected           string
+		expectError        bool
 	}{
 		{
-			name:        "environment variable is set",
-			envValue:    "https://test-config.azconfig.io",
-			setEnv:      true,
-			expected:    "https://test-config.azconfig.io",
-			expectError: false,
+			name:               "resource id is valid",
+			appConfigurationId: "/subscriptions/24c2ec3e-7537-4800-9dd6-7326f26c3484/resourceGroups/test/providers/Microsoft.AppConfiguration/configurationStores/test-config",
+			expected:           "https://test-config.azconfig.io",
+			expectError:        false,
 		},
 		{
-			name:        "environment variable is not set",
-			setEnv:      false,
-			expected:    "",
-			expectError: true,
-		},
-		{
-			name:        "environment variable is empty",
-			envValue:    "",
-			setEnv:      true,
-			expected:    "",
-			expectError: false,
+			name:               "resource id is invalid",
+			appConfigurationId: "subscriptions/24c2ec3e-7537-4800-9dd6-7326f26c3484/resourceGroups/test/providers/Microsoft.AppConfiguration/configurationStores/test-config",
+			expected:           "",
+			expectError:        true,
 		},
 	}
 
-	originalValue := os.Getenv("AZURE_APP_CONFIG_ENDPOINT")
-	defer func() {
-		if originalValue != "" {
-			os.Setenv("AZURE_APP_CONFIG_ENDPOINT", originalValue)
-		} else {
-			os.Unsetenv("AZURE_APP_CONFIG_ENDPOINT")
-		}
-	}()
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			os.Unsetenv("AZURE_APP_CONFIG_ENDPOINT")
-
-			if tt.setEnv {
-				os.Setenv("AZURE_APP_CONFIG_ENDPOINT", tt.envValue)
-			}
-
-			result, err := GetAppConfigEndpoint()
+			result, err := GetAppConfigEndpoint(tt.appConfigurationId)
 
 			if tt.expectError {
 				assert.Error(t, err)
-				assert.Contains(t, err.Error(), "AZURE_APP_CONFIG_ENDPOINT environment variable is not set")
+				assert.Contains(t, err.Error(), "invalid app configuration id format")
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.expected, result)
@@ -190,7 +165,7 @@ func TestAzureFunctionAction_Prepare(t *testing.T) {
 		name           string
 		configProvider func(request action_kit_api.PrepareActionRequestBody) (*FaultInjectionConfig, error)
 		request        action_kit_api.PrepareActionRequestBody
-		expectedState  AzureFunctionActionState
+		expectedState  AppConfigurationActionState
 		expectError    bool
 	}{
 		{
@@ -208,7 +183,7 @@ func TestAzureFunctionAction_Prepare(t *testing.T) {
 					ExecutionId:   extutil.Ptr(123),
 				},
 			},
-			expectedState: AzureFunctionActionState{
+			expectedState: AppConfigurationActionState{
 				ExperimentKey: extutil.Ptr("test-experiment"),
 				ExecutionId:   extutil.Ptr(123),
 				Config: &FaultInjectionConfig{
@@ -230,7 +205,7 @@ func TestAzureFunctionAction_Prepare(t *testing.T) {
 					ExecutionId:   extutil.Ptr(123),
 				},
 			},
-			expectedState: AzureFunctionActionState{},
+			expectedState: AppConfigurationActionState{},
 			expectError:   true,
 		},
 	}
@@ -241,7 +216,7 @@ func TestAzureFunctionAction_Prepare(t *testing.T) {
 				configProvider: tt.configProvider,
 			}
 
-			state := AzureFunctionActionState{}
+			state := AppConfigurationActionState{}
 			result, err := action.Prepare(context.Background(), &state, tt.request)
 
 			if tt.expectError {

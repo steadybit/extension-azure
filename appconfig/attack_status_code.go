@@ -1,4 +1,4 @@
-package azurefunctions
+package appconfig
 
 import (
 	"fmt"
@@ -9,23 +9,23 @@ import (
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-func NewExceptionAction() action_kit_sdk.Action[AzureFunctionActionState] {
+func NewStatusCodeAction() action_kit_sdk.Action[AppConfigurationActionState] {
 	return &azureFunctionAction{
-		description:    getInjectExceptionDescription(),
-		configProvider: injectException,
+		description:    getInjectStatusCodeDescription(),
+		configProvider: injectStatusCode,
 	}
 }
 
-func getInjectExceptionDescription() action_kit_api.ActionDescription {
+func getInjectStatusCodeDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:              fmt.Sprintf("%s.exception", TargetIDAzureFunction),
+		Id:              fmt.Sprintf("%s.status_code", TargetIDAzureAppConfiguration),
 		Version:         extbuild.GetSemverVersionStringOrUnknown(),
-		Label:           "Inject Exception",
-		Description:     "Injects exception into the function.",
+		Label:           "Inject Status Code",
+		Description:     "Injects status code into the function.",
 		Icon:            extutil.Ptr(string(targetIcon)),
 		TargetSelection: &azureFunctionTargetSelection,
 		Technology:      extutil.Ptr("Azure"),
-		Category:        extutil.Ptr("Azure Functions"),
+		Category:        extutil.Ptr("Azure App Configuration"),
 		Kind:            action_kit_api.Attack,
 		TimeControl:     action_kit_api.TimeControlExternal,
 		Parameters: []action_kit_api.ActionParameter{
@@ -49,11 +49,11 @@ func getInjectExceptionDescription() action_kit_api.ActionDescription {
 				Order:        extutil.Ptr(1),
 			},
 			{
-				Name:         "exceptionMsg",
-				Label:        "Message",
-				Description:  extutil.Ptr("Message of the thrown exception."),
-				Type:         action_kit_api.ActionParameterTypeString,
-				DefaultValue: extutil.Ptr("Injected exception"),
+				Name:         "statusCode",
+				Label:        "Status Code",
+				Description:  extutil.Ptr("Status code to inject into the function."),
+				Type:         action_kit_api.ActionParameterTypeInteger,
+				DefaultValue: extutil.Ptr("400"),
 				Required:     extutil.Ptr(true),
 				Order:        extutil.Ptr(2),
 			},
@@ -62,11 +62,12 @@ func getInjectExceptionDescription() action_kit_api.ActionDescription {
 	}
 }
 
-func injectException(request action_kit_api.PrepareActionRequestBody) (*FaultInjectionConfig, error) {
+func injectStatusCode(request action_kit_api.PrepareActionRequestBody) (*FaultInjectionConfig, error) {
 	return &FaultInjectionConfig{
-		Injection:    "Exception",
-		Rate:         int(request.Config["rate"].(float64)),
-		ExceptionMsg: extutil.Ptr(request.Config["exceptionMsg"].(string)),
-		Enabled:      true,
+		Injection:          "StatusCode",
+		Rate:               int(request.Config["rate"].(float64)),
+		StatusCode:         extutil.Ptr(int(request.Config["statusCode"].(float64))),
+		Enabled:            true,
+		AppConfigurationId: request.Target.Name,
 	}, nil
 }
