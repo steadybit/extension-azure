@@ -28,7 +28,7 @@ func TestWithMinikube(t *testing.T) {
 				"--set", "azure.level=debug",
 				"--set", "discovery.enable.vm=true",
 				"--set", "discovery.enable.scaleSetInstance=true",
-				"--set", "discovery.enable.azureFunction=true",
+				"--set", "discovery.enable.appConfiguration=true",
 				"--set", "discovery.enable.networkSecurityGroup=true",
 			}
 		},
