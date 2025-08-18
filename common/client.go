@@ -3,17 +3,18 @@ package common
 import (
 	"crypto"
 	"crypto/x509"
+	"os"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/extension-azure/config"
-	"os"
 )
 
 func GetClientByCredentials() (*armresourcegraph.Client, error) {
-	cred, err := connectionAzure()
+	cred, err := ConnectionAzure()
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to create Azure connection.")
 		return nil, err
@@ -30,7 +31,7 @@ func GetClientByCredentials() (*armresourcegraph.Client, error) {
 }
 
 func GetVirtualMachinesClient(subscriptionId string) (*armcompute.VirtualMachinesClient, error) {
-	conn, err := connectionAzure()
+	conn, err := ConnectionAzure()
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to create Azure connection.")
 		return nil, err
@@ -45,7 +46,7 @@ func GetVirtualMachinesClient(subscriptionId string) (*armcompute.VirtualMachine
 }
 
 func GetVirtualMachineScaleSetVMsClient(subscriptionId string) (*armcompute.VirtualMachineScaleSetVMsClient, error) {
-	conn, err := connectionAzure()
+	conn, err := ConnectionAzure()
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to create Azure connection.")
 		return nil, err
@@ -59,7 +60,7 @@ func GetVirtualMachineScaleSetVMsClient(subscriptionId string) (*armcompute.Virt
 	return virtualMachinesClient, nil
 }
 
-func connectionAzure() (azcore.TokenCredential, error) {
+func ConnectionAzure() (azcore.TokenCredential, error) {
 	tenantID := os.Getenv("AZURE_TENANT_ID")
 	clientID := os.Getenv("AZURE_CLIENT_ID")
 	clientSecret := os.Getenv("AZURE_CLIENT_SECRET")

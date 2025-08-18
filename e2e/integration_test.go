@@ -5,6 +5,9 @@ package e2e
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_test/e2e"
 	actValidate "github.com/steadybit/action-kit/go/action_kit_test/validate"
@@ -13,8 +16,6 @@ import (
 	"github.com/steadybit/extension-azure/extvm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestWithMinikube(t *testing.T) {
@@ -25,6 +26,10 @@ func TestWithMinikube(t *testing.T) {
 			return []string{
 				"--set", "logging.level=debug",
 				"--set", "azure.level=debug",
+				"--set", "discovery.enable.vm=true",
+				"--set", "discovery.enable.scaleSetInstance=true",
+				"--set", "discovery.enable.appConfiguration=true",
+				"--set", "discovery.enable.networkSecurityGroup=true",
 			}
 		},
 	}
@@ -35,7 +40,7 @@ func TestWithMinikube(t *testing.T) {
 			Test: validateDiscovery,
 		},
 		{
-			Name: "valudate action",
+			Name: "validate action",
 			Test: validateAction,
 		},
 	})
@@ -46,10 +51,12 @@ func validateDiscovery(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
 	validationErr := disValidate.ValidateEndpointReferences("/", e.Client)
 	if uw, ok := validationErr.(interface{ Unwrap() []error }); ok {
 		errs := uw.Unwrap()
-		// we expect two errors, because we do not have a real azure vm running
-		assert.Len(t, errs, 2)
+		// we expect four errors, because we do not have a real azure environment running
+		assert.Len(t, errs, 4)
 		assert.Contains(t, errs[0].Error(), "GET /com.steadybit.extension_azure") // failed to get all virtual machines
 		assert.Contains(t, errs[1].Error(), "GET /com.steadybit.extension_azure") // failed to get all scale sets
+		assert.Contains(t, errs[2].Error(), "GET /com.steadybit.extension_azure") // failed to get all azure functions
+		assert.Contains(t, errs[3].Error(), "GET /com.steadybit.extension_azure") // failed to get all network security groups
 	} else {
 		assert.NoError(t, validationErr)
 	}
