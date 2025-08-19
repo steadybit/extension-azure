@@ -64,9 +64,10 @@ func getInjectFillDiskDescription() action_kit_api.ActionDescription {
 
 func injectFillDisk(request action_kit_api.PrepareActionRequestBody) (*FaultInjectionConfig, error) {
 	return &FaultInjectionConfig{
-		Injection: "FillDisk",
-		Rate:      int(request.Config["rate"].(float64)),
-		DiskSpace: extutil.Ptr(int(request.Config["megabytes"].(float64))),
-		Enabled:   true,
+		Injection:          "FillDisk",
+		Rate:               int(request.Config["rate"].(float64)),
+		DiskSpace:          extutil.Ptr(int(request.Config["megabytes"].(float64))),
+		Enabled:            true,
+		AppConfigurationId: request.Target.Name,
 	}, nil
 }
