@@ -129,21 +129,21 @@ func getAppConfigEndpoint(config FaultInjectionConfig) (string, error) {
 		appConfigEndpoint := *config.AppConfigurationEndpoint
 		return appConfigEndpoint, nil
 	} else {
-		return "", extension_kit.ToError("Missing App Configuration Endpoint", errors.New("Missing App Configuration Endpoint"))
+		return "", fmt.Errorf("missing app configuration endpoint")
 	}
 }
 
 func getAppConfigName(endpoint string) (string, error) {
 	splitEndpoint := strings.Split(endpoint, ".")
 	if len(splitEndpoint) != 3 {
-		return "", errors.New("Invalid App Configuration Endpoint")
+		return "", errors.New("invalid app configuration endpoint")
 	}
 
 	if strings.Contains(splitEndpoint[0], "https://") {
 		return strings.Replace(splitEndpoint[0], "https://", "", 1), nil
 	}
 
-	return "", errors.New("Invalid App Configuration Endpoint")
+	return "", errors.New("invalid app configuration endpoint")
 }
 
 func (a *AppConfigurationAction) Start(ctx context.Context, state *AppConfigurationActionState) (*action_kit_api.StartResult, error) {
@@ -208,7 +208,7 @@ func (a *AppConfigurationAction) Stop(ctx context.Context, state *AppConfigurati
 	for pager.More() {
 		page, err := pager.NextPage(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to list settings: %v", err)
+			return nil, fmt.Errorf("failed to list settings: %v", err)
 		}
 
 		for _, setting := range page.Settings {
