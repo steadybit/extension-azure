@@ -18,14 +18,12 @@ type Specification struct {
 	AzureUserAssertionString                        string   `json:"azureUserAssertionString" required:"false" split_words:"true"`
 	DiscoveryAttributesExcludesScaleSetInstance     []string `json:"discoveryAttributesExcludesScaleSetInstance" required:"false" split_words:"true"`
 	DiscoveryAttributesExcludesVM                   []string `json:"discoveryAttributesExcludesVM" required:"false" split_words:"true"`
-	DiscoveryAttributesExcludesAppConfiguration     []string `json:"discoveryAttributesExcludesAppConfiguration" required:"false" split_words:"true"`
 	DiscoveryAttributesExcludesAzureFunction        []string `json:"discoveryAttributesExcludesAzureFunction" required:"false" split_words:"true"`
 	DiscoveryAttributesExcludesNetworkSecurityGroup []string `json:"discoveryAttributesExcludesNetworkSecurityGroup" required:"false" split_words:"true"`
 	DiscoveryAttributesExcludesContainerApp         []string `json:"discoveryAttributesExcludesContainerApp" required:"false" split_words:"true"`
 	EnrichScaleSetVMDataForTargetTypes              []string `json:"EnrichScaleSetVMDataForTargetTypes" split_words:"true" default:"com.steadybit.extension_jvm.jvm-instance,com.steadybit.extension_container.container,com.steadybit.extension_kubernetes.kubernetes-deployment,com.steadybit.extension_kubernetes.kubernetes-pod,com.steadybit.extension_kubernetes.kubernetes-daemonset,com.steadybit.extension_kubernetes.kubernetes-statefulset,com.steadybit.extension_http.client-location,com.steadybit.extension_jmeter.location,com.steadybit.extension_k6.location,com.steadybit.extension_gatling.location"`
 	DiscoveryEnableVirtualMachines                  bool     `json:"discoveryEnableVirtualMachines" split_words:"true" required:"false" default:"true"`
 	DiscoveryEnableScaleInstances                   bool     `json:"discoveryEnableScaleInstances" split_words:"true" required:"false" default:"true"`
-	DiscoveryEnableAppConfigurations                bool     `json:"discoveryEnableAppConfigurations" split_words:"true" required:"false" default:"false"`
 	DiscoveryEnableAzureFunctions                   bool     `json:"discoveryEnableAzureFunctions" split_words:"true" required:"false" default:"false"`
 	DiscoveryEnableNetworkSecurityGroups            bool     `json:"discoveryEnableNetworkSecurityGroups" split_words:"true" required:"false" default:"false"`
 	DiscoveryEnableContainerApps                    bool     `json:"discoveryEnableContainerApps" split_words:"true" required:"false" default:"false"`

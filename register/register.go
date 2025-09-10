@@ -29,7 +29,7 @@ func RegisterHandlers() error {
 		action_kit_sdk.RegisterAction(nsg.NewBlockAction())
 	}
 
-	if configSpec.DiscoveryEnableAppConfigurations {
+	if configSpec.DiscoveryEnableAzureFunctions {
 		discovery_kit_sdk.Register(azurefunctions.NewAzureFunctionDiscovery())
 		action_kit_sdk.RegisterAction(azurefunctions.NewAzureFunctionExceptionAction())
 		action_kit_sdk.RegisterAction(azurefunctions.NewAzureFunctionStatusCodeAction())
