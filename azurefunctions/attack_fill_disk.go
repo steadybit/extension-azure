@@ -1,31 +1,33 @@
-package appconfig
+package azurefunctions
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
+	"github.com/steadybit/extension-azure/appconfig"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-func NewFillDiskAction() action_kit_sdk.Action[AppConfigurationActionState] {
-	return &azureFunctionAction{
-		description:    getInjectFillDiskDescription(),
-		configProvider: injectFillDisk,
+func NewAzureFunctionFillDiskAction() action_kit_sdk.Action[appconfig.AppConfigurationActionState] {
+	return &appconfig.AppConfigurationAction{
+		Description:    getInjectFillDiskDescription(),
+		ConfigProvider: injectFillDisk,
 	}
 }
 
 func getInjectFillDiskDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:              fmt.Sprintf("%s.fill_disk", TargetIDAzureAppConfiguration),
+		Id:              fmt.Sprintf("%s.fill_disk", TargetIDAzureFunction),
 		Version:         extbuild.GetSemverVersionStringOrUnknown(),
 		Label:           "Fill Diskspace",
 		Description:     "Fills tmp diskspace of the function.",
 		Icon:            extutil.Ptr(string(targetIcon)),
 		TargetSelection: &azureFunctionTargetSelection,
 		Technology:      extutil.Ptr("Azure"),
-		Category:        extutil.Ptr("Azure App Configuration"),
+		Category:        extutil.Ptr("Azure Function"),
 		Kind:            action_kit_api.Attack,
 		TimeControl:     action_kit_api.TimeControlExternal,
 		Parameters: []action_kit_api.ActionParameter{
@@ -62,12 +64,19 @@ func getInjectFillDiskDescription() action_kit_api.ActionDescription {
 	}
 }
 
-func injectFillDisk(request action_kit_api.PrepareActionRequestBody) (*FaultInjectionConfig, error) {
-	return &FaultInjectionConfig{
-		Injection:          "FillDisk",
-		Rate:               int(request.Config["rate"].(float64)),
-		DiskSpace:          extutil.Ptr(int(request.Config["megabytes"].(float64))),
-		Enabled:            true,
-		AppConfigurationId: request.Target.Name,
+func injectFillDisk(request action_kit_api.PrepareActionRequestBody) (*appconfig.FaultInjectionConfig, error) {
+	appConfigurationEndpoints := request.Target.Attributes["azure-function.app-configuration.endpoint"]
+
+	if len(appConfigurationEndpoints) == 0 {
+		return nil, errors.New("no app configuration endpoint found")
+	}
+
+	return &appconfig.FaultInjectionConfig{
+		Injection:                "FillDisk",
+		Rate:                     int(request.Config["rate"].(float64)),
+		DiskSpace:                extutil.Ptr(int(request.Config["megabytes"].(float64))),
+		Enabled:                  true,
+		AppConfigurationEndpoint: extutil.Ptr(request.Target.Attributes["azure-function.app-configuration.endpoint"][0]),
+		AppConfigurationSuffix:   extutil.Ptr(request.Target.Attributes["steadybit.label"][0]),
 	}, nil
 }

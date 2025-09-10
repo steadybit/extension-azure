@@ -2,6 +2,7 @@ package appconfig
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 )
 
 func TestFaultInjectionConfig_ToAppConfigKeyValuePairs(t *testing.T) {
+	targetName := "test-target"
 	tests := []struct {
 		name     string
 		config   FaultInjectionConfig
@@ -24,9 +26,9 @@ func TestFaultInjectionConfig_ToAppConfigKeyValuePairs(t *testing.T) {
 				Enabled:   true,
 			},
 			expected: map[string]*string{
-				"Steadybit:FaultInjection:Injection": extutil.Ptr("exception"),
-				"Steadybit:FaultInjection:Rate":      extutil.Ptr("50"),
-				"Steadybit:FaultInjection:Enabled":   extutil.Ptr("true"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Injection", targetName): extutil.Ptr("exception"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", targetName):      extutil.Ptr("50"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", targetName):   extutil.Ptr("true"),
 			},
 		},
 		{
@@ -38,10 +40,10 @@ func TestFaultInjectionConfig_ToAppConfigKeyValuePairs(t *testing.T) {
 				StatusCode: extutil.Ptr(500),
 			},
 			expected: map[string]*string{
-				"Steadybit:FaultInjection:Injection":  extutil.Ptr("status_code"),
-				"Steadybit:FaultInjection:Rate":       extutil.Ptr("75"),
-				"Steadybit:FaultInjection:Enabled":    extutil.Ptr("true"),
-				"Steadybit:FaultInjection:StatusCode": extutil.Ptr("500"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Injection", targetName):  extutil.Ptr("status_code"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", targetName):       extutil.Ptr("75"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", targetName):    extutil.Ptr("true"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:StatusCode", targetName): extutil.Ptr("500"),
 			},
 		},
 		{
@@ -54,11 +56,11 @@ func TestFaultInjectionConfig_ToAppConfigKeyValuePairs(t *testing.T) {
 				MaxLatency: extutil.Ptr(500 * time.Millisecond),
 			},
 			expected: map[string]*string{
-				"Steadybit:FaultInjection:Injection":            extutil.Ptr("latency"),
-				"Steadybit:FaultInjection:Rate":                 extutil.Ptr("100"),
-				"Steadybit:FaultInjection:Enabled":              extutil.Ptr("true"),
-				"Steadybit:FaultInjection:Delay:MinimumLatency": extutil.Ptr("100"),
-				"Steadybit:FaultInjection:Delay:MaximumLatency": extutil.Ptr("500"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Injection", targetName):            extutil.Ptr("latency"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", targetName):                 extutil.Ptr("100"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", targetName):              extutil.Ptr("true"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MinimumLatency", targetName): extutil.Ptr("100"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MaximumLatency", targetName): extutil.Ptr("500"),
 			},
 		},
 		{
@@ -70,10 +72,10 @@ func TestFaultInjectionConfig_ToAppConfigKeyValuePairs(t *testing.T) {
 				ExceptionMsg: extutil.Ptr("Test exception message"),
 			},
 			expected: map[string]*string{
-				"Steadybit:FaultInjection:Injection":         extutil.Ptr("exception"),
-				"Steadybit:FaultInjection:Rate":              extutil.Ptr("25"),
-				"Steadybit:FaultInjection:Enabled":           extutil.Ptr("true"),
-				"Steadybit:FaultInjection:Exception:Message": extutil.Ptr("Test exception message"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Injection", targetName):         extutil.Ptr("exception"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", targetName):              extutil.Ptr("25"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", targetName):           extutil.Ptr("true"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Exception:Message", targetName): extutil.Ptr("Test exception message"),
 			},
 		},
 		{
@@ -85,10 +87,10 @@ func TestFaultInjectionConfig_ToAppConfigKeyValuePairs(t *testing.T) {
 				DiskSpace: extutil.Ptr(1024),
 			},
 			expected: map[string]*string{
-				"Steadybit:FaultInjection:Injection":          extutil.Ptr("fill_disk"),
-				"Steadybit:FaultInjection:Rate":               extutil.Ptr("90"),
-				"Steadybit:FaultInjection:Enabled":            extutil.Ptr("true"),
-				"Steadybit:FaultInjection:FillDisk:Megabytes": extutil.Ptr("1024"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Injection", targetName):          extutil.Ptr("fill_disk"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", targetName):               extutil.Ptr("90"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", targetName):            extutil.Ptr("true"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:FillDisk:Megabytes", targetName): extutil.Ptr("1024"),
 			},
 		},
 		{
@@ -104,21 +106,21 @@ func TestFaultInjectionConfig_ToAppConfigKeyValuePairs(t *testing.T) {
 				DiskSpace:    extutil.Ptr(512),
 			},
 			expected: map[string]*string{
-				"Steadybit:FaultInjection:Injection":            extutil.Ptr("mixed"),
-				"Steadybit:FaultInjection:Rate":                 extutil.Ptr("60"),
-				"Steadybit:FaultInjection:Enabled":              extutil.Ptr("false"),
-				"Steadybit:FaultInjection:StatusCode":           extutil.Ptr("404"),
-				"Steadybit:FaultInjection:Delay:MinimumLatency": extutil.Ptr("200"),
-				"Steadybit:FaultInjection:Delay:MaximumLatency": extutil.Ptr("800"),
-				"Steadybit:FaultInjection:Exception:Message":    extutil.Ptr("All fields test"),
-				"Steadybit:FaultInjection:FillDisk:Megabytes":   extutil.Ptr("512"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Injection", targetName):            extutil.Ptr("mixed"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", targetName):                 extutil.Ptr("60"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", targetName):              extutil.Ptr("false"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:StatusCode", targetName):           extutil.Ptr("404"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MinimumLatency", targetName): extutil.Ptr("200"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MaximumLatency", targetName): extutil.Ptr("800"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:Exception:Message", targetName):    extutil.Ptr("All fields test"),
+				fmt.Sprintf("Steadybit:FaultInjection:%s:FillDisk:Megabytes", targetName):   extutil.Ptr("512"),
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.config.ToAppConfigKeyValuePairs()
+			result := tt.config.ToAppConfigKeyValuePairs(targetName)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -212,8 +214,8 @@ func TestAzureFunctionAction_Prepare(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			action := azureFunctionAction{
-				configProvider: tt.configProvider,
+			action := AppConfigurationAction{
+				ConfigProvider: tt.configProvider,
 			}
 
 			state := AppConfigurationActionState{}

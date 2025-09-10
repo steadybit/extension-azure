@@ -143,15 +143,18 @@ discovery:
   enable:
     vm: true
     scaleSetInstance: true
-    appConfiguration: false
+    azureFunction: false
     networkSecurityGroup: false
+    containerApp: false
   attributes:
     excludes:
       # discovery.attributes.excludes.vm -- List of attributes to exclude from VM discovery.
       vm: []
       # discovery.attributes.excludes.scaleSetInstance -- List of attributes to exclude from scaleSetInstance discovery.
       scaleSetInstance: []
-      # discovery.attributes.excludes.appConfiguration -- List of attributes to exclude from azureFunction discovery.
-      appConfiguration: []
       # discovery.attributes.excludes.networkSecurityGroup -- List of attributes to exclude from networkSecurityGroup discovery.
       networkSecurityGroup: []
+      # discovery.attributes.excludes.azureFunction -- List of attributes to exclude from azureFunction discovery.
+      azureFunction: []
+      # discovery.attributes.excludes.containerApp -- List of attributes to exclude from azureFunction discovery.
+      containerApp: []
