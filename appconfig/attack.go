@@ -52,33 +52,33 @@ type FaultInjectionConfig struct {
 	DiskSpace                *int           `json:"diskSpace,omitempty"`
 }
 
-func (config *FaultInjectionConfig) ToAppConfigKeyValuePairs(azureFunctionName string) map[string]*string {
+func (config *FaultInjectionConfig) ToAppConfigKeyValuePairs(suffix string) map[string]*string {
 	appConfigMapping := make(map[string]*string)
 
-	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Injection", azureFunctionName)] = &config.Injection
-	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", azureFunctionName)] = extutil.Ptr(fmt.Sprint(config.Rate))
-	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", azureFunctionName)] = extutil.Ptr(fmt.Sprint(config.Enabled))
+	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Injection", suffix)] = &config.Injection
+	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", suffix)] = extutil.Ptr(fmt.Sprint(config.Rate))
+	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", suffix)] = extutil.Ptr(fmt.Sprint(config.Enabled))
 
 	if config.StatusCode != nil {
-		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:StatusCode", azureFunctionName)] = extutil.Ptr(fmt.Sprint(*config.StatusCode))
+		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:StatusCode", suffix)] = extutil.Ptr(fmt.Sprint(*config.StatusCode))
 	}
 
 	if config.MinLatency != nil {
 		log.Debug().Msgf("Setting minimum latency to %d ms", config.MinLatency.Milliseconds())
-		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MinimumLatency", azureFunctionName)] = extutil.Ptr(fmt.Sprint(config.MinLatency.Milliseconds()))
+		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MinimumLatency", suffix)] = extutil.Ptr(fmt.Sprint(config.MinLatency.Milliseconds()))
 	}
 
 	if config.MaxLatency != nil {
 		log.Debug().Msgf("Setting maximum latency to %d ms", config.MaxLatency.Milliseconds())
-		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MaximumLatency", azureFunctionName)] = extutil.Ptr(fmt.Sprint(config.MaxLatency.Milliseconds()))
+		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MaximumLatency", suffix)] = extutil.Ptr(fmt.Sprint(config.MaxLatency.Milliseconds()))
 	}
 
 	if config.ExceptionMsg != nil {
-		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Exception:Message", azureFunctionName)] = config.ExceptionMsg
+		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Exception:Message", suffix)] = config.ExceptionMsg
 	}
 
 	if config.DiskSpace != nil {
-		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:FillDisk:Megabytes", azureFunctionName)] = extutil.Ptr(fmt.Sprint(*config.DiskSpace))
+		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:FillDisk:Megabytes", suffix)] = extutil.Ptr(fmt.Sprint(*config.DiskSpace))
 	}
 
 	return appConfigMapping
