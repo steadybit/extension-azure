@@ -68,7 +68,7 @@ func injectException(request action_kit_api.PrepareActionRequestBody) (*appconfi
 	appConfigurationEndpoints := request.Target.Attributes["container-app.app-configuration.endpoint"]
 
 	if len(appConfigurationEndpoints) == 0 {
-		return nil, errors.New("no app configuration endpoint found, check if 'STEADYBIT_FAULT_INJECTION_ENDPOINT' environment variable is pointing to the correct app configuration and you are using the Steadybit .NET middleware (https://github.com/steadybit/failure-azure-functions-net).")
+		return nil, errors.New("no app configuration endpoint found, check if 'STEADYBIT_FAULT_INJECTION_ENDPOINT' environment variable is pointing to the correct app configuration and you are using the Steadybit .NET middleware (https://github.com/steadybit/failure-azure-functions-net)")
 	}
 
 	return &appconfig.FaultInjectionConfig{
