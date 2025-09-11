@@ -1,32 +1,34 @@
-package appconfig
+package azurefunctions
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
+	"github.com/steadybit/extension-azure/appconfig"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
 )
 
-func NewLatencyAction() action_kit_sdk.Action[AppConfigurationActionState] {
-	return &azureFunctionAction{
-		description:    getInjectLatencyDescription(),
-		configProvider: injectLatency,
+func NewAzureFunctionLatencyAction() action_kit_sdk.Action[appconfig.AppConfigurationActionState] {
+	return &appconfig.AppConfigurationAction{
+		Description:    getInjectLatencyDescription(),
+		ConfigProvider: injectLatency,
 	}
 }
 
 func getInjectLatencyDescription() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
-		Id:              fmt.Sprintf("%s.latency", TargetIDAzureAppConfiguration),
+		Id:              fmt.Sprintf("%s.latency", TargetIDAzureFunction),
 		Version:         extbuild.GetSemverVersionStringOrUnknown(),
 		Label:           "Inject Latency",
 		Description:     "Injects latency into the function.",
 		Icon:            extutil.Ptr(string(targetIcon)),
 		TargetSelection: &azureFunctionTargetSelection,
 		Technology:      extutil.Ptr("Azure"),
-		Category:        extutil.Ptr("Azure App Configuration"),
+		Category:        extutil.Ptr("Azure Function"),
 		Kind:            action_kit_api.Attack,
 		TimeControl:     action_kit_api.TimeControlExternal,
 		Parameters: []action_kit_api.ActionParameter{
@@ -72,13 +74,20 @@ func getInjectLatencyDescription() action_kit_api.ActionDescription {
 	}
 }
 
-func injectLatency(request action_kit_api.PrepareActionRequestBody) (*FaultInjectionConfig, error) {
-	return &FaultInjectionConfig{
-		Injection:          "Delay",
-		Rate:               int(request.Config["rate"].(float64)),
-		MinLatency:         extutil.Ptr(time.Duration(extutil.ToInt64(request.Config["minimumLatency"])) * time.Millisecond),
-		MaxLatency:         extutil.Ptr(time.Duration(extutil.ToInt64(request.Config["maximumLatency"])) * time.Millisecond),
-		Enabled:            true,
-		AppConfigurationId: request.Target.Name,
+func injectLatency(request action_kit_api.PrepareActionRequestBody) (*appconfig.FaultInjectionConfig, error) {
+	appConfigurationEndpoints := request.Target.Attributes["azure-function.app-configuration.endpoint"]
+
+	if len(appConfigurationEndpoints) == 0 {
+		return nil, errors.New("no app configuration endpoint found, check if 'STEADYBIT_FAULT_INJECTION_ENDPOINT' environment variable is pointing to the correct app configuration and you are using the Steadybit .NET middleware (https://github.com/steadybit/failure-azure-functions-net)")
+	}
+
+	return &appconfig.FaultInjectionConfig{
+		Injection:                "Delay",
+		Rate:                     int(request.Config["rate"].(float64)),
+		MinLatency:               extutil.Ptr(time.Duration(extutil.ToInt64(request.Config["minimumLatency"])) * time.Millisecond),
+		MaxLatency:               extutil.Ptr(time.Duration(extutil.ToInt64(request.Config["maximumLatency"])) * time.Millisecond),
+		Enabled:                  true,
+		AppConfigurationEndpoint: extutil.Ptr(request.Target.Attributes["azure-function.app-configuration.endpoint"][0]),
+		AppConfigurationSuffix:   extutil.Ptr(request.Target.Attributes["steadybit.label"][0]),
 	}, nil
 }

@@ -28,8 +28,9 @@ func TestWithMinikube(t *testing.T) {
 				"--set", "azure.level=debug",
 				"--set", "discovery.enable.vm=true",
 				"--set", "discovery.enable.scaleSetInstance=true",
-				"--set", "discovery.enable.appConfiguration=true",
+				"--set", "discovery.enable.containerApp=true",
 				"--set", "discovery.enable.networkSecurityGroup=true",
+				"--set", "discovery.enable.azureFunction=true",
 			}
 		},
 	}
@@ -52,11 +53,12 @@ func validateDiscovery(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
 	if uw, ok := validationErr.(interface{ Unwrap() []error }); ok {
 		errs := uw.Unwrap()
 		// we expect four errors, because we do not have a real azure environment running
-		assert.Len(t, errs, 4)
+		assert.Len(t, errs, 5)
 		assert.Contains(t, errs[0].Error(), "GET /com.steadybit.extension_azure") // failed to get all virtual machines
 		assert.Contains(t, errs[1].Error(), "GET /com.steadybit.extension_azure") // failed to get all scale sets
 		assert.Contains(t, errs[2].Error(), "GET /com.steadybit.extension_azure") // failed to get all azure functions
 		assert.Contains(t, errs[3].Error(), "GET /com.steadybit.extension_azure") // failed to get all network security groups
+		assert.Contains(t, errs[4].Error(), "GET /com.steadybit.extension_azure") // failed to get all container apps
 	} else {
 		assert.NoError(t, validationErr)
 	}

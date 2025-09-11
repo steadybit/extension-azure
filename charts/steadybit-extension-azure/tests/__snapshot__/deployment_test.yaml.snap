@@ -68,6 +68,16 @@ manifest should match snapshot using podAnnotations and Labels:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -181,6 +191,16 @@ manifest should match snapshot with TLS:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -305,6 +325,16 @@ manifest should match snapshot with azure certificates vars:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -418,6 +448,16 @@ manifest should match snapshot with azure secrets vars:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -531,6 +571,16 @@ manifest should match snapshot with extra env vars:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -653,6 +703,16 @@ manifest should match snapshot with extra labels:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -766,6 +826,16 @@ manifest should match snapshot with mutual TLS:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -899,6 +969,16 @@ manifest should match snapshot with mutual TLS using containerPaths:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -1018,6 +1098,16 @@ manifest should match snapshot with podSecurityContext:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -1132,6 +1222,16 @@ manifest should match snapshot with priority class:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -1246,6 +1346,16 @@ manifest should match snapshot without TLS:
                       key: userAssertionString
                       name: steadybit-extension-azure
                       optional: true
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_VIRTUAL_MACHINES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_INSTANCES
+                  value: "true"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_CONTAINER_APPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
