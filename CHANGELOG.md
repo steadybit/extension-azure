@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.1.0
+## v1.2.0
 - (Beta) add support for Azure Function
 - (Beta) add support for Network Security Groupy
 - (Beta) add support for .Net container apps
