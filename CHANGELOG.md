@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.1
+
+- Update dependencies
+
 ## v1.2.0
 - (Beta) add support for Azure Function
 - (Beta) add support for Network Security Groupy
