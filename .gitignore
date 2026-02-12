@@ -5,3 +5,5 @@
 /snyk.sarif
 /gpg.key
 main
+
+.env
