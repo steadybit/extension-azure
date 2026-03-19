@@ -147,12 +147,9 @@ func getAllAzureFunctions(ctx context.Context, client common.ArmResourceGraphApi
 				attributes["azure-function.resource.id"] = []string{items["id"].(string)}
 
 				settings, err := appClient.ListApplicationSettings(ctx, items["resourceGroup"].(string), items["name"].(string), nil)
-
 				if err != nil {
-					return nil, fmt.Errorf("unable to list application settings: %w", err)
-				}
-
-				if endpointPtr, ok := settings.Properties["STEADYBIT_FAULT_INJECTION_ENDPOINT"]; ok && endpointPtr != nil {
+					log.Warn().Str("function", items["name"].(string)).Err(err).Msg("failed to list application settings, skipping STEADYBIT_FAULT_INJECTION_ENDPOINT attribute")
+				} else if endpointPtr, ok := settings.Properties["STEADYBIT_FAULT_INJECTION_ENDPOINT"]; ok && endpointPtr != nil {
 					attributes["azure-function.app-configuration.endpoint"] = []string{*endpointPtr}
 				}
 
