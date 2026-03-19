@@ -258,12 +258,9 @@ func getAllContainerApps(ctx context.Context, client common.ArmResourceGraphApi)
 			}
 
 			resp, err := appClient.Get(ctx, items["resourceGroup"].(string), items["name"].(string), nil)
-
 			if err != nil {
-				return nil, err
-			}
-
-			if !(resp.ContainerApp.Properties == nil || resp.ContainerApp.Properties.Template == nil ||
+				log.Warn().Str("containerApp", items["name"].(string)).Err(err).Msg("failed to get container app details, skipping STEADYBIT_FAULT_INJECTION_ENDPOINT attribute")
+			} else if !(resp.ContainerApp.Properties == nil || resp.ContainerApp.Properties.Template == nil ||
 				resp.ContainerApp.Properties.Template.Containers == nil) {
 				for _, container := range resp.ContainerApp.Properties.Template.Containers {
 					if len(container.Env) == 0 {
