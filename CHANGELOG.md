@@ -1,8 +1,11 @@
 # Changelog
 
-## (next)
+## v1.2.6
 
+- Bump Go to 1.25.9
 - Support if-none-match for the extension list endpoint
+- Make discoveries resilient to per-resource permission errors
+- Update dependencies
 
 ## v1.2.5
 
