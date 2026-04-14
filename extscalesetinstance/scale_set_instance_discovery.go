@@ -19,6 +19,7 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
+	"maps"
 	"os"
 	"slices"
 	"strconv"
@@ -47,7 +48,7 @@ func (d *ssiDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: TargetIDScaleSetInstance,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("30s"),
+			CallInterval: new("30s"),
 		},
 	}
 }
@@ -56,13 +57,13 @@ func (d *ssiDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:      TargetIDScaleSetInstance,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(targetIcon),
+		Icon:    new(targetIcon),
 
 		// Labels used in the UI
 		Label: discovery_kit_api.PluralLabel{One: "Azure Scale Set Instance", Other: "Azure Scale Set Instances"},
 
 		// Category for the targets to appear in
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 
 		// Specify attributes shown in table columns and to be used for sorting
 		Table: discovery_kit_api.Table{
@@ -262,9 +263,7 @@ func GetAllScaleSetInstances(ctx context.Context, scaleSetVMsClient AzureVirtual
 				attributes[fmt.Sprintf("azure-scale-set-instance.label.%s", strings.ToLower(k))] = []string{common.GetStringValue(v)}
 			}
 			//scaleSet.Attributes
-			for k, v := range scaleSet.Attributes {
-				attributes[k] = v
-			}
+			maps.Copy(attributes, scaleSet.Attributes)
 
 			targets = append(targets, discovery_kit_api.Target{
 				Id:         common.GetStringValue(instance.ID),
@@ -298,11 +297,11 @@ func getKubernetesManagedClusters(ctx context.Context, client common.ArmResource
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
 	if subscriptionId != "" {
-		subscriptions = []*string{to.Ptr(subscriptionId)}
+		subscriptions = []*string{new(subscriptionId)}
 	}
 	results, err := client.Resources(ctx,
 		armresourcegraph.QueryRequest{
-			Query: to.Ptr("resources | where type =~ 'microsoft.containerservice/managedclusters' and tolower(properties.nodeResourceGroup) == \"" + nodeResourceGroup + "\" | project name, type, resourceGroup, location, tags, properties, subscriptionId"),
+			Query: new("resources | where type =~ 'microsoft.containerservice/managedclusters' and tolower(properties.nodeResourceGroup) == \"" + nodeResourceGroup + "\" | project name, type, resourceGroup, location, tags, properties, subscriptionId"),
 			Options: &armresourcegraph.QueryRequestOptions{
 				ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 			},
@@ -315,9 +314,9 @@ func getKubernetesManagedClusters(ctx context.Context, client common.ArmResource
 	} else {
 		log.Debug().Msgf("Kubernetes Services found: %s", strconv.FormatInt(*results.TotalRecords, 10))
 		kubernetesServices := make([]KubernetesService, 0)
-		if m, ok := results.Data.([]interface{}); ok {
+		if m, ok := results.Data.([]any); ok {
 			for _, r := range m {
-				items := r.(map[string]interface{})
+				items := r.(map[string]any)
 				attributes := make(map[string][]string)
 
 				for k, v := range common.GetMapValue(items, "tags") {
@@ -340,11 +339,11 @@ func getAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
 	if subscriptionId != "" {
-		subscriptions = []*string{to.Ptr(subscriptionId)}
+		subscriptions = []*string{new(subscriptionId)}
 	}
 	results, err := client.Resources(ctx,
 		armresourcegraph.QueryRequest{
-			Query: to.Ptr("Resources | where type =~ 'microsoft.compute/virtualmachinescalesets' | project name, type, ['id'], resourceGroup, location, tags, properties, subscriptionId"),
+			Query: new("Resources | where type =~ 'microsoft.compute/virtualmachinescalesets' | project name, type, ['id'], resourceGroup, location, tags, properties, subscriptionId"),
 			Options: &armresourcegraph.QueryRequestOptions{
 				ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 			},
@@ -357,9 +356,9 @@ func getAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]
 	} else {
 		log.Debug().Msgf("ScaleSets found: %s", strconv.FormatInt(*results.TotalRecords, 10))
 		scaleSets := make([]ScaleSet, 0)
-		if m, ok := results.Data.([]interface{}); ok {
+		if m, ok := results.Data.([]any); ok {
 			for _, r := range m {
-				items := r.(map[string]interface{})
+				items := r.(map[string]any)
 				attributes := make(map[string][]string)
 
 				for k, v := range common.GetMapValue(items, "tags") {

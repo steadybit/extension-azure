@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/steadybit/extension-azure/config"
-	"github.com/steadybit/extension-kit/extutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -29,7 +28,7 @@ func TestGetAllAzureVirtualMachines(t *testing.T) {
 	var totalRecords int64 = 1
 	mockedReturnValue := armresourcegraph.ClientResourcesResponse{
 		QueryResponse: armresourcegraph.QueryResponse{
-			TotalRecords: extutil.Ptr(totalRecords),
+			TotalRecords: new(totalRecords),
 			Data: []any{
 				map[string]any{
 					"name":           "myVm",

@@ -18,8 +18,8 @@ func TestBlockAction_Prepare_Success(t *testing.T) {
 				"network-security-group.id": {"/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg/providers/Microsoft.Network/networkSecurityGroups/test-nsg"},
 			},
 		},
-		Config: map[string]interface{}{
-			"hosts":     []interface{}{"192.168.1.1"},
+		Config: map[string]any{
+			"hosts":     []any{"192.168.1.1"},
 			"direction": string(BlockInbound),
 		},
 	}
@@ -42,8 +42,8 @@ func TestBlockAction_Prepare_MissingResourceId(t *testing.T) {
 		Target: &action_kit_api.Target{
 			Attributes: map[string][]string{},
 		},
-		Config: map[string]interface{}{
-			"hosts":     []interface{}{"192.168.1.1"},
+		Config: map[string]any{
+			"hosts":     []any{"192.168.1.1"},
 			"direction": string(BlockInbound),
 		},
 	}
@@ -64,8 +64,8 @@ func TestBlockAction_Prepare_InvalidResourceIdFormat(t *testing.T) {
 				"network-security-group.id": {"invalid-resource-id"},
 			},
 		},
-		Config: map[string]interface{}{
-			"hosts":     []interface{}{"192.168.1.1"},
+		Config: map[string]any{
+			"hosts":     []any{"192.168.1.1"},
 			"direction": string(BlockInbound),
 		},
 	}
@@ -106,8 +106,8 @@ func TestBlockHostsConfig_BlockDirection(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			request := action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
-					"hosts":     []interface{}{"192.168.1.1"},
+				Config: map[string]any{
+					"hosts":     []any{"192.168.1.1"},
 					"direction": tt.inputDirection,
 				},
 			}
@@ -129,42 +129,42 @@ func TestBlockHostsConfig_BlockDirection(t *testing.T) {
 func TestBlockAction_IPAddressHandling(t *testing.T) {
 	tests := []struct {
 		name          string
-		inputHosts    []interface{}
+		inputHosts    []any
 		expectError   bool
 		expectedCount int
 	}{
 		{
 			name:          "single IP address",
-			inputHosts:    []interface{}{"192.168.1.1"},
+			inputHosts:    []any{"192.168.1.1"},
 			expectError:   false,
 			expectedCount: 1,
 		},
 		{
 			name:          "multiple IP addresses",
-			inputHosts:    []interface{}{"192.168.1.1", "10.0.0.1", "172.16.0.1"},
+			inputHosts:    []any{"192.168.1.1", "10.0.0.1", "172.16.0.1"},
 			expectError:   false,
 			expectedCount: 3,
 		},
 		{
 			name:          "IPv6 address",
-			inputHosts:    []interface{}{"2001:db8::1"},
+			inputHosts:    []any{"2001:db8::1"},
 			expectError:   false,
 			expectedCount: 1,
 		},
 		{
 			name:          "mixed IPv4 and IPv6",
-			inputHosts:    []interface{}{"192.168.1.1", "2001:db8::1"},
+			inputHosts:    []any{"192.168.1.1", "2001:db8::1"},
 			expectError:   false,
 			expectedCount: 2,
 		},
 		{
 			name:        "invalid IP format",
-			inputHosts:  []interface{}{"not.an.ip.address"},
+			inputHosts:  []any{"not.an.ip.address"},
 			expectError: true,
 		},
 		{
 			name:        "invalid Domain",
-			inputHosts:  []interface{}{"not-a-domain"},
+			inputHosts:  []any{"not-a-domain"},
 			expectError: true,
 		},
 	}
@@ -172,7 +172,7 @@ func TestBlockAction_IPAddressHandling(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			request := action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"hosts":     tt.inputHosts,
 					"direction": string(BlockInbound),
 				},

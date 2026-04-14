@@ -8,7 +8,6 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/extension-azure/appconfig"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 func NewAzureFunctionExceptionAction() action_kit_sdk.Action[appconfig.AppConfigurationActionState] {
@@ -24,10 +23,10 @@ func getInjectExceptionDescription() action_kit_api.ActionDescription {
 		Version:         extbuild.GetSemverVersionStringOrUnknown(),
 		Label:           "Inject Exception",
 		Description:     "Injects exception into the function.",
-		Icon:            extutil.Ptr(string(targetIcon)),
+		Icon:            new(string(targetIcon)),
 		TargetSelection: &azureFunctionTargetSelection,
-		Technology:      extutil.Ptr("Azure"),
-		Category:        extutil.Ptr("Azure Function"),
+		Technology:      new("Azure"),
+		Category:        new("Azure Function"),
 		Kind:            action_kit_api.Attack,
 		TimeControl:     action_kit_api.TimeControlExternal,
 		Parameters: []action_kit_api.ActionParameter{
@@ -35,32 +34,32 @@ func getInjectExceptionDescription() action_kit_api.ActionDescription {
 				Label:        "Duration",
 				Name:         "duration",
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				Description:  extutil.Ptr("The duration of the attack."),
-				Advanced:     extutil.Ptr(false),
-				Required:     extutil.Ptr(true),
-				DefaultValue: extutil.Ptr("30s"),
-				Order:        extutil.Ptr(0),
+				Description:  new("The duration of the attack."),
+				Advanced:     new(false),
+				Required:     new(true),
+				DefaultValue: new("30s"),
+				Order:        new(0),
 			},
 			{
 				Name:         "rate",
 				Label:        "Rate",
-				Description:  extutil.Ptr("The rate of invocations to affect."),
+				Description:  new("The rate of invocations to affect."),
 				Type:         action_kit_api.ActionParameterTypePercentage,
-				DefaultValue: extutil.Ptr("100"),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(1),
+				DefaultValue: new("100"),
+				Required:     new(true),
+				Order:        new(1),
 			},
 			{
 				Name:         "exceptionMsg",
 				Label:        "Message",
-				Description:  extutil.Ptr("Message of the thrown exception."),
+				Description:  new("Message of the thrown exception."),
 				Type:         action_kit_api.ActionParameterTypeString,
-				DefaultValue: extutil.Ptr("Injected exception"),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(2),
+				DefaultValue: new("Injected exception"),
+				Required:     new(true),
+				Order:        new(2),
 			},
 		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
@@ -74,9 +73,9 @@ func injectException(request action_kit_api.PrepareActionRequestBody) (*appconfi
 	return &appconfig.FaultInjectionConfig{
 		Injection:                "Exception",
 		Rate:                     int(request.Config["rate"].(float64)),
-		ExceptionMsg:             extutil.Ptr(request.Config["exceptionMsg"].(string)),
+		ExceptionMsg:             new(request.Config["exceptionMsg"].(string)),
 		Enabled:                  true,
-		AppConfigurationEndpoint: extutil.Ptr(request.Target.Attributes["azure-function.app-configuration.endpoint"][0]),
-		AppConfigurationSuffix:   extutil.Ptr(request.Target.Attributes["steadybit.label"][0]),
+		AppConfigurationEndpoint: new(request.Target.Attributes["azure-function.app-configuration.endpoint"][0]),
+		AppConfigurationSuffix:   new(request.Target.Attributes["steadybit.label"][0]),
 	}, nil
 }

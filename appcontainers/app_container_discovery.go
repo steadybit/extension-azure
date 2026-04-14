@@ -19,7 +19,6 @@ import (
 	"github.com/steadybit/extension-azure/common"
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 type appContainerDiscovery struct {
@@ -42,9 +41,9 @@ func (a *appContainerDiscovery) DescribeTarget() discovery_kit_api.TargetDescrip
 	return discovery_kit_api.TargetDescription{
 		Id:       TargetIDContainerApp,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(targetIcon),
+		Icon:     new(targetIcon),
 		Label:    discovery_kit_api.PluralLabel{One: "Container App", Other: "Container Apps"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
@@ -99,7 +98,7 @@ func (a *appContainerDiscovery) Describe() discovery_kit_api.DiscoveryDescriptio
 	return discovery_kit_api.DiscoveryDescription{
 		Id: TargetIDContainerApp,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("30s"),
+			CallInterval: new("30s"),
 		},
 	}
 }
@@ -113,7 +112,7 @@ func (a *appContainerDiscovery) DiscoverTargets(ctx context.Context) ([]discover
 }
 
 // safeToString safely converts any value to string
-func safeToString(value interface{}) string {
+func safeToString(value any) string {
 	if value == nil {
 		return ""
 	}
@@ -141,7 +140,7 @@ func getAllContainerApps(ctx context.Context, client common.ArmResourceGraphApi)
 
 	var subscriptions []*string
 	if subscriptionId != "" {
-		subscriptions = []*string{to.Ptr(subscriptionId)}
+		subscriptions = []*string{new(subscriptionId)}
 	}
 
 	cred, err := common.ConnectionAzure()
@@ -162,7 +161,7 @@ func getAllContainerApps(ctx context.Context, client common.ArmResourceGraphApi)
 
 	results, err := client.Resources(ctx,
 		armresourcegraph.QueryRequest{
-			Query: to.Ptr(query),
+			Query: new(query),
 			Options: &armresourcegraph.QueryRequestOptions{
 				ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 			},
@@ -176,9 +175,9 @@ func getAllContainerApps(ctx context.Context, client common.ArmResourceGraphApi)
 
 	targets := make([]discovery_kit_api.Target, 0)
 
-	if m, ok := results.Data.([]interface{}); ok {
+	if m, ok := results.Data.([]any); ok {
 		for _, r := range m {
-			items := r.(map[string]interface{})
+			items := r.(map[string]any)
 			attributes := make(map[string][]string)
 
 			// Add basic attributes
@@ -204,9 +203,9 @@ func getAllContainerApps(ctx context.Context, client common.ArmResourceGraphApi)
 			}
 
 			// Add configuration information
-			if configuration, ok := properties["configuration"].(map[string]interface{}); ok {
+			if configuration, ok := properties["configuration"].(map[string]any); ok {
 				// Add ingress information
-				if ingress, ok := configuration["ingress"].(map[string]interface{}); ok {
+				if ingress, ok := configuration["ingress"].(map[string]any); ok {
 					if fqdn, ok := ingress["fqdn"]; ok && fqdn != nil {
 						attributes["container-app.ingress.fqdn"] = []string{safeToString(fqdn)}
 					}
@@ -225,9 +224,9 @@ func getAllContainerApps(ctx context.Context, client common.ArmResourceGraphApi)
 			}
 
 			// Add template information
-			if template, ok := properties["template"].(map[string]interface{}); ok {
+			if template, ok := properties["template"].(map[string]any); ok {
 				// Add scale information
-				if scale, ok := template["scale"].(map[string]interface{}); ok {
+				if scale, ok := template["scale"].(map[string]any); ok {
 					if minReplicas, ok := scale["minReplicas"]; ok {
 						attributes["container-app.scale.min-replicas"] = []string{safeToString(minReplicas)}
 					}
@@ -237,10 +236,10 @@ func getAllContainerApps(ctx context.Context, client common.ArmResourceGraphApi)
 				}
 
 				// Add container information
-				if containers, ok := template["containers"].([]interface{}); ok && len(containers) > 0 {
+				if containers, ok := template["containers"].([]any); ok && len(containers) > 0 {
 					containerNames := make([]string, 0, len(containers))
 					for _, container := range containers {
-						if containerMap, ok := container.(map[string]interface{}); ok {
+						if containerMap, ok := container.(map[string]any); ok {
 							if name, ok := containerMap["name"]; ok {
 								containerNames = append(containerNames, safeToString(name))
 							}

@@ -15,7 +15,6 @@ import (
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/extension-azure/common"
 	extension_kit "github.com/steadybit/extension-kit"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 type AppConfigurationAction struct {
@@ -56,21 +55,21 @@ func (config *FaultInjectionConfig) ToAppConfigKeyValuePairs(suffix string) map[
 	appConfigMapping := make(map[string]*string)
 
 	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Injection", suffix)] = &config.Injection
-	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", suffix)] = extutil.Ptr(fmt.Sprint(config.Rate))
-	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", suffix)] = extutil.Ptr(fmt.Sprint(config.Enabled))
+	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Rate", suffix)] = new(fmt.Sprint(config.Rate))
+	appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", suffix)] = new(fmt.Sprint(config.Enabled))
 
 	if config.StatusCode != nil {
-		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:StatusCode", suffix)] = extutil.Ptr(fmt.Sprint(*config.StatusCode))
+		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:StatusCode", suffix)] = new(fmt.Sprint(*config.StatusCode))
 	}
 
 	if config.MinLatency != nil {
 		log.Debug().Msgf("Setting minimum latency to %d ms", config.MinLatency.Milliseconds())
-		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MinimumLatency", suffix)] = extutil.Ptr(fmt.Sprint(config.MinLatency.Milliseconds()))
+		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MinimumLatency", suffix)] = new(fmt.Sprint(config.MinLatency.Milliseconds()))
 	}
 
 	if config.MaxLatency != nil {
 		log.Debug().Msgf("Setting maximum latency to %d ms", config.MaxLatency.Milliseconds())
-		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MaximumLatency", suffix)] = extutil.Ptr(fmt.Sprint(config.MaxLatency.Milliseconds()))
+		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:Delay:MaximumLatency", suffix)] = new(fmt.Sprint(config.MaxLatency.Milliseconds()))
 	}
 
 	if config.ExceptionMsg != nil {
@@ -78,7 +77,7 @@ func (config *FaultInjectionConfig) ToAppConfigKeyValuePairs(suffix string) map[
 	}
 
 	if config.DiskSpace != nil {
-		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:FillDisk:Megabytes", suffix)] = extutil.Ptr(fmt.Sprint(*config.DiskSpace))
+		appConfigMapping[fmt.Sprintf("Steadybit:FaultInjection:%s:FillDisk:Megabytes", suffix)] = new(fmt.Sprint(*config.DiskSpace))
 	}
 
 	return appConfigMapping
@@ -166,8 +165,8 @@ func (a *AppConfigurationAction) Start(ctx context.Context, state *AppConfigurat
 		return nil, extension_kit.ToError("Failed to create Azure App Configuration client.", err)
 	}
 
-	client.SetSetting(ctx, fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", *state.Config.AppConfigurationSuffix), extutil.Ptr("Yes"), nil)
-	client.SetSetting(ctx, fmt.Sprintf("Steadybit:FaultInjection:%s:Revision", *state.Config.AppConfigurationSuffix), extutil.Ptr(uuid.New().String()), nil)
+	client.SetSetting(ctx, fmt.Sprintf("Steadybit:FaultInjection:%s:Enabled", *state.Config.AppConfigurationSuffix), new("Yes"), nil)
+	client.SetSetting(ctx, fmt.Sprintf("Steadybit:FaultInjection:%s:Revision", *state.Config.AppConfigurationSuffix), new(uuid.New().String()), nil)
 
 	for key, value := range state.Config.ToAppConfigKeyValuePairs(*state.Config.AppConfigurationSuffix) {
 		if _, err := client.SetSetting(ctx, key, value, nil); err != nil {
@@ -200,7 +199,7 @@ func (a *AppConfigurationAction) Stop(ctx context.Context, state *AppConfigurati
 
 	filter := *state.Config.AppConfigurationSuffix
 	pager := client.NewListSettingsPager(azappconfig.SettingSelector{
-		KeyFilter: extutil.Ptr(fmt.Sprintf("Steadybit:FaultInjection:%s:*", filter)),
+		KeyFilter: new(fmt.Sprintf("Steadybit:FaultInjection:%s:*", filter)),
 	}, &azappconfig.ListSettingsOptions{})
 
 	var keysToDelete []string

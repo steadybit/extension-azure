@@ -40,9 +40,9 @@ func (a *azureFunctionDiscovery) DescribeTarget() discovery_kit_api.TargetDescri
 	return discovery_kit_api.TargetDescription{
 		Id:       TargetIDAzureFunction,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(targetIcon),
+		Icon:     new(targetIcon),
 		Label:    discovery_kit_api.PluralLabel{One: "Azure Function", Other: "Azure Functions"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
@@ -90,7 +90,7 @@ func (a *azureFunctionDiscovery) Describe() discovery_kit_api.DiscoveryDescripti
 	return discovery_kit_api.DiscoveryDescription{
 		Id: TargetIDAzureFunction,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("30s"),
+			CallInterval: new("30s"),
 		},
 	}
 }
@@ -119,11 +119,11 @@ func getAllAzureFunctions(ctx context.Context, client common.ArmResourceGraphApi
 
 	var subscriptions []*string
 	if subscriptionId != "" {
-		subscriptions = []*string{to.Ptr(subscriptionId)}
+		subscriptions = []*string{new(subscriptionId)}
 	}
 	results, err := client.Resources(ctx,
 		armresourcegraph.QueryRequest{
-			Query: to.Ptr("resources | where type =~ 'microsoft.web/sites' and kind has 'functionapp' | project name, type, ['id'], resourceGroup, location, tags, properties, subscriptionId"),
+			Query: new("resources | where type =~ 'microsoft.web/sites' and kind has 'functionapp' | project name, type, ['id'], resourceGroup, location, tags, properties, subscriptionId"),
 			Options: &armresourcegraph.QueryRequestOptions{
 				ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 			},
@@ -135,9 +135,9 @@ func getAllAzureFunctions(ctx context.Context, client common.ArmResourceGraphApi
 		return nil, err
 	} else {
 		targets := make([]discovery_kit_api.Target, 0)
-		if m, ok := results.Data.([]interface{}); ok {
+		if m, ok := results.Data.([]any); ok {
 			for _, r := range m {
-				items := r.(map[string]interface{})
+				items := r.(map[string]any)
 				attributes := make(map[string][]string)
 
 				// Add basic attributes

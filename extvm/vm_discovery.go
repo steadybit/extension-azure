@@ -44,7 +44,7 @@ func (d *vmDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: TargetIDVM,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("30s"),
+			CallInterval: new("30s"),
 		},
 	}
 }
@@ -53,13 +53,13 @@ func (d *vmDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:      TargetIDVM,
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(targetIcon),
+		Icon:    new(targetIcon),
 
 		// Labels used in the UI
 		Label: discovery_kit_api.PluralLabel{One: "Azure Virtual Machine", Other: "Azure Virtual Machines"},
 
 		// Category for the targets to appear in
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 
 		// Specify attributes shown in table columns and to be used for sorting
 		Table: discovery_kit_api.Table{
@@ -190,11 +190,11 @@ func getAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
 	if subscriptionId != "" {
-		subscriptions = []*string{to.Ptr(subscriptionId)}
+		subscriptions = []*string{new(subscriptionId)}
 	}
 	results, err := client.Resources(ctx,
 		armresourcegraph.QueryRequest{
-			Query: to.Ptr("Resources | where type =~ 'Microsoft.Compute/virtualMachines' | project name, type, resourceGroup, location, tags, properties, subscriptionId"),
+			Query: new("Resources | where type =~ 'Microsoft.Compute/virtualMachines' | project name, type, resourceGroup, location, tags, properties, subscriptionId"),
 			Options: &armresourcegraph.QueryRequestOptions{
 				ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 			},
@@ -208,9 +208,9 @@ func getAllVirtualMachines(ctx context.Context, client common.ArmResourceGraphAp
 		// Print the obtained query results
 		log.Debug().Msgf("Virtual Machines found: %s", strconv.FormatInt(*results.TotalRecords, 10))
 		targets := make([]discovery_kit_api.Target, 0)
-		if m, ok := results.Data.([]interface{}); ok {
+		if m, ok := results.Data.([]any); ok {
 			for _, r := range m {
-				items := r.(map[string]interface{})
+				items := r.(map[string]any)
 				attributes := make(map[string][]string)
 
 				properties := common.GetMapValue(items, "properties")
@@ -320,7 +320,7 @@ func getToContainerEnrichmentRule() discovery_kit_api.TargetEnrichmentRule {
 	}
 }
 
-func getPropertyValue(properties map[string]interface{}, key string) string {
+func getPropertyValue(properties map[string]any, key string) string {
 	if value, ok := properties[key]; ok {
 		return value.(string)
 	}
