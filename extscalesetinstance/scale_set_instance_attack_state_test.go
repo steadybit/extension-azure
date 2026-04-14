@@ -26,10 +26,10 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 		{
 			name: "Should return config",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"action": "power-off",
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure-scale-set.name":        {"my-scaleSet"},
 						"azure.subscription.id":       {"42"},
@@ -49,10 +49,10 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if subscription is missing",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"action": "power-off",
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure-scale-set.name":        {"my-scaleSet"},
 						"azure-scale-set-instance.id": {"InstanceID0815"},
@@ -65,10 +65,10 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if instanceId is missing",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"action": "power-off",
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure-scale-set.name":      {"my-scaleSet"},
 						"azure.resource-group.name": {"rg0815"},
@@ -81,10 +81,10 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if vm name is missing",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"action": "power-off",
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure.subscription.id":       {"42"},
 						"azure-scale-set-instance.id": {"InstanceID0815"},
@@ -97,10 +97,10 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if resource-group is missing",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{
+				Config: map[string]any{
 					"action": "power-off",
 				},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure-scale-set.name":        {"my-scaleSet"},
 						"azure-scale-set-instance.id": {"InstanceID0815"},
@@ -113,8 +113,8 @@ func TestAzureScaleSetInstanceAction_Prepare(t *testing.T) {
 		{
 			name: "Should return error if action is missing",
 			requestBody: extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-				Config: map[string]interface{}{},
-				Target: extutil.Ptr(action_kit_api.Target{
+				Config: map[string]any{},
+				Target: new(action_kit_api.Target{
 					Attributes: map[string][]string{
 						"azure-scale-set.name":        {"my-scaleSet"},
 						"azure-scale-set-instance.id": {"InstanceID0815"},

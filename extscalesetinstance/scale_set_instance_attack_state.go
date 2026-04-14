@@ -14,7 +14,6 @@ import (
 	"github.com/steadybit/extension-azure/common"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 type scaleSetInstanceAction struct {
@@ -53,39 +52,39 @@ func (e *scaleSetInstanceAction) Describe() action_kit_api.ActionDescription {
 		Label:       "Change Virtual Machine State",
 		Description: "Restart, start, stop, deallocate or delete Azure scale set instances",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(targetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(targetIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: TargetIDScaleSetInstance,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "cluster name",
-					Description: extutil.Ptr("Find azure scale set instance by cluster name"),
+					Description: new("Find azure scale set instance by cluster name"),
 					Query:       "azure-containerservice-managed-cluster.name=\"\"",
 				},
 				{
 					Label:       "instance name",
-					Description: extutil.Ptr("Find azure scale set instance by name"),
+					Description: new("Find azure scale set instance by name"),
 					Query:       "azure-scale-set-instance.name=\"\"",
 				},
 				{
 					Label:       "scaleset name",
-					Description: extutil.Ptr("Find azure scale set instance by scale set name"),
+					Description: new("Find azure scale set instance by scale set name"),
 					Query:       "azure-scale-set.name=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("Azure"),
-		Category:    extutil.Ptr("Virtual Machines"),
+		Technology:  new("Azure"),
+		Category:    new("Virtual Machines"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:        "action",
 				Label:       "Action",
-				Description: extutil.Ptr("The kind of state change operation to execute for the azure scale set instances"),
-				Required:    extutil.Ptr(true),
+				Description: new("The kind of state change operation to execute for the azure scale set instances"),
+				Required:    new(true),
 				Type:        action_kit_api.ActionParameterTypeString,
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{
 						Label: "Restart",
 						Value: "restart",

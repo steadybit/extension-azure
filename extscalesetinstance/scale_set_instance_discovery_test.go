@@ -51,7 +51,7 @@ func TestGetAllAzureScaleSets(t *testing.T) {
 	var totalRecords int64 = 1
 	mockedReturnValue := armresourcegraph.ClientResourcesResponse{
 		QueryResponse: armresourcegraph.QueryResponse{
-			TotalRecords: extutil.Ptr(totalRecords),
+			TotalRecords: new(totalRecords),
 			Data: []any{
 				map[string]any{
 					"id":             "myScalesetId",
@@ -95,29 +95,29 @@ func TestGetAllAzureScaleSetInstances(t *testing.T) {
 	mockedReturnValue := armcompute.VirtualMachineScaleSetVMsClientListResponse{
 		VirtualMachineScaleSetVMListResult: armcompute.VirtualMachineScaleSetVMListResult{
 			Value: []*armcompute.VirtualMachineScaleSetVM{{
-				Location:   extutil.Ptr("westeurope"),
-				Tags:       map[string]*string{"tag1": extutil.Ptr("Value1"), "tag2": extutil.Ptr("Value2")},
-				ID:         extutil.Ptr("/subscriptions/42/resourceGroups/rg-1/providers/Microsoft.Compute/virtualMachineScaleSets/myScaleSet/virtualMachines/myVm"),
-				InstanceID: extutil.Ptr("0"),
-				Name:       extutil.Ptr("myVm"),
-				Zones:      []*string{extutil.Ptr("1"), extutil.Ptr("2")},
+				Location:   new("westeurope"),
+				Tags:       map[string]*string{"tag1": new("Value1"), "tag2": new("Value2")},
+				ID:         new("/subscriptions/42/resourceGroups/rg-1/providers/Microsoft.Compute/virtualMachineScaleSets/myScaleSet/virtualMachines/myVm"),
+				InstanceID: new("0"),
+				Name:       new("myVm"),
+				Zones:      []*string{new("1"), new("2")},
 				Properties: &armcompute.VirtualMachineScaleSetVMProperties{
 					OSProfile: &armcompute.OSProfile{
-						ComputerName: extutil.Ptr("dev-demo"),
+						ComputerName: new("dev-demo"),
 					},
 					HardwareProfile: &armcompute.HardwareProfile{
 						VMSize: extutil.Ptr(armcompute.VirtualMachineSizeTypesBasicA0),
 					},
 					InstanceView: &armcompute.VirtualMachineScaleSetVMInstanceView{
-						OSName:    extutil.Ptr("Ubuntu 18.04.5 LTS"),
-						OSVersion: extutil.Ptr("18.04.5 LTS"),
+						OSName:    new("Ubuntu 18.04.5 LTS"),
+						OSVersion: new("18.04.5 LTS"),
 					},
 					StorageProfile: &armcompute.StorageProfile{
 						OSDisk: &armcompute.OSDisk{
 							OSType: extutil.Ptr(armcompute.OperatingSystemTypesLinux),
 						},
 					},
-					ProvisioningState: extutil.Ptr("Succeeded"),
+					ProvisioningState: new("Succeeded"),
 				},
 			},
 			},

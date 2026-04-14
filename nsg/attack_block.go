@@ -59,10 +59,10 @@ func getInjectBlockDescription() action_kit_api.ActionDescription {
 		Version:         extbuild.GetSemverVersionStringOrUnknown(),
 		Label:           "Block Hosts",
 		Description:     "Block specific inbound or outbound traffic for specific hosts.",
-		Icon:            extutil.Ptr(string(targetIcon)),
+		Icon:            new(string(targetIcon)),
 		TargetSelection: &networkSecurityGroupTargetSelection,
-		Technology:      extutil.Ptr("Azure"),
-		Category:        extutil.Ptr("Network Security Groups"),
+		Technology:      new("Azure"),
+		Category:        new("Network Security Groups"),
 		Kind:            action_kit_api.Attack,
 		TimeControl:     action_kit_api.TimeControlExternal,
 		Parameters: []action_kit_api.ActionParameter{
@@ -70,30 +70,30 @@ func getInjectBlockDescription() action_kit_api.ActionDescription {
 				Label:        "Duration",
 				Name:         "duration",
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				Description:  extutil.Ptr("The duration of the attack."),
-				Advanced:     extutil.Ptr(false),
-				Required:     extutil.Ptr(true),
-				DefaultValue: extutil.Ptr("30s"),
-				Order:        extutil.Ptr(0),
+				Description:  new("The duration of the attack."),
+				Advanced:     new(false),
+				Required:     new(true),
+				DefaultValue: new("30s"),
+				Order:        new(0),
 			},
 			{
 				Name:         "hosts",
 				Label:        "Hosts To Block",
-				Description:  extutil.Ptr("Hosts to block from executing the function."),
+				Description:  new("Hosts to block from executing the function."),
 				Type:         action_kit_api.ActionParameterTypeStringArray,
-				DefaultValue: extutil.Ptr(""),
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(2),
+				DefaultValue: new(""),
+				Required:     new(true),
+				Order:        new(2),
 			},
 			{
 				Name:         "direction",
 				Label:        "Block direction",
-				Description:  extutil.Ptr("Direction in which to block traffic"),
+				Description:  new("Direction in which to block traffic"),
 				Type:         action_kit_api.ActionParameterTypeString,
-				Required:     extutil.Ptr(true),
-				Order:        extutil.Ptr(3),
-				DefaultValue: extutil.Ptr(string(BlockOutbound)),
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				Required:     new(true),
+				Order:        new(3),
+				DefaultValue: new(string(BlockOutbound)),
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{
 						Label: "Block inbound traffic",
 						Value: string(BlockInbound),
@@ -105,12 +105,12 @@ func getInjectBlockDescription() action_kit_api.ActionDescription {
 				}),
 			},
 		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
 func injectBlock(request action_kit_api.PrepareActionRequestBody) (*BlockHostsConfig, error) {
-	hostsInterface := request.Config["hosts"].([]interface{})
+	hostsInterface := request.Config["hosts"].([]any)
 	ipHosts := make([]string, 0)
 	hosts := make([]string, len(hostsInterface))
 	for i, h := range hostsInterface {
@@ -146,7 +146,7 @@ func injectBlock(request action_kit_api.PrepareActionRequestBody) (*BlockHostsCo
 	}
 
 	return &BlockHostsConfig{
-		BlockedIPs:     extutil.Ptr(ipHosts),
+		BlockedIPs:     new(ipHosts),
 		BlockDirection: blockDirection,
 	}, nil
 }
@@ -236,11 +236,11 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 	for i, ip := range *state.Config.BlockedIPs {
 		var sourcePrefix, destinationPrefix *string
 		if state.Config.BlockDirection == armnetwork.SecurityRuleDirectionInbound {
-			sourcePrefix = to.Ptr(ip)
-			destinationPrefix = to.Ptr("*")
+			sourcePrefix = new(ip)
+			destinationPrefix = new("*")
 		} else {
-			sourcePrefix = to.Ptr("*")
-			destinationPrefix = to.Ptr(ip)
+			sourcePrefix = new("*")
+			destinationPrefix = new(ip)
 		}
 
 		priority := 100 + int32(i)
@@ -256,14 +256,14 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 			armnetwork.SecurityRule{
 				Properties: &armnetwork.SecurityRulePropertiesFormat{
 					Protocol:                 to.Ptr(armnetwork.SecurityRuleProtocolAsterisk),
-					SourcePortRange:          to.Ptr("*"),
-					DestinationPortRange:     to.Ptr("*"),
+					SourcePortRange:          new("*"),
+					DestinationPortRange:     new("*"),
 					SourceAddressPrefix:      sourcePrefix,
 					DestinationAddressPrefix: destinationPrefix,
 					Access:                   to.Ptr(armnetwork.SecurityRuleAccessDeny),
-					Direction:                to.Ptr(state.Config.BlockDirection),
-					Priority:                 to.Ptr(priority),
-					Description:              to.Ptr("Blocked by steadybit"),
+					Direction:                new(state.Config.BlockDirection),
+					Priority:                 new(priority),
+					Description:              new("Blocked by steadybit"),
 				},
 			}, nil)
 

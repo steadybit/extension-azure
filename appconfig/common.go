@@ -2,7 +2,6 @@ package appconfig
 
 import (
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 const (
@@ -13,7 +12,7 @@ const (
 var (
 	azureFunctionTargetSelection = action_kit_api.TargetSelection{
 		TargetType: TargetIDAzureAppConfiguration,
-		SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+		SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 			{
 				Label: "function name",
 				Query: "app-configuration.resource.id=\"\"",

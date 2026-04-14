@@ -14,7 +14,6 @@ import (
 	"github.com/steadybit/extension-azure/common"
 	extension_kit "github.com/steadybit/extension-kit"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 type virtualMachineStateAction struct {
@@ -52,34 +51,34 @@ func (e *virtualMachineStateAction) Describe() action_kit_api.ActionDescription 
 		Label:       "Change Virtual Machine State",
 		Description: "Restart, stop, deallocate or delete Azure virtual machines",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(targetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:        new(targetIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: TargetIDVM,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "vm-name",
-					Description: extutil.Ptr("Find azure virtual machine by name"),
+					Description: new("Find azure virtual machine by name"),
 					Query:       "azure-vm.vm.name=\"\"",
 				},
 				{
 					Label:       "vm-id",
-					Description: extutil.Ptr("Find azure virtual machine by vm-id"),
+					Description: new("Find azure virtual machine by vm-id"),
 					Query:       "azure-vm.vm.id=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("Azure"),
-		Category:    extutil.Ptr("Virtual Machines"),
+		Technology:  new("Azure"),
+		Category:    new("Virtual Machines"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:        "action",
 				Label:       "Action",
-				Description: extutil.Ptr("The kind of state change operation to execute for the azure virtual machines"),
-				Required:    extutil.Ptr(true),
+				Description: new("The kind of state change operation to execute for the azure virtual machines"),
+				Required:    new(true),
 				Type:        action_kit_api.ActionParameterTypeString,
-				Options: extutil.Ptr([]action_kit_api.ParameterOption{
+				Options: new([]action_kit_api.ParameterOption{
 					action_kit_api.ExplicitParameterOption{
 						Label: "Restart",
 						Value: "restart",
