@@ -150,6 +150,20 @@ discovery:
     azureFunction: false
     networkSecurityGroup: false
     containerApp: false
+    # New target types added in feat/expand-azure-targets-and-attacks. Default to false to keep the smallest IAM/cost
+    # footprint for users upgrading from a previous version. Enable explicitly the ones you want to discover.
+    aksCluster: false
+    aksNodePool: false
+    scaleSet: false
+    managedDisk: false
+    natGateway: false
+    cosmosDb: false
+    eventGrid: false
+    serviceBus: false
+    storageQueue: false
+    loadBalancer: false
+    applicationGateway: false
+    apiManagement: false
   attributes:
     excludes:
       # discovery.attributes.excludes.vm -- List of attributes to exclude from VM discovery.
@@ -162,3 +176,16 @@ discovery:
       azureFunction: []
       # discovery.attributes.excludes.containerApp -- List of attributes to exclude from azureFunction discovery.
       containerApp: []
+      # New per-module excludes for the modules added in feat/expand-azure-targets-and-attacks.
+      aksCluster: []
+      aksNodePool: []
+      scaleSet: []
+      managedDisk: []
+      natGateway: []
+      cosmosDb: []
+      eventGrid: []
+      serviceBus: []
+      storageQueue: []
+      loadBalancer: []
+      applicationGateway: []
+      apiManagement: []

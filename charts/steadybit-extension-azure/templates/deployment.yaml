@@ -122,6 +122,30 @@ spec:
               value: "{{ if .Values.discovery.enable.networkSecurityGroup }}true{{ else }}false{{ end }}"
             - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
               value: "{{ if .Values.discovery.enable.azureFunction }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+              value: "{{ if .Values.discovery.enable.aksCluster }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+              value: "{{ if .Values.discovery.enable.aksNodePool }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+              value: "{{ if .Values.discovery.enable.scaleSet }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+              value: "{{ if .Values.discovery.enable.managedDisk }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+              value: "{{ if .Values.discovery.enable.natGateway }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+              value: "{{ if .Values.discovery.enable.cosmosDb }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+              value: "{{ if .Values.discovery.enable.eventGrid }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+              value: "{{ if .Values.discovery.enable.serviceBus }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+              value: "{{ if .Values.discovery.enable.storageQueue }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+              value: "{{ if .Values.discovery.enable.loadBalancer }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+              value: "{{ if .Values.discovery.enable.applicationGateway }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+              value: "{{ if .Values.discovery.enable.apiManagement }}true{{ else }}false{{ end }}"
             {{- include "extensionlib.deployment.env" (list .) | nindent 12 }}
             {{- with .Values.extraEnv }}
               {{- toYaml . | nindent 12 }}

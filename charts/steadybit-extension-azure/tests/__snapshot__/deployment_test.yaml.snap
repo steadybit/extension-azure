@@ -78,6 +78,30 @@ manifest should match snapshot using podAnnotations and Labels:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -200,6 +224,30 @@ manifest should match snapshot with TLS:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
                   value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
@@ -335,6 +383,30 @@ manifest should match snapshot with azure certificates vars:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -457,6 +529,30 @@ manifest should match snapshot with azure secrets vars:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
                   value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
@@ -581,6 +677,30 @@ manifest should match snapshot with custom image registry:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -703,6 +823,30 @@ manifest should match snapshot with extra env vars:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
                   value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
@@ -836,6 +980,30 @@ manifest should match snapshot with extra labels:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -958,6 +1126,30 @@ manifest should match snapshot with global image pull secrets:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
                   value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
@@ -1084,6 +1276,30 @@ manifest should match snapshot with global image registry:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -1206,6 +1422,30 @@ manifest should match snapshot with global priority class:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
                   value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
@@ -1330,6 +1570,30 @@ manifest should match snapshot with image pull secrets:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
                   value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
@@ -1456,6 +1720,30 @@ manifest should match snapshot with legacy image name containing registry:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -1578,6 +1866,30 @@ manifest should match snapshot with mutual TLS:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
                   value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
@@ -1722,6 +2034,30 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -1851,6 +2187,30 @@ manifest should match snapshot with podSecurityContext:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -1975,6 +2335,30 @@ manifest should match snapshot with priority class:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
+                  value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
                 - name: STEADYBIT_LOG_FORMAT
@@ -2098,6 +2482,30 @@ manifest should match snapshot without TLS:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NETWORK_SECURITY_GROUPS
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AZURE_FUNCTIONS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_CLUSTER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_AKS_NODE_POOL
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SCALE_SET
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_MANAGED_DISK
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_NAT_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_COSMOS_DB
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_APPLICATION_GATEWAY
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_API_MANAGEMENT
                   value: "false"
                 - name: STEADYBIT_LOG_LEVEL
                   value: INFO
