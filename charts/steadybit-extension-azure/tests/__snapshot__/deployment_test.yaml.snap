@@ -94,6 +94,10 @@ manifest should match snapshot using podAnnotations and Labels:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
@@ -240,6 +244,10 @@ manifest should match snapshot with TLS:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
@@ -399,6 +407,10 @@ manifest should match snapshot with azure certificates vars:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
@@ -545,6 +557,10 @@ manifest should match snapshot with azure secrets vars:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
@@ -693,6 +709,10 @@ manifest should match snapshot with custom image registry:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
@@ -839,6 +859,10 @@ manifest should match snapshot with extra env vars:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
@@ -996,6 +1020,10 @@ manifest should match snapshot with extra labels:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
@@ -1142,6 +1170,10 @@ manifest should match snapshot with global image pull secrets:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
@@ -1292,6 +1324,10 @@ manifest should match snapshot with global image registry:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
@@ -1438,6 +1474,10 @@ manifest should match snapshot with global priority class:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
@@ -1586,6 +1626,10 @@ manifest should match snapshot with image pull secrets:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
@@ -1736,6 +1780,10 @@ manifest should match snapshot with legacy image name containing registry:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
@@ -1882,6 +1930,10 @@ manifest should match snapshot with mutual TLS:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
@@ -2050,6 +2102,10 @@ manifest should match snapshot with mutual TLS using containerPaths:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
@@ -2203,6 +2259,10 @@ manifest should match snapshot with podSecurityContext:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
@@ -2351,6 +2411,10 @@ manifest should match snapshot with priority class:
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
                   value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+                  value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER
@@ -2498,6 +2562,10 @@ manifest should match snapshot without TLS:
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_EVENT_GRID
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+                  value: "false"
+                - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
                   value: "false"
                 - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
                   value: "false"

@@ -71,9 +71,11 @@ func RegisterHandlers() error {
 	}
 	if configSpec.DiscoveryEnableNatGateway {
 		discovery_kit_sdk.Register(extnatgateway.NewNatGatewayDiscovery())
+		action_kit_sdk.RegisterAction(extnatgateway.NewNatGatewayDisassociateAction())
 	}
 	if configSpec.DiscoveryEnableCosmosDb {
 		discovery_kit_sdk.Register(extcosmosdb.NewAccountDiscovery())
+		action_kit_sdk.RegisterAction(extcosmosdb.NewCosmosDbFailoverAction())
 	}
 	if configSpec.DiscoveryEnableEventGrid {
 		discovery_kit_sdk.Register(exteventgrid.NewTopicDiscovery())
@@ -81,6 +83,14 @@ func RegisterHandlers() error {
 	}
 	if configSpec.DiscoveryEnableServiceBus {
 		discovery_kit_sdk.Register(extservicebus.NewNamespaceDiscovery())
+	}
+	if configSpec.DiscoveryEnableServiceBusQueue {
+		discovery_kit_sdk.Register(extservicebus.NewQueueDiscovery())
+		action_kit_sdk.RegisterAction(extservicebus.NewQueueDisableAction())
+	}
+	if configSpec.DiscoveryEnableServiceBusTopic {
+		discovery_kit_sdk.Register(extservicebus.NewTopicDiscovery())
+		action_kit_sdk.RegisterAction(extservicebus.NewTopicDisableAction())
 	}
 	if configSpec.DiscoveryEnableStorageQueue {
 		discovery_kit_sdk.Register(extstoragequeue.NewStorageAccountDiscovery())

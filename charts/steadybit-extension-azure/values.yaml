@@ -160,6 +160,8 @@ discovery:
     cosmosDb: false
     eventGrid: false
     serviceBus: false
+    serviceBusQueue: false
+    serviceBusTopic: false
     storageQueue: false
     loadBalancer: false
     applicationGateway: false

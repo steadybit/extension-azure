@@ -138,6 +138,10 @@ spec:
               value: "{{ if .Values.discovery.enable.eventGrid }}true{{ else }}false{{ end }}"
             - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS
               value: "{{ if .Values.discovery.enable.serviceBus }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_QUEUE
+              value: "{{ if .Values.discovery.enable.serviceBusQueue }}true{{ else }}false{{ end }}"
+            - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_SERVICE_BUS_TOPIC
+              value: "{{ if .Values.discovery.enable.serviceBusTopic }}true{{ else }}false{{ end }}"
             - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_STORAGE_QUEUE
               value: "{{ if .Values.discovery.enable.storageQueue }}true{{ else }}false{{ end }}"
             - name: STEADYBIT_EXTENSION_DISCOVERY_ENABLE_LOAD_BALANCER

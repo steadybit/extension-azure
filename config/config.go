@@ -38,6 +38,8 @@ type Specification struct {
 	DiscoveryEnableCosmosDb           bool `json:"discoveryEnableCosmosDb" split_words:"true" required:"false" default:"false"`
 	DiscoveryEnableEventGrid          bool `json:"discoveryEnableEventGrid" split_words:"true" required:"false" default:"false"`
 	DiscoveryEnableServiceBus         bool `json:"discoveryEnableServiceBus" split_words:"true" required:"false" default:"false"`
+	DiscoveryEnableServiceBusQueue    bool `json:"discoveryEnableServiceBusQueue" split_words:"true" required:"false" default:"false"`
+	DiscoveryEnableServiceBusTopic    bool `json:"discoveryEnableServiceBusTopic" split_words:"true" required:"false" default:"false"`
 	DiscoveryEnableStorageQueue       bool `json:"discoveryEnableStorageQueue" split_words:"true" required:"false" default:"false"`
 	DiscoveryEnableLoadBalancer       bool `json:"discoveryEnableLoadBalancer" split_words:"true" required:"false" default:"false"`
 	DiscoveryEnableApplicationGateway bool `json:"discoveryEnableApplicationGateway" split_words:"true" required:"false" default:"false"`
