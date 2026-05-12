@@ -88,6 +88,7 @@ func (d *nodePoolDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDe
 		{Attribute: "azure.aks.nodepool.taints", Label: discovery_kit_api.PluralLabel{One: "AKS node pool taint", Other: "AKS node pool taints"}},
 		{Attribute: "azure.aks.nodepool.upgrade-settings.max-surge", Label: discovery_kit_api.PluralLabel{One: "AKS node pool upgrade max surge", Other: "AKS node pool upgrade max surges"}},
 		{Attribute: "azure.aks.nodepool.provisioning-state", Label: discovery_kit_api.PluralLabel{One: "AKS node pool provisioning state", Other: "AKS node pool provisioning states"}},
+		{Attribute: "k8s.cluster-name", Label: discovery_kit_api.PluralLabel{One: "Kubernetes cluster name", Other: "Kubernetes cluster names"}},
 	}
 }
 
@@ -152,6 +153,9 @@ func toNodePoolTarget(items map[string]any) discovery_kit_api.Target {
 	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
 	attributes["azure.location"] = []string{stringFromMap(items, "location")}
 	attributes["azure.aks.cluster.name"] = []string{clusterName}
+	// Surface the cluster-wide k8s.cluster-name attribute so extension-kubernetes's targets can be joined
+	// to this node pool via enrichment (matches the AKS cluster target's k8s.cluster-name).
+	attributes["k8s.cluster-name"] = []string{clusterName}
 	attributes["azure.aks.nodepool.name"] = []string{poolName}
 
 	if v := stringFromMap(properties, "mode"); v != "" {

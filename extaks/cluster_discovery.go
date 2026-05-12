@@ -28,9 +28,43 @@ import (
 type clusterDiscovery struct{}
 
 var (
-	_ discovery_kit_sdk.TargetDescriber    = (*clusterDiscovery)(nil)
-	_ discovery_kit_sdk.AttributeDescriber = (*clusterDiscovery)(nil)
+	_ discovery_kit_sdk.TargetDescriber          = (*clusterDiscovery)(nil)
+	_ discovery_kit_sdk.AttributeDescriber       = (*clusterDiscovery)(nil)
+	_ discovery_kit_sdk.EnrichmentRulesDescriber = (*clusterDiscovery)(nil)
 )
+
+// aksEnrichmentTargetTypes are the extension-kubernetes target types that get enriched with AKS cluster
+// reliability config (kubernetes version, API-server public-access posture, network plugin/policy, AAD/RBAC,
+// SKU tier, etc.). The K8s extension already carries k8s.cluster-name on its targets; we join on that.
+var aksEnrichmentTargetTypes = []string{
+	"com.steadybit.extension_kubernetes.kubernetes-deployment",
+	"com.steadybit.extension_kubernetes.kubernetes-pod",
+	"com.steadybit.extension_kubernetes.kubernetes-statefulset",
+	"com.steadybit.extension_kubernetes.kubernetes-daemonset",
+	"com.steadybit.extension_kubernetes.kubernetes-node",
+	"com.steadybit.extension_kubernetes.argo-rollout",
+}
+
+// aksEnrichmentAttributes are the AKS cluster attributes copied onto matching Kubernetes targets.
+// Stable, reliability-relevant config only — no labels (high cardinality) and no volatile state
+// (power-state, provisioning-state).
+var aksEnrichmentAttributes = []discovery_kit_api.Attribute{
+	{Matcher: discovery_kit_api.Equals, Name: "azure.subscription.id"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.resource-group.name"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.location"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.name"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.kubernetes-version"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.private-cluster"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.authorized-ip-ranges"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.api-server-open-to-internet"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.network-plugin"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.network-policy"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.sku.tier"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.disable-local-accounts"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.aad-managed"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.azure-rbac-enabled"},
+	{Matcher: discovery_kit_api.Equals, Name: "azure.aks.cluster.node-resource-group"},
+}
 
 func NewClusterDiscovery() discovery_kit_sdk.TargetDiscovery {
 	return discovery_kit_sdk.NewCachedTargetDiscovery(&clusterDiscovery{},
@@ -88,6 +122,7 @@ func (d *clusterDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDes
 		{Attribute: "azure.location", Label: discovery_kit_api.PluralLabel{One: "Location", Other: "Locations"}},
 		{Attribute: "azure.subscription.id", Label: discovery_kit_api.PluralLabel{One: "Subscription ID", Other: "Subscription IDs"}},
 		{Attribute: "azure.resource-group.name", Label: discovery_kit_api.PluralLabel{One: "Resource group name", Other: "Resource group names"}},
+		{Attribute: "k8s.cluster-name", Label: discovery_kit_api.PluralLabel{One: "Kubernetes cluster name", Other: "Kubernetes cluster names"}},
 	}
 }
 
@@ -145,6 +180,10 @@ func toClusterTarget(items map[string]any) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["azure.aks.cluster.name"] = []string{name}
+	// The AKS cluster name IS the Kubernetes cluster name (1:1). Surface it under the cluster-wide
+	// k8s.cluster-name attribute that extension-kubernetes carries on its discovered targets, so enrichment
+	// rules below can join AKS reliability config onto Kubernetes targets discovered by that extension.
+	attributes["k8s.cluster-name"] = []string{name}
 	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
 	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
 	attributes["azure.location"] = []string{stringFromMap(items, "location")}
@@ -246,4 +285,32 @@ func stringSliceFromMap(m map[string]any, key string) []string {
 		}
 	}
 	return out
+}
+
+func (d *clusterDiscovery) DescribeEnrichmentRules() []discovery_kit_api.TargetEnrichmentRule {
+	rules := make([]discovery_kit_api.TargetEnrichmentRule, 0, len(aksEnrichmentTargetTypes))
+	for _, t := range aksEnrichmentTargetTypes {
+		rules = append(rules, aksClusterToK8sEnrichmentRule(t))
+	}
+	return rules
+}
+
+func aksClusterToK8sEnrichmentRule(destTargetType string) discovery_kit_api.TargetEnrichmentRule {
+	return discovery_kit_api.TargetEnrichmentRule{
+		Id:      fmt.Sprintf("com.steadybit.extension_azure.aks.cluster-to-%s", destTargetType),
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Src: discovery_kit_api.SourceOrDestination{
+			Type: TargetIDCluster,
+			Selector: map[string]string{
+				"k8s.cluster-name": "${dest.k8s.cluster-name}",
+			},
+		},
+		Dest: discovery_kit_api.SourceOrDestination{
+			Type: destTargetType,
+			Selector: map[string]string{
+				"k8s.cluster-name": "${src.k8s.cluster-name}",
+			},
+		},
+		Attributes: aksEnrichmentAttributes,
+	}
 }
