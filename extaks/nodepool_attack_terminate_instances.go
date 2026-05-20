@@ -55,11 +55,10 @@ func (a *nodePoolTerminateInstancesAttack) NewEmptyState() NodePoolTerminateInst
 func (a *nodePoolTerminateInstancesAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    NodePoolTerminateInstancesActionId,
-		Label: "Terminate AKS node pool instances",
-		Description: "Deletes a percentage of nodes from an AKS managed node pool via the AKS deleteMachines API. " +
-			"AKS replaces the deleted nodes via the underlying VMSS within minutes. " +
-			"Validates pod rescheduling, PDB enforcement, cluster-autoscaler scale-up timing, and stateful workload AZ failover. " +
-			"This is an instantaneous attack — there is no automatic rollback; AKS handles node replacement.",
+		Label: "Trigger Terminate AKS Instances",
+		Description: "Deletes a percentage of nodes from an AKS managed node pool via the AKS API. " +
+			"AKS automatically replaces the deleted nodes within minutes. " +
+			"Validates pod rescheduling, PDB enforcement, and cluster-autoscaler scale-up timing.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:    extutil.Ptr(targetIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{

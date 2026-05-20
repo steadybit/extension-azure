@@ -73,9 +73,9 @@ func (a *queueDisableAttack) NewEmptyState() EntityDisableState { return EntityD
 func (a *queueDisableAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    QueueDisableActionId,
-		Label: "Disable Service Bus queue",
+		Label: "Disable Service Bus Queue",
 		Description: "Sets the queue's status to 'Disabled' to drop both sends and receives. The original status is restored on stop. " +
-			"Validates how producers and consumers handle the queue being unavailable — a clean reversible chaos test for Service Bus-driven workflows.",
+			"Validates how producers and consumers handle the queue being unavailable.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:    extutil.Ptr(targetIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
@@ -203,7 +203,7 @@ func (a *topicDisableAttack) NewEmptyState() EntityDisableState { return EntityD
 func (a *topicDisableAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    TopicDisableActionId,
-		Label: "Disable Service Bus topic",
+		Label: "Disable Service Bus Topic",
 		Description: "Sets the topic's status to 'Disabled' to drop both publishes and subscriber receives. The original status is restored on stop. " +
 			"Validates how publishers and all subscribers handle the topic being unavailable.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),

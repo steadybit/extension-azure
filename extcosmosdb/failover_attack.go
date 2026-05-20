@@ -77,8 +77,7 @@ func (a *cosmosFailoverAttack) Describe() action_kit_api.ActionDescription {
 		Id:    CosmosDbFailoverActionId,
 		Label: "Trigger Cosmos DB Failover",
 		Description: "Promotes the secondary region to write for a multi-region Cosmos DB account, simulating a regional failover. " +
-			"Validates that your application correctly follows the SDK's automatic write-region tracking and that retry/backoff logic survives the promotion. " +
-			"Re-run the experiment to fail back to the original region.",
+			"Validates that your application correctly follows the SDK's automatic write-region tracking and that retry/backoff logic survives the promotion.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(targetIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{

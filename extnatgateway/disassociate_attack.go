@@ -67,7 +67,7 @@ func (a *natGatewayDisassociateAttack) Describe() action_kit_api.ActionDescripti
 		Id:    NatGatewayDisassociateActionId,
 		Label: "Disassociate NAT Gateway",
 		Description: "Disassociates the NAT Gateway from all of its currently associated subnets to simulate an outbound-internet outage for the workloads in those subnets. " +
-			"Each subnet's NAT Gateway reference is restored on stop. Only the NatGateway field is modified — concurrent edits to other subnet properties are preserved.",
+			"Each subnet's NAT Gateway reference is restored on stop.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:    extutil.Ptr(targetIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
