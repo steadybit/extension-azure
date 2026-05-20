@@ -56,7 +56,7 @@ func (d *accountDiscovery) DescribeTarget() discovery_kit_api.TargetDescription 
 		Id:       TargetIDCosmosDbAccount,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(targetIcon),
-		Label:    discovery_kit_api.PluralLabel{One: "Azure Cosmos DB account", Other: "Azure Cosmos DB accounts"},
+		Label:    discovery_kit_api.PluralLabel{One: "Azure Cosmos DB", Other: "Azure Cosmos DBs"},
 		Category: extutil.Ptr("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
