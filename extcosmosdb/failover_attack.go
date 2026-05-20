@@ -76,10 +76,9 @@ func (a *cosmosFailoverAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    CosmosDbFailoverActionId,
 		Label: "Trigger Cosmos DB Failover",
-		Description: "Promotes the lowest-priority failover region to priority 0 (write region) for a Cosmos DB account, swapping the previous primary down. " +
-			"Validates that your application correctly follows the SDK's automatic write-region tracking and that retry / backoff logic survives the promotion. " +
-			"This is a one-shot attack with no automatic rollback: Azure's FailoverPriorityChange is async and takes 5-15 min per call, so transient set-and-restore semantics would be misleading. " +
-			"To switch back, run the experiment again against the (now-secondary) region. Multi-region account required.",
+		Description: "Promotes the secondary region to write for a multi-region Cosmos DB account, simulating a regional failover. " +
+			"Validates that your application correctly follows the SDK's automatic write-region tracking and that retry/backoff logic survives the promotion. " +
+			"Re-run the experiment to fail back to the original region.",
 		Version:     extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:        extutil.Ptr(targetIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
