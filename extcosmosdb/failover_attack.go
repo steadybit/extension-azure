@@ -11,7 +11,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos/v3"
-	"github.com/rs/zerolog/log"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/action-kit/go/action_kit_sdk"
 	"github.com/steadybit/extension-azure/common"
@@ -22,15 +21,19 @@ import (
 
 const CosmosDbFailoverActionId = "com.steadybit.extension_azure.cosmosdb.account.failover"
 
-// CosmosDbFailoverState captures the original failover priorities so we can restore them on stop.
+// CosmosDbFailoverState carries the computed new failover priorities from Prepare to Start. This
+// attack is one-shot (no Stop / no rollback): Azure's FailoverPriorityChange is async and takes
+// 5-15 min per call, so a transient experiment-style "set & restore" semantics is misleading. Users
+// who want to switch back can run the experiment again against the (now-secondary) region.
 type CosmosDbFailoverState struct {
 	SubscriptionId    string
 	ResourceGroupName string
 	AccountName       string
-	// OriginalPolicies stores the (locationName, priority) pairs as observed at prepare.
-	OriginalPolicies []failoverPolicy
-	// PromotedRegion is the region we promoted to priority 0 at start. Captured for messaging only.
+	// PromotedRegion is the region we will promote to priority 0. Captured for log messaging.
 	PromotedRegion string
+	// NewPolicies is the full priority order to submit at Start (computed from the current order
+	// at Prepare, with PromotedRegion swapped to priority 0).
+	NewPolicies []failoverPolicy
 }
 
 type failoverPolicy struct {
@@ -48,9 +51,8 @@ type cosmosFailoverAttack struct {
 }
 
 var _ action_kit_sdk.Action[CosmosDbFailoverState] = (*cosmosFailoverAttack)(nil)
-var _ action_kit_sdk.ActionWithStop[CosmosDbFailoverState] = (*cosmosFailoverAttack)(nil)
 
-func NewCosmosDbFailoverAction() action_kit_sdk.ActionWithStop[CosmosDbFailoverState] {
+func NewCosmosDbFailoverAction() action_kit_sdk.Action[CosmosDbFailoverState] {
 	return &cosmosFailoverAttack{
 		clientProvider: func(subscriptionId string) (cosmosDatabaseAccountsApi, error) {
 			cred, err := common.ConnectionAzure()
@@ -76,9 +78,10 @@ func (a *cosmosFailoverAttack) Describe() action_kit_api.ActionDescription {
 		Label: "Trigger Cosmos DB Failover",
 		Description: "Promotes the lowest-priority failover region to priority 0 (write region) for a Cosmos DB account, swapping the previous primary down. " +
 			"Validates that your application correctly follows the SDK's automatic write-region tracking and that retry / backoff logic survives the promotion. " +
-			"The original failover priority order is restored on stop. Multi-region account required.",
-		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(targetIcon),
+			"This is a one-shot attack with no automatic rollback: Azure's FailoverPriorityChange is async and takes 5-15 min per call, so transient set-and-restore semantics would be misleading. " +
+			"To switch back, run the experiment again against the (now-secondary) region. Multi-region account required.",
+		Version:     extbuild.GetSemverVersionStringOrUnknown(),
+		Icon:        extutil.Ptr(targetIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
 			TargetType: TargetIDCosmosDbAccount,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
@@ -91,20 +94,9 @@ func (a *cosmosFailoverAttack) Describe() action_kit_api.ActionDescription {
 		}),
 		Technology:  extutil.Ptr("Azure"),
 		Category:    extutil.Ptr("Cosmos DB"),
-		TimeControl: action_kit_api.TimeControlExternal,
+		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
-		Parameters: []action_kit_api.ActionParameter{
-			{
-				Name:         "duration",
-				Label:        "Duration",
-				Description:  extutil.Ptr("How long the new failover priority order is in effect. The original priority order is restored on stop."),
-				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("60s"),
-				Order:        extutil.Ptr(1),
-				Required:     extutil.Ptr(true),
-			},
-		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Parameters:  []action_kit_api.ActionParameter{},
 	}
 }
 
@@ -127,25 +119,27 @@ func (a *cosmosFailoverAttack) Prepare(ctx context.Context, state *CosmosDbFailo
 	if got.Properties == nil || len(got.Properties.FailoverPolicies) < 2 {
 		return nil, extension_kit.ToError(fmt.Sprintf("Cosmos DB account %s has fewer than 2 regions; failover requires a multi-region account", state.AccountName), nil)
 	}
-	state.OriginalPolicies = make([]failoverPolicy, 0, len(got.Properties.FailoverPolicies))
+	current := make([]failoverPolicy, 0, len(got.Properties.FailoverPolicies))
 	for _, p := range got.Properties.FailoverPolicies {
 		if p == nil || p.LocationName == nil || p.FailoverPriority == nil {
 			continue
 		}
-		state.OriginalPolicies = append(state.OriginalPolicies, failoverPolicy{
+		current = append(current, failoverPolicy{
 			LocationName: *p.LocationName,
 			Priority:     *p.FailoverPriority,
 		})
 	}
-	if len(state.OriginalPolicies) < 2 {
+	if len(current) < 2 {
 		return nil, extension_kit.ToError(fmt.Sprintf("Cosmos DB account %s has fewer than 2 valid failover policies", state.AccountName), nil)
 	}
-	// Determine which region we will promote: the current secondary with the lowest priority > 0.
-	state.PromotedRegion = secondaryWithLowestPriority(state.OriginalPolicies)
+	// Promote the current secondary with the lowest priority > 0 — the same region the SDK would
+	// automatically promote on a regional outage. Most realistic chaos signal.
+	state.PromotedRegion = secondaryWithLowestPriority(current)
+	state.NewPolicies = promotePolicies(current, state.PromotedRegion)
 	return &action_kit_api.PrepareResult{
 		Messages: extutil.Ptr([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
-			Message: fmt.Sprintf("Cosmos DB account %s has %d region(s); will promote %q to write region.", state.AccountName, len(state.OriginalPolicies), state.PromotedRegion),
+			Message: fmt.Sprintf("Cosmos DB account %s has %d region(s); will promote %q to write region. No automatic rollback.", state.AccountName, len(current), state.PromotedRegion),
 		}}),
 	}, nil
 }
@@ -155,9 +149,8 @@ func (a *cosmosFailoverAttack) Start(ctx context.Context, state *CosmosDbFailove
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize Cosmos DB client for subscription %s", state.SubscriptionId), err)
 	}
-	policies := promotePolicies(state.OriginalPolicies, state.PromotedRegion)
 	_, err = client.BeginFailoverPriorityChange(ctx, state.ResourceGroupName, state.AccountName, armcosmos.FailoverPolicies{
-		FailoverPolicies: toCosmosPolicies(policies),
+		FailoverPolicies: toCosmosPolicies(state.NewPolicies),
 	}, nil)
 	if err != nil {
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to trigger failover for Cosmos DB account %s", state.AccountName), err)
@@ -165,27 +158,7 @@ func (a *cosmosFailoverAttack) Start(ctx context.Context, state *CosmosDbFailove
 	return &action_kit_api.StartResult{
 		Messages: extutil.Ptr([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
-			Message: fmt.Sprintf("Promoted region %q to write region for Cosmos DB account %s", state.PromotedRegion, state.AccountName),
-		}}),
-	}, nil
-}
-
-func (a *cosmosFailoverAttack) Stop(ctx context.Context, state *CosmosDbFailoverState) (*action_kit_api.StopResult, error) {
-	client, err := a.clientProvider(state.SubscriptionId)
-	if err != nil {
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to initialize Cosmos DB client for subscription %s", state.SubscriptionId), err)
-	}
-	_, err = client.BeginFailoverPriorityChange(ctx, state.ResourceGroupName, state.AccountName, armcosmos.FailoverPolicies{
-		FailoverPolicies: toCosmosPolicies(state.OriginalPolicies),
-	}, nil)
-	if err != nil {
-		log.Error().Err(err).Msgf("Failed to restore failover priorities on Cosmos DB account %s", state.AccountName)
-		return nil, extension_kit.ToError(fmt.Sprintf("Failed to restore failover priorities on Cosmos DB account %s", state.AccountName), err)
-	}
-	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
-			Level:   extutil.Ptr(action_kit_api.Info),
-			Message: fmt.Sprintf("Restored original failover priorities on Cosmos DB account %s", state.AccountName),
+			Message: fmt.Sprintf("Triggered failover for Cosmos DB account %s; promoted region %q to write region. Azure-side completion takes 5-15 min.", state.AccountName, state.PromotedRegion),
 		}}),
 	}, nil
 }
