@@ -88,7 +88,31 @@ func (d *queueDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_a
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Resource Graph client: %w", err)
 	}
-	return getAllQueues(ctx, rgClient, common.GetServiceBusQueuesClient)
+	return getAllQueues(ctx, rgClient, sdkQueueLister(common.GetServiceBusQueuesClient))
+}
+
+// queueLister returns the queues in (subscription, resourceGroup, namespace). Indirection over the
+// SDK pager so we can swap a fake implementation in tests.
+type queueLister func(ctx context.Context, subscriptionId, resourceGroup, namespace string) ([]*armservicebus.SBQueue, error)
+
+// sdkQueueLister adapts the SDK pager into a flat queueLister. Production use only.
+func sdkQueueLister(provider func(subscriptionId string) (*armservicebus.QueuesClient, error)) queueLister {
+	return func(ctx context.Context, subscriptionId, resourceGroup, namespace string) ([]*armservicebus.SBQueue, error) {
+		client, err := provider(subscriptionId)
+		if err != nil {
+			return nil, err
+		}
+		pager := client.NewListByNamespacePager(resourceGroup, namespace, nil)
+		var queues []*armservicebus.SBQueue
+		for pager.More() {
+			page, err := pager.NextPage(ctx)
+			if err != nil {
+				return queues, err
+			}
+			queues = append(queues, page.Value...)
+		}
+		return queues, nil
+	}
 }
 
 // serviceBusNamespaceRef carries the addressing fields the queue/topic discovery need to issue
@@ -142,11 +166,7 @@ func listServiceBusNamespaceRefs(ctx context.Context, rgClient common.ArmResourc
 // resources with a multi-minute lag, which makes ad-hoc testing painful; the direct ARM path is
 // real-time. Namespaces themselves are still enumerated via Resource Graph because their cardinality
 // is low and the lag matters less at the namespace level.
-func getAllQueues(
-	ctx context.Context,
-	rgClient common.ArmResourceGraphApi,
-	queuesClientProvider func(subscriptionId string) (*armservicebus.QueuesClient, error),
-) ([]discovery_kit_api.Target, error) {
+func getAllQueues(ctx context.Context, rgClient common.ArmResourceGraphApi, lister queueLister) ([]discovery_kit_api.Target, error) {
 	namespaces, err := listServiceBusNamespaceRefs(ctx, rgClient)
 	if err != nil {
 		return nil, err
@@ -154,24 +174,16 @@ func getAllQueues(
 
 	targets := make([]discovery_kit_api.Target, 0)
 	for _, ns := range namespaces {
-		client, err := queuesClientProvider(ns.subscriptionId)
+		queues, err := lister(ctx, ns.subscriptionId, ns.resourceGroup, ns.name)
 		if err != nil {
-			log.Warn().Err(err).Msgf("failed to create Service Bus queues client for subscription %s; skipping", ns.subscriptionId)
+			log.Warn().Err(err).Msgf("failed to list queues for namespace %s/%s; skipping", ns.subscriptionId, ns.name)
 			continue
 		}
-		pager := client.NewListByNamespacePager(ns.resourceGroup, ns.name, nil)
-		for pager.More() {
-			page, err := pager.NextPage(ctx)
-			if err != nil {
-				log.Warn().Err(err).Msgf("failed to list queues for namespace %s/%s; skipping rest of namespace", ns.subscriptionId, ns.name)
-				break
+		for _, q := range queues {
+			if q == nil {
+				continue
 			}
-			for _, q := range page.Value {
-				if q == nil {
-					continue
-				}
-				targets = append(targets, queueToTarget(q, ns))
-			}
+			targets = append(targets, queueToTarget(q, ns))
 		}
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesServiceBus), nil

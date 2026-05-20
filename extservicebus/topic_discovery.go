@@ -82,16 +82,34 @@ func (d *topicDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_a
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Resource Graph client: %w", err)
 	}
-	return getAllTopics(ctx, rgClient, common.GetServiceBusTopicsClient)
+	return getAllTopics(ctx, rgClient, sdkTopicLister(common.GetServiceBusTopicsClient))
+}
+
+// topicLister mirrors queueLister for topics — indirection over the SDK pager so tests can swap it.
+type topicLister func(ctx context.Context, subscriptionId, resourceGroup, namespace string) ([]*armservicebus.SBTopic, error)
+
+func sdkTopicLister(provider func(subscriptionId string) (*armservicebus.TopicsClient, error)) topicLister {
+	return func(ctx context.Context, subscriptionId, resourceGroup, namespace string) ([]*armservicebus.SBTopic, error) {
+		client, err := provider(subscriptionId)
+		if err != nil {
+			return nil, err
+		}
+		pager := client.NewListByNamespacePager(resourceGroup, namespace, nil)
+		var topics []*armservicebus.SBTopic
+		for pager.More() {
+			page, err := pager.NextPage(ctx)
+			if err != nil {
+				return topics, err
+			}
+			topics = append(topics, page.Value...)
+		}
+		return topics, nil
+	}
 }
 
 // getAllTopics lists Service Bus topics via direct ARM. See getAllQueues' comment for the rationale
 // on direct ARM vs. Resource Graph for Service Bus child resources.
-func getAllTopics(
-	ctx context.Context,
-	rgClient common.ArmResourceGraphApi,
-	topicsClientProvider func(subscriptionId string) (*armservicebus.TopicsClient, error),
-) ([]discovery_kit_api.Target, error) {
+func getAllTopics(ctx context.Context, rgClient common.ArmResourceGraphApi, lister topicLister) ([]discovery_kit_api.Target, error) {
 	namespaces, err := listServiceBusNamespaceRefs(ctx, rgClient)
 	if err != nil {
 		return nil, err
@@ -99,24 +117,16 @@ func getAllTopics(
 
 	targets := make([]discovery_kit_api.Target, 0)
 	for _, ns := range namespaces {
-		client, err := topicsClientProvider(ns.subscriptionId)
+		topics, err := lister(ctx, ns.subscriptionId, ns.resourceGroup, ns.name)
 		if err != nil {
-			log.Warn().Err(err).Msgf("failed to create Service Bus topics client for subscription %s; skipping", ns.subscriptionId)
+			log.Warn().Err(err).Msgf("failed to list topics for namespace %s/%s; skipping", ns.subscriptionId, ns.name)
 			continue
 		}
-		pager := client.NewListByNamespacePager(ns.resourceGroup, ns.name, nil)
-		for pager.More() {
-			page, err := pager.NextPage(ctx)
-			if err != nil {
-				log.Warn().Err(err).Msgf("failed to list topics for namespace %s/%s; skipping rest of namespace", ns.subscriptionId, ns.name)
-				break
+		for _, t := range topics {
+			if t == nil {
+				continue
 			}
-			for _, t := range page.Value {
-				if t == nil {
-					continue
-				}
-				targets = append(targets, topicToTarget(t, ns))
-			}
+			targets = append(targets, topicToTarget(t, ns))
 		}
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesServiceBus), nil
