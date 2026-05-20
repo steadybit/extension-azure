@@ -8,11 +8,11 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -84,102 +84,151 @@ func (d *queueDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescr
 }
 
 func (d *queueDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	client, err := common.GetClientByCredentials()
+	rgClient, err := common.GetClientByCredentials()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get client: %w", err)
+		return nil, fmt.Errorf("failed to get Resource Graph client: %w", err)
 	}
-	return getAllQueues(ctx, client)
+	return getAllQueues(ctx, rgClient, common.GetServiceBusQueuesClient)
 }
 
-func getAllQueues(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
+// serviceBusNamespaceRef carries the addressing fields the queue/topic discovery need to issue
+// per-namespace ARM List calls. Built from a low-cardinality Resource Graph query.
+type serviceBusNamespaceRef struct {
+	name           string
+	resourceGroup  string
+	subscriptionId string
+	location       string
+}
+
+func listServiceBusNamespaceRefs(ctx context.Context, rgClient common.ArmResourceGraphApi) ([]serviceBusNamespaceRef, error) {
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
 	if subscriptionId != "" {
 		subscriptions = []*string{&subscriptionId}
 	}
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.ServiceBus/namespaces/queues' | project id, name, type, resourceGroup, location, properties, subscriptionId"),
+	results, err := rgClient.Resources(ctx, armresourcegraph.QueryRequest{
+		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.ServiceBus/namespaces' | project name, resourceGroup, location, subscriptionId"),
 		Options: &armresourcegraph.QueryRequestOptions{
 			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 		},
 		Subscriptions: subscriptions,
 	}, nil)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get Service Bus queue results")
+		log.Error().Err(err).Msgf("failed to list Service Bus namespaces from Resource Graph")
 		return nil, err
 	}
-	targets := make([]discovery_kit_api.Target, 0)
+
+	refs := make([]serviceBusNamespaceRef, 0)
 	rows, ok := results.Data.([]any)
 	if !ok {
-		return targets, nil
+		return refs, nil
 	}
 	for _, r := range rows {
 		items, ok := r.(map[string]any)
 		if !ok {
 			continue
 		}
-		targets = append(targets, toQueueTarget(items))
+		refs = append(refs, serviceBusNamespaceRef{
+			name:           stringFromMap(items, "name"),
+			resourceGroup:  stringFromMap(items, "resourceGroup"),
+			subscriptionId: stringFromMap(items, "subscriptionId"),
+			location:       stringFromMap(items, "location"),
+		})
+	}
+	return refs, nil
+}
+
+// getAllQueues lists Service Bus queues via direct ARM. Resource Graph indexes Service Bus child
+// resources with a multi-minute lag, which makes ad-hoc testing painful; the direct ARM path is
+// real-time. Namespaces themselves are still enumerated via Resource Graph because their cardinality
+// is low and the lag matters less at the namespace level.
+func getAllQueues(
+	ctx context.Context,
+	rgClient common.ArmResourceGraphApi,
+	queuesClientProvider func(subscriptionId string) (*armservicebus.QueuesClient, error),
+) ([]discovery_kit_api.Target, error) {
+	namespaces, err := listServiceBusNamespaceRefs(ctx, rgClient)
+	if err != nil {
+		return nil, err
+	}
+
+	targets := make([]discovery_kit_api.Target, 0)
+	for _, ns := range namespaces {
+		client, err := queuesClientProvider(ns.subscriptionId)
+		if err != nil {
+			log.Warn().Err(err).Msgf("failed to create Service Bus queues client for subscription %s; skipping", ns.subscriptionId)
+			continue
+		}
+		pager := client.NewListByNamespacePager(ns.resourceGroup, ns.name, nil)
+		for pager.More() {
+			page, err := pager.NextPage(ctx)
+			if err != nil {
+				log.Warn().Err(err).Msgf("failed to list queues for namespace %s/%s; skipping rest of namespace", ns.subscriptionId, ns.name)
+				break
+			}
+			for _, q := range page.Value {
+				if q == nil {
+					continue
+				}
+				targets = append(targets, queueToTarget(q, ns))
+			}
+		}
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesServiceBus), nil
 }
 
-func toQueueTarget(items map[string]any) discovery_kit_api.Target {
-	properties := common.GetMapValue(items, "properties")
-
-	id, _ := items["id"].(string)
-	rawName, _ := items["name"].(string)
-	namespace := ""
-	queueName := rawName
-	if i := strings.LastIndex(rawName, "/"); i >= 0 {
-		namespace = rawName[:i]
-		queueName = rawName[i+1:]
+func queueToTarget(q *armservicebus.SBQueue, ns serviceBusNamespaceRef) discovery_kit_api.Target {
+	queueName := ""
+	if q.Name != nil {
+		queueName = *q.Name
 	}
-	label := queueName
-	if namespace != "" {
-		label = fmt.Sprintf("%s/%s", namespace, queueName)
+	id := ""
+	if q.ID != nil {
+		id = *q.ID
 	}
 
-	attributes := make(map[string][]string)
-	attributes["azure.servicebus.queue.name"] = []string{queueName}
-	if namespace != "" {
-		attributes["azure.servicebus.namespace.name"] = []string{namespace}
+	attributes := map[string][]string{
+		"azure.servicebus.queue.name":     {queueName},
+		"azure.servicebus.namespace.name": {ns.name},
+		"azure.subscription.id":           {ns.subscriptionId},
+		"azure.resource-group.name":       {ns.resourceGroup},
+		"azure.location":                  {ns.location},
 	}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
 
-	if v := stringFromMap(properties, "status"); v != "" {
-		attributes["azure.servicebus.queue.status"] = []string{v}
-	}
-	if v, ok := properties["maxDeliveryCount"].(float64); ok {
-		attributes["azure.servicebus.queue.max-delivery-count"] = []string{strconv.Itoa(int(v))}
-	}
-	if v, ok := properties["deadLetteringOnMessageExpiration"].(bool); ok {
-		attributes["azure.servicebus.queue.dead-lettering-on-message-expiration"] = []string{strconv.FormatBool(v)}
-	}
-	if v, ok := properties["requiresDuplicateDetection"].(bool); ok {
-		attributes["azure.servicebus.queue.requires-duplicate-detection"] = []string{strconv.FormatBool(v)}
-	}
-	if v, ok := properties["requiresSession"].(bool); ok {
-		attributes["azure.servicebus.queue.requires-session"] = []string{strconv.FormatBool(v)}
-	}
-	if v := stringFromMap(properties, "lockDuration"); v != "" {
-		attributes["azure.servicebus.queue.lock-duration"] = []string{v}
-	}
-	if v := stringFromMap(properties, "defaultMessageTimeToLive"); v != "" {
-		attributes["azure.servicebus.queue.default-message-time-to-live"] = []string{v}
-	}
-	if v := stringFromMap(properties, "forwardTo"); v != "" {
-		attributes["azure.servicebus.queue.forward-to"] = []string{v}
-	}
-	if v := stringFromMap(properties, "forwardDeadLetteredMessagesTo"); v != "" {
-		attributes["azure.servicebus.queue.forward-dead-lettered-messages-to"] = []string{v}
+	if p := q.Properties; p != nil {
+		if p.Status != nil {
+			attributes["azure.servicebus.queue.status"] = []string{string(*p.Status)}
+		}
+		if p.MaxDeliveryCount != nil {
+			attributes["azure.servicebus.queue.max-delivery-count"] = []string{strconv.Itoa(int(*p.MaxDeliveryCount))}
+		}
+		if p.DeadLetteringOnMessageExpiration != nil {
+			attributes["azure.servicebus.queue.dead-lettering-on-message-expiration"] = []string{strconv.FormatBool(*p.DeadLetteringOnMessageExpiration)}
+		}
+		if p.RequiresDuplicateDetection != nil {
+			attributes["azure.servicebus.queue.requires-duplicate-detection"] = []string{strconv.FormatBool(*p.RequiresDuplicateDetection)}
+		}
+		if p.RequiresSession != nil {
+			attributes["azure.servicebus.queue.requires-session"] = []string{strconv.FormatBool(*p.RequiresSession)}
+		}
+		if p.LockDuration != nil {
+			attributes["azure.servicebus.queue.lock-duration"] = []string{*p.LockDuration}
+		}
+		if p.DefaultMessageTimeToLive != nil {
+			attributes["azure.servicebus.queue.default-message-time-to-live"] = []string{*p.DefaultMessageTimeToLive}
+		}
+		if p.ForwardTo != nil && *p.ForwardTo != "" {
+			attributes["azure.servicebus.queue.forward-to"] = []string{*p.ForwardTo}
+		}
+		if p.ForwardDeadLetteredMessagesTo != nil && *p.ForwardDeadLetteredMessagesTo != "" {
+			attributes["azure.servicebus.queue.forward-dead-lettered-messages-to"] = []string{*p.ForwardDeadLetteredMessagesTo}
+		}
 	}
 
 	return discovery_kit_api.Target{
 		Id:         id,
 		TargetType: TargetIDQueue,
-		Label:      label,
+		Label:      fmt.Sprintf("%s/%s", ns.name, queueName),
 		Attributes: attributes,
 	}
 }

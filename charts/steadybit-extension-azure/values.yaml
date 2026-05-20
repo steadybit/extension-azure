@@ -150,8 +150,6 @@ discovery:
     azureFunction: false
     networkSecurityGroup: false
     containerApp: false
-    # New target types added in feat/expand-azure-targets-and-attacks. Default to false to keep the smallest IAM/cost
-    # footprint for users upgrading from a previous version. Enable explicitly the ones you want to discover.
     aksCluster: false
     aksNodePool: false
     scaleSet: false

@@ -8,11 +8,9 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -21,7 +19,6 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"os"
 )
 
 const TargetIDTopic = "com.steadybit.extension_azure.servicebus.topic"
@@ -81,93 +78,93 @@ func (d *topicDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescr
 }
 
 func (d *topicDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	client, err := common.GetClientByCredentials()
+	rgClient, err := common.GetClientByCredentials()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get client: %w", err)
+		return nil, fmt.Errorf("failed to get Resource Graph client: %w", err)
 	}
-	return getAllTopics(ctx, client)
+	return getAllTopics(ctx, rgClient, common.GetServiceBusTopicsClient)
 }
 
-func getAllTopics(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	var subscriptions []*string
-	if subscriptionId != "" {
-		subscriptions = []*string{&subscriptionId}
-	}
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.ServiceBus/namespaces/topics' | project id, name, type, resourceGroup, location, properties, subscriptionId"),
-		Options: &armresourcegraph.QueryRequestOptions{
-			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
-		},
-		Subscriptions: subscriptions,
-	}, nil)
+// getAllTopics lists Service Bus topics via direct ARM. See getAllQueues' comment for the rationale
+// on direct ARM vs. Resource Graph for Service Bus child resources.
+func getAllTopics(
+	ctx context.Context,
+	rgClient common.ArmResourceGraphApi,
+	topicsClientProvider func(subscriptionId string) (*armservicebus.TopicsClient, error),
+) ([]discovery_kit_api.Target, error) {
+	namespaces, err := listServiceBusNamespaceRefs(ctx, rgClient)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get Service Bus topic results")
 		return nil, err
 	}
+
 	targets := make([]discovery_kit_api.Target, 0)
-	rows, ok := results.Data.([]any)
-	if !ok {
-		return targets, nil
-	}
-	for _, r := range rows {
-		items, ok := r.(map[string]any)
-		if !ok {
+	for _, ns := range namespaces {
+		client, err := topicsClientProvider(ns.subscriptionId)
+		if err != nil {
+			log.Warn().Err(err).Msgf("failed to create Service Bus topics client for subscription %s; skipping", ns.subscriptionId)
 			continue
 		}
-		targets = append(targets, toTopicTarget(items))
+		pager := client.NewListByNamespacePager(ns.resourceGroup, ns.name, nil)
+		for pager.More() {
+			page, err := pager.NextPage(ctx)
+			if err != nil {
+				log.Warn().Err(err).Msgf("failed to list topics for namespace %s/%s; skipping rest of namespace", ns.subscriptionId, ns.name)
+				break
+			}
+			for _, t := range page.Value {
+				if t == nil {
+					continue
+				}
+				targets = append(targets, topicToTarget(t, ns))
+			}
+		}
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesServiceBus), nil
 }
 
-func toTopicTarget(items map[string]any) discovery_kit_api.Target {
-	properties := common.GetMapValue(items, "properties")
-
-	id, _ := items["id"].(string)
-	rawName, _ := items["name"].(string)
-	namespace := ""
-	topicName := rawName
-	if i := strings.LastIndex(rawName, "/"); i >= 0 {
-		namespace = rawName[:i]
-		topicName = rawName[i+1:]
+func topicToTarget(t *armservicebus.SBTopic, ns serviceBusNamespaceRef) discovery_kit_api.Target {
+	topicName := ""
+	if t.Name != nil {
+		topicName = *t.Name
 	}
-	label := topicName
-	if namespace != "" {
-		label = fmt.Sprintf("%s/%s", namespace, topicName)
+	id := ""
+	if t.ID != nil {
+		id = *t.ID
 	}
 
-	attributes := make(map[string][]string)
-	attributes["azure.servicebus.topic.name"] = []string{topicName}
-	if namespace != "" {
-		attributes["azure.servicebus.namespace.name"] = []string{namespace}
+	attributes := map[string][]string{
+		"azure.servicebus.topic.name":     {topicName},
+		"azure.servicebus.namespace.name": {ns.name},
+		"azure.subscription.id":           {ns.subscriptionId},
+		"azure.resource-group.name":       {ns.resourceGroup},
+		"azure.location":                  {ns.location},
 	}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
 
-	if v := stringFromMap(properties, "status"); v != "" {
-		attributes["azure.servicebus.topic.status"] = []string{v}
-	}
-	if v, ok := properties["requiresDuplicateDetection"].(bool); ok {
-		attributes["azure.servicebus.topic.requires-duplicate-detection"] = []string{strconv.FormatBool(v)}
-	}
-	if v, ok := properties["supportOrdering"].(bool); ok {
-		attributes["azure.servicebus.topic.support-ordering"] = []string{strconv.FormatBool(v)}
-	}
-	if v, ok := properties["enablePartitioning"].(bool); ok {
-		attributes["azure.servicebus.topic.enable-partitioning"] = []string{strconv.FormatBool(v)}
-	}
-	if v := stringFromMap(properties, "defaultMessageTimeToLive"); v != "" {
-		attributes["azure.servicebus.topic.default-message-time-to-live"] = []string{v}
-	}
-	if v, ok := properties["subscriptionCount"].(float64); ok {
-		attributes["azure.servicebus.topic.subscription-count"] = []string{strconv.Itoa(int(v))}
+	if p := t.Properties; p != nil {
+		if p.Status != nil {
+			attributes["azure.servicebus.topic.status"] = []string{string(*p.Status)}
+		}
+		if p.RequiresDuplicateDetection != nil {
+			attributes["azure.servicebus.topic.requires-duplicate-detection"] = []string{strconv.FormatBool(*p.RequiresDuplicateDetection)}
+		}
+		if p.SupportOrdering != nil {
+			attributes["azure.servicebus.topic.support-ordering"] = []string{strconv.FormatBool(*p.SupportOrdering)}
+		}
+		if p.EnablePartitioning != nil {
+			attributes["azure.servicebus.topic.enable-partitioning"] = []string{strconv.FormatBool(*p.EnablePartitioning)}
+		}
+		if p.DefaultMessageTimeToLive != nil {
+			attributes["azure.servicebus.topic.default-message-time-to-live"] = []string{*p.DefaultMessageTimeToLive}
+		}
+		if p.SubscriptionCount != nil {
+			attributes["azure.servicebus.topic.subscription-count"] = []string{strconv.Itoa(int(*p.SubscriptionCount))}
+		}
 	}
 
 	return discovery_kit_api.Target{
 		Id:         id,
 		TargetType: TargetIDTopic,
-		Label:      label,
+		Label:      fmt.Sprintf("%s/%s", ns.name, topicName),
 		Attributes: attributes,
 	}
 }

@@ -60,7 +60,7 @@ func (d *accountDiscovery) DescribeTarget() discovery_kit_api.TargetDescription 
 		Id:       TargetIDStorageQueue,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:     extutil.Ptr(targetIcon),
-		Label:    discovery_kit_api.PluralLabel{One: "Azure Storage account (queue)", Other: "Azure Storage accounts (queue)"},
+		Label:    discovery_kit_api.PluralLabel{One: "Azure Storage Queue", Other: "Azure Storage Queues"},
 		Category: extutil.Ptr("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{

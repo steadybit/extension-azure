@@ -9,6 +9,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/extension-azure/config"
 )
@@ -58,6 +59,39 @@ func GetVirtualMachineScaleSetVMsClient(subscriptionId string) (*armcompute.Virt
 	}
 	virtualMachinesClient := computeClientFactory.NewVirtualMachineScaleSetVMsClient()
 	return virtualMachinesClient, nil
+}
+
+// GetServiceBusQueuesClient returns a per-subscription Service Bus QueuesClient. Used by the queue
+// discovery to enumerate queues via the direct ARM API (Resource Graph indexes Service Bus child
+// resources with a multi-minute lag — direct ARM is real-time).
+func GetServiceBusQueuesClient(subscriptionId string) (*armservicebus.QueuesClient, error) {
+	conn, err := ConnectionAzure()
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to create Azure connection.")
+		return nil, err
+	}
+	factory, err := armservicebus.NewClientFactory(subscriptionId, conn, nil)
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to create Azure Service Bus client factory.")
+		return nil, err
+	}
+	return factory.NewQueuesClient(), nil
+}
+
+// GetServiceBusTopicsClient returns a per-subscription Service Bus TopicsClient. See
+// GetServiceBusQueuesClient for the rationale on using direct ARM over Resource Graph.
+func GetServiceBusTopicsClient(subscriptionId string) (*armservicebus.TopicsClient, error) {
+	conn, err := ConnectionAzure()
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to create Azure connection.")
+		return nil, err
+	}
+	factory, err := armservicebus.NewClientFactory(subscriptionId, conn, nil)
+	if err != nil {
+		log.Error().Err(err).Msgf("Failed to create Azure Service Bus client factory.")
+		return nil, err
+	}
+	return factory.NewTopicsClient(), nil
 }
 
 func ConnectionAzure() (azcore.TokenCredential, error) {
