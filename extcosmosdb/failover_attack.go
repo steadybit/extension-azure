@@ -73,7 +73,7 @@ func (a *cosmosFailoverAttack) NewEmptyState() CosmosDbFailoverState {
 func (a *cosmosFailoverAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    CosmosDbFailoverActionId,
-		Label: "Trigger Cosmos DB Regional Failover",
+		Label: "Promote Cosmos DB Failover Region",
 		Description: "Promotes the lowest-priority failover region to priority 0 (write region) for a Cosmos DB account, swapping the previous primary down. " +
 			"Validates that your application correctly follows the SDK's automatic write-region tracking and that retry / backoff logic survives the promotion. " +
 			"The original failover priority order is restored on stop. Multi-region account required.",
