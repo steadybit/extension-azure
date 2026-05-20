@@ -65,7 +65,7 @@ func (a *natGatewayDisassociateAttack) NewEmptyState() NatGatewayDisassociateSta
 func (a *natGatewayDisassociateAttack) Describe() action_kit_api.ActionDescription {
 	return action_kit_api.ActionDescription{
 		Id:    NatGatewayDisassociateActionId,
-		Label: "Disassociate NAT Gateway from its subnets",
+		Label: "Disassociate NAT Gateway",
 		Description: "Disassociates the NAT Gateway from all of its currently associated subnets to simulate an outbound-internet outage for the workloads in those subnets. " +
 			"Each subnet's NAT Gateway reference is restored on stop. Only the NatGateway field is modified — concurrent edits to other subnet properties are preserved.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
