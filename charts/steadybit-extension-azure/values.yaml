@@ -144,6 +144,8 @@ azure:
   existingSecret: null
 
 discovery:
+  # discovery.group -- Optional group identifier. When set, the extension adds steadybit.group=<value> to every discovered target. Used as an additional matcher in enrichment rules.
+  group: ""
   enable:
     vm: true
     scaleSetInstance: true
