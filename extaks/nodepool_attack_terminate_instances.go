@@ -57,7 +57,7 @@ func (a *nodePoolTerminateInstancesAttack) Describe() action_kit_api.ActionDescr
 		Id:    NodePoolTerminateInstancesActionId,
 		Label: "Trigger Terminate AKS Instances",
 		Description: "Deletes a percentage of nodes from an AKS managed node pool via the AKS API. " +
-			"AKS automatically replaces the deleted nodes within minutes. " +
+			"With cluster-autoscaler enabled, AKS replaces the deleted nodes within minutes; without autoscaling, the pool shrinks until manually scaled back. " +
 			"Validates pod rescheduling, PDB enforcement, and cluster-autoscaler scale-up timing.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
 		Icon:    extutil.Ptr(targetIcon),

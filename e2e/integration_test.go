@@ -26,11 +26,28 @@ func TestWithMinikube(t *testing.T) {
 			return []string{
 				"--set", "logging.level=debug",
 				"--set", "azure.level=debug",
+				// Existing discoveries.
 				"--set", "discovery.enable.vm=true",
 				"--set", "discovery.enable.scaleSetInstance=true",
 				"--set", "discovery.enable.containerApp=true",
 				"--set", "discovery.enable.networkSecurityGroup=true",
 				"--set", "discovery.enable.azureFunction=true",
+				// New discoveries added in feat/expand-azure-targets-and-attacks. Enabling them in the
+				// e2e startup smoke-test catches accidental panics or missing registrations.
+				"--set", "discovery.enable.aksCluster=true",
+				"--set", "discovery.enable.aksNodePool=true",
+				"--set", "discovery.enable.scaleSet=true",
+				"--set", "discovery.enable.managedDisk=true",
+				"--set", "discovery.enable.natGateway=true",
+				"--set", "discovery.enable.cosmosDb=true",
+				"--set", "discovery.enable.eventGrid=true",
+				"--set", "discovery.enable.serviceBus=true",
+				"--set", "discovery.enable.serviceBusQueue=true",
+				"--set", "discovery.enable.serviceBusTopic=true",
+				"--set", "discovery.enable.storageQueue=true",
+				"--set", "discovery.enable.loadBalancer=true",
+				"--set", "discovery.enable.applicationGateway=true",
+				"--set", "discovery.enable.apiManagement=true",
 			}
 		},
 	}
@@ -52,13 +69,15 @@ func validateDiscovery(t *testing.T, m *e2e.Minikube, e *e2e.Extension) {
 	validationErr := disValidate.ValidateEndpointReferences("/", e.Client)
 	if uw, ok := validationErr.(interface{ Unwrap() []error }); ok {
 		errs := uw.Unwrap()
-		// we expect four errors, because we do not have a real azure environment running
-		assert.Len(t, errs, 5)
-		assert.Contains(t, errs[0].Error(), "GET /com.steadybit.extension_azure") // failed to get all virtual machines
-		assert.Contains(t, errs[1].Error(), "GET /com.steadybit.extension_azure") // failed to get all scale sets
-		assert.Contains(t, errs[2].Error(), "GET /com.steadybit.extension_azure") // failed to get all azure functions
-		assert.Contains(t, errs[3].Error(), "GET /com.steadybit.extension_azure") // failed to get all network security groups
-		assert.Contains(t, errs[4].Error(), "GET /com.steadybit.extension_azure") // failed to get all container apps
+		// Every enabled discovery hits Azure (or Resource Graph) and fails because the Minikube test
+		// environment has no Azure backend. We expect one error per enabled discovery: 5 pre-existing
+		// + 14 added in feat/expand-azure-targets-and-attacks = 19 total.
+		const expectedDiscoveryCount = 19
+		assert.Len(t, errs, expectedDiscoveryCount)
+		for i, err := range errs {
+			assert.Contains(t, err.Error(), "GET /com.steadybit.extension_azure",
+				"error %d should be a discovery endpoint failure", i)
+		}
 	} else {
 		assert.NoError(t, validationErr)
 	}
