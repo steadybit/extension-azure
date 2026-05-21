@@ -138,6 +138,17 @@ func (a *nodePoolTerminateInstancesAttack) Prepare(ctx context.Context, state *N
 	if sampleSize > len(allNames) {
 		sampleSize = len(allNames)
 	}
+	// AKS rejects deleting every node in a system pool (control-plane needs at least one survivor).
+	// Catch it here with an actionable error instead of letting the deleteMachines call fail mid-experiment.
+	if sampleSize >= len(allNames) {
+		mode := mustHave(request.Target.Attributes, "azure.aks.nodepool.mode")
+		if mode == "System" {
+			return nil, extension_kit.ToError(fmt.Sprintf(
+				"Cannot terminate all %d node(s) of system node pool %s/%s: AKS requires at least one surviving system node. Reduce the percentage, scale up the pool, or target a user node pool instead.",
+				len(allNames), state.ClusterName, state.NodePoolName), nil)
+		}
+	}
+
 	perm := a.rng(len(allNames))
 	state.MachineNames = make([]string, 0, sampleSize)
 	for i := 0; i < sampleSize; i++ {

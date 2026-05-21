@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v6"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
@@ -93,127 +93,204 @@ func (d *nodePoolDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDe
 }
 
 func (d *nodePoolDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_api.Target, error) {
-	client, err := common.GetClientByCredentials()
+	rgClient, err := common.GetClientByCredentials()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get client: %w", err)
+		return nil, fmt.Errorf("failed to get Resource Graph client: %w", err)
 	}
-	return getAllAksNodePools(ctx, client)
+	return getAllAksNodePools(ctx, rgClient, sdkAksAgentPoolLister(newAgentPoolsClient))
 }
 
-func getAllAksNodePools(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
+// aksClusterRef carries the addressing fields needed to issue per-cluster AgentPool listings.
+type aksClusterRef struct {
+	name           string
+	resourceGroup  string
+	subscriptionId string
+	location       string
+}
+
+// aksAgentPoolLister returns all agent pools for one cluster. Indirection over the SDK pager so
+// tests can swap a fake implementation.
+type aksAgentPoolLister func(ctx context.Context, subscriptionId, resourceGroup, clusterName string) ([]*armcontainerservice.AgentPool, error)
+
+// sdkAksAgentPoolLister wraps the SDK pager into a flat lister. Production use only.
+func sdkAksAgentPoolLister(provider func(subscriptionId string) (*armcontainerservice.AgentPoolsClient, error)) aksAgentPoolLister {
+	return func(ctx context.Context, subscriptionId, resourceGroup, clusterName string) ([]*armcontainerservice.AgentPool, error) {
+		client, err := provider(subscriptionId)
+		if err != nil {
+			return nil, err
+		}
+		pager := client.NewListPager(resourceGroup, clusterName, nil)
+		var pools []*armcontainerservice.AgentPool
+		for pager.More() {
+			page, err := pager.NextPage(ctx)
+			if err != nil {
+				return pools, err
+			}
+			pools = append(pools, page.Value...)
+		}
+		return pools, nil
+	}
+}
+
+// getAllAksNodePools lists AKS node pools via direct ARM. Resource Graph indexes the
+// Microsoft.ContainerService/managedClusters/agentPools type with a multi-minute lag, which makes
+// ad-hoc dev testing painful (newly-created clusters' pools don't appear for ~15-20 min). Direct
+// ARM is real-time. Clusters themselves still come from Resource Graph because their cardinality
+// is low and the lag matters less at the cluster level.
+func getAllAksNodePools(ctx context.Context, rgClient common.ArmResourceGraphApi, lister aksAgentPoolLister) ([]discovery_kit_api.Target, error) {
+	clusters, err := listAksClusterRefs(ctx, rgClient)
+	if err != nil {
+		return nil, err
+	}
+
+	targets := make([]discovery_kit_api.Target, 0)
+	for _, c := range clusters {
+		pools, err := lister(ctx, c.subscriptionId, c.resourceGroup, c.name)
+		if err != nil {
+			log.Warn().Err(err).Msgf("failed to list AKS node pools for cluster %s/%s; skipping", c.subscriptionId, c.name)
+			continue
+		}
+		for _, p := range pools {
+			if p == nil {
+				continue
+			}
+			targets = append(targets, nodePoolTargetFromSDK(p, c))
+		}
+	}
+	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesAksNodePool), nil
+}
+
+func listAksClusterRefs(ctx context.Context, rgClient common.ArmResourceGraphApi) ([]aksClusterRef, error) {
 	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
 	var subscriptions []*string
 	if subscriptionId != "" {
 		subscriptions = []*string{&subscriptionId}
 	}
-	// AKS node pools live as separate ARM resources of type Microsoft.ContainerService/managedClusters/agentPools.
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.ContainerService/managedClusters/agentPools' | project id, name, type, resourceGroup, location, properties, subscriptionId"),
+	results, err := rgClient.Resources(ctx, armresourcegraph.QueryRequest{
+		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.ContainerService/managedClusters' | project name, resourceGroup, location, subscriptionId"),
 		Options: &armresourcegraph.QueryRequestOptions{
 			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 		},
 		Subscriptions: subscriptions,
 	}, nil)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get AKS node pool results")
+		log.Error().Err(err).Msgf("failed to list AKS clusters from Resource Graph")
 		return nil, err
 	}
 
-	targets := make([]discovery_kit_api.Target, 0)
+	refs := make([]aksClusterRef, 0)
 	rows, ok := results.Data.([]any)
 	if !ok {
-		return targets, nil
+		return refs, nil
 	}
 	for _, r := range rows {
 		items, ok := r.(map[string]any)
 		if !ok {
 			continue
 		}
-		targets = append(targets, toNodePoolTarget(items))
+		refs = append(refs, aksClusterRef{
+			name:           stringFromMap(items, "name"),
+			resourceGroup:  stringFromMap(items, "resourceGroup"),
+			subscriptionId: stringFromMap(items, "subscriptionId"),
+			location:       stringFromMap(items, "location"),
+		})
 	}
-	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesAksNodePool), nil
+	return refs, nil
 }
 
-func toNodePoolTarget(items map[string]any) discovery_kit_api.Target {
-	properties := common.GetMapValue(items, "properties")
-	upgradeSettings := common.GetMapValue(properties, "upgradeSettings")
-
-	id, _ := items["id"].(string)
-	name, _ := items["name"].(string) // ARM returns "<cluster>/<pool>" for child resources
-	clusterName := name
-	poolName := name
-	if i := strings.Index(name, "/"); i >= 0 {
-		clusterName = name[:i]
-		poolName = name[i+1:]
+func nodePoolTargetFromSDK(p *armcontainerservice.AgentPool, c aksClusterRef) discovery_kit_api.Target {
+	poolName := ""
+	if p.Name != nil {
+		poolName = *p.Name
 	}
-	label := fmt.Sprintf("%s/%s", clusterName, poolName)
-
-	attributes := make(map[string][]string)
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
-	attributes["azure.aks.cluster.name"] = []string{clusterName}
-	// Surface the cluster-wide k8s.cluster-name attribute so extension-kubernetes's targets can be joined
-	// to this node pool via enrichment (matches the AKS cluster target's k8s.cluster-name).
-	attributes["k8s.cluster-name"] = []string{clusterName}
-	attributes["azure.aks.nodepool.name"] = []string{poolName}
-
-	if v := stringFromMap(properties, "mode"); v != "" {
-		attributes["azure.aks.nodepool.mode"] = []string{v}
-	}
-	if v := stringFromMap(properties, "scaleSetPriority"); v != "" {
-		attributes["azure.aks.nodepool.scale-set-priority"] = []string{v}
-	}
-	if v := stringFromMap(properties, "scaleSetEvictionPolicy"); v != "" {
-		attributes["azure.aks.nodepool.scale-set-eviction-policy"] = []string{v}
-	}
-	if v := stringFromMap(properties, "osType"); v != "" {
-		attributes["azure.aks.nodepool.os-type"] = []string{v}
-	}
-	if v := stringFromMap(properties, "osSKU"); v != "" {
-		attributes["azure.aks.nodepool.os-sku"] = []string{v}
-	}
-	if v := stringFromMap(properties, "vmSize"); v != "" {
-		attributes["azure.aks.nodepool.vm-size"] = []string{v}
-	}
-	if v := stringFromMap(properties, "orchestratorVersion"); v != "" {
-		attributes["azure.aks.nodepool.orchestrator-version"] = []string{v}
-	}
-	if v := stringFromMap(properties, "provisioningState"); v != "" {
-		attributes["azure.aks.nodepool.provisioning-state"] = []string{v}
-	}
-	if v, ok := properties["minCount"].(float64); ok {
-		attributes["azure.aks.nodepool.min-count"] = []string{strconv.Itoa(int(v))}
-	}
-	if v, ok := properties["maxCount"].(float64); ok {
-		attributes["azure.aks.nodepool.max-count"] = []string{strconv.Itoa(int(v))}
-	}
-	if v, ok := properties["enableAutoScaling"].(bool); ok {
-		attributes["azure.aks.nodepool.enable-auto-scaling"] = []string{strconv.FormatBool(v)}
-	}
-	if v, ok := properties["maxPods"].(float64); ok {
-		attributes["azure.aks.nodepool.max-pods"] = []string{strconv.Itoa(int(v))}
-	}
-	if zones := stringSliceFromMap(properties, "availabilityZones"); len(zones) > 0 {
-		sort.Strings(zones)
-		attributes["azure.aks.nodepool.availability-zones"] = zones
-	}
-	if taints := stringSliceFromMap(properties, "nodeTaints"); len(taints) > 0 {
-		sort.Strings(taints)
-		attributes["azure.aks.nodepool.taints"] = taints
-	}
-	if v := stringFromMap(upgradeSettings, "maxSurge"); v != "" {
-		attributes["azure.aks.nodepool.upgrade-settings.max-surge"] = []string{v}
+	id := ""
+	if p.ID != nil {
+		id = *p.ID
 	}
 
-	for k, v := range common.GetMapValue(items, "tags") {
-		attributes[fmt.Sprintf("azure.aks.nodepool.label.%s", strings.ToLower(k))] = []string{extutil.ToString(v)}
+	attributes := map[string][]string{
+		"azure.subscription.id":     {c.subscriptionId},
+		"azure.resource-group.name": {c.resourceGroup},
+		"azure.location":            {c.location},
+		"azure.aks.cluster.name":    {c.name},
+		// Surface the cluster-wide k8s.cluster-name attribute so extension-kubernetes's targets can be
+		// joined to this node pool via enrichment (matches the AKS cluster target's k8s.cluster-name).
+		"k8s.cluster-name":           {c.name},
+		"azure.aks.nodepool.name":    {poolName},
+	}
+
+	if pp := p.Properties; pp != nil {
+		if pp.Mode != nil {
+			attributes["azure.aks.nodepool.mode"] = []string{string(*pp.Mode)}
+		}
+		if pp.ScaleSetPriority != nil {
+			attributes["azure.aks.nodepool.scale-set-priority"] = []string{string(*pp.ScaleSetPriority)}
+		}
+		if pp.ScaleSetEvictionPolicy != nil {
+			attributes["azure.aks.nodepool.scale-set-eviction-policy"] = []string{string(*pp.ScaleSetEvictionPolicy)}
+		}
+		if pp.OSType != nil {
+			attributes["azure.aks.nodepool.os-type"] = []string{string(*pp.OSType)}
+		}
+		if pp.OSSKU != nil {
+			attributes["azure.aks.nodepool.os-sku"] = []string{string(*pp.OSSKU)}
+		}
+		if pp.VMSize != nil {
+			attributes["azure.aks.nodepool.vm-size"] = []string{*pp.VMSize}
+		}
+		if pp.OrchestratorVersion != nil {
+			attributes["azure.aks.nodepool.orchestrator-version"] = []string{*pp.OrchestratorVersion}
+		}
+		if pp.ProvisioningState != nil {
+			attributes["azure.aks.nodepool.provisioning-state"] = []string{*pp.ProvisioningState}
+		}
+		if pp.MinCount != nil {
+			attributes["azure.aks.nodepool.min-count"] = []string{strconv.Itoa(int(*pp.MinCount))}
+		}
+		if pp.MaxCount != nil {
+			attributes["azure.aks.nodepool.max-count"] = []string{strconv.Itoa(int(*pp.MaxCount))}
+		}
+		if pp.EnableAutoScaling != nil {
+			attributes["azure.aks.nodepool.enable-auto-scaling"] = []string{strconv.FormatBool(*pp.EnableAutoScaling)}
+		}
+		if pp.MaxPods != nil {
+			attributes["azure.aks.nodepool.max-pods"] = []string{strconv.Itoa(int(*pp.MaxPods))}
+		}
+		if len(pp.AvailabilityZones) > 0 {
+			zones := make([]string, 0, len(pp.AvailabilityZones))
+			for _, z := range pp.AvailabilityZones {
+				if z != nil {
+					zones = append(zones, *z)
+				}
+			}
+			sort.Strings(zones)
+			attributes["azure.aks.nodepool.availability-zones"] = zones
+		}
+		if len(pp.NodeTaints) > 0 {
+			taints := make([]string, 0, len(pp.NodeTaints))
+			for _, t := range pp.NodeTaints {
+				if t != nil {
+					taints = append(taints, *t)
+				}
+			}
+			sort.Strings(taints)
+			attributes["azure.aks.nodepool.taints"] = taints
+		}
+		if pp.UpgradeSettings != nil && pp.UpgradeSettings.MaxSurge != nil {
+			attributes["azure.aks.nodepool.upgrade-settings.max-surge"] = []string{*pp.UpgradeSettings.MaxSurge}
+		}
+		for k, v := range pp.Tags {
+			if v != nil {
+				attributes[fmt.Sprintf("azure.aks.nodepool.label.%s", k)] = []string{*v}
+			}
+		}
 	}
 
 	return discovery_kit_api.Target{
 		Id:         id,
 		TargetType: TargetIDNodePool,
-		Label:      label,
+		Label:      fmt.Sprintf("%s/%s", c.name, poolName),
 		Attributes: attributes,
 	}
 }
+
