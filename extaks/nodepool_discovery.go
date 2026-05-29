@@ -52,7 +52,7 @@ func (d *nodePoolDiscovery) DescribeTarget() discovery_kit_api.TargetDescription
 	return discovery_kit_api.TargetDescription{
 		Id:       TargetIDNodePool,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(targetIcon),
+		Icon:     extutil.Ptr(nodePoolIcon),
 		Label:    discovery_kit_api.PluralLabel{One: "Azure AKS node pool", Other: "Azure AKS node pools"},
 		Category: extutil.Ptr("cloud"),
 		Table: discovery_kit_api.Table{

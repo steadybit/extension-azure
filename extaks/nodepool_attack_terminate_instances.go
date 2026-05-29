@@ -60,7 +60,7 @@ func (a *nodePoolTerminateInstancesAttack) Describe() action_kit_api.ActionDescr
 			"With cluster-autoscaler enabled, AKS replaces the deleted nodes within minutes; without autoscaling, the pool shrinks until manually scaled back. " +
 			"Validates pod rescheduling, PDB enforcement, and cluster-autoscaler scale-up timing.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(targetIcon),
+		Icon:    extutil.Ptr(nodePoolIcon),
 		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
 			TargetType: TargetIDNodePool,
 			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
