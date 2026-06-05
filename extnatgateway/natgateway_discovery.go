@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -22,7 +20,6 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"os"
 )
 
 const (
@@ -92,34 +89,12 @@ func (d *natGatewayDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_
 }
 
 func getAllNatGateways(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	var subscriptions []*string
-	if subscriptionId != "" {
-		subscriptions = []*string{&subscriptionId}
-	}
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.Network/natGateways' | project id, name, type, resourceGroup, location, tags, properties, sku, zones, subscriptionId"),
-		Options: &armresourcegraph.QueryRequestOptions{
-			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
-		},
-		Subscriptions: subscriptions,
-	}, nil)
+	targets, err := common.DiscoverViaResourceGraph(ctx, client,
+		"Resources | where type =~ 'Microsoft.Network/natGateways' | project id, name, type, resourceGroup, location, tags, properties, sku, zones, subscriptionId",
+		toNatGatewayTarget)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get NAT Gateway results")
+		log.Error().Err(err).Msg("failed to get NAT Gateway results")
 		return nil, err
-	}
-
-	targets := make([]discovery_kit_api.Target, 0)
-	rows, ok := results.Data.([]any)
-	if !ok {
-		return targets, nil
-	}
-	for _, r := range rows {
-		items, ok := r.(map[string]any)
-		if !ok {
-			continue
-		}
-		targets = append(targets, toNatGatewayTarget(items))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesNatGateway), nil
 }
@@ -133,21 +108,21 @@ func toNatGatewayTarget(items map[string]any) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["azure.nat-gateway.name"] = []string{name}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
+	attributes["azure.subscription.id"] = []string{common.StringFromMap(items, "subscriptionId")}
+	attributes["azure.resource-group.name"] = []string{common.StringFromMap(items, "resourceGroup")}
+	attributes["azure.location"] = []string{common.StringFromMap(items, "location")}
 
-	if v := stringFromMap(sku, "name"); v != "" {
+	if v := common.StringFromMap(sku, "name"); v != "" {
 		attributes["azure.nat-gateway.sku-name"] = []string{v}
 	}
-	if zones := stringSliceFromMap(items, "zones"); len(zones) > 0 {
+	if zones := common.StringSliceFromMap(items, "zones"); len(zones) > 0 {
 		sort.Strings(zones)
 		attributes["azure.nat-gateway.zones"] = zones
 	}
 	if v, ok := properties["idleTimeoutInMinutes"].(float64); ok {
 		attributes["azure.nat-gateway.idle-timeout-in-minutes"] = []string{strconv.Itoa(int(v))}
 	}
-	if v := stringFromMap(properties, "provisioningState"); v != "" {
+	if v := common.StringFromMap(properties, "provisioningState"); v != "" {
 		attributes["azure.nat-gateway.provisioning-state"] = []string{v}
 	}
 
@@ -194,33 +169,6 @@ func referenceIds(m map[string]any, key string) []string {
 		}
 		if id, ok := ref["id"].(string); ok && id != "" {
 			out = append(out, id)
-		}
-	}
-	return out
-}
-
-func stringFromMap(m map[string]any, key string) string {
-	if v, ok := m[key]; ok {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-	return ""
-}
-
-func stringSliceFromMap(m map[string]any, key string) []string {
-	v, ok := m[key]
-	if !ok {
-		return nil
-	}
-	arr, ok := v.([]any)
-	if !ok {
-		return nil
-	}
-	out := make([]string, 0, len(arr))
-	for _, e := range arr {
-		if s, ok := e.(string); ok && s != "" {
-			out = append(out, s)
 		}
 	}
 	return out

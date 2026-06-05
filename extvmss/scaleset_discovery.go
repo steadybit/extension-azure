@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -22,7 +20,6 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"os"
 )
 
 type scaleSetDiscovery struct{}
@@ -92,34 +89,12 @@ func (d *scaleSetDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_ki
 }
 
 func getAllScaleSets(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	var subscriptions []*string
-	if subscriptionId != "" {
-		subscriptions = []*string{&subscriptionId}
-	}
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.Compute/virtualMachineScaleSets' | project id, name, type, resourceGroup, location, tags, properties, sku, zones, subscriptionId"),
-		Options: &armresourcegraph.QueryRequestOptions{
-			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
-		},
-		Subscriptions: subscriptions,
-	}, nil)
+	targets, err := common.DiscoverViaResourceGraph(ctx, client,
+		"Resources | where type =~ 'Microsoft.Compute/virtualMachineScaleSets' | project id, name, type, resourceGroup, location, tags, properties, sku, zones, subscriptionId",
+		toScaleSetTarget)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get VMSS results")
+		log.Error().Err(err).Msg("failed to get VMSS results")
 		return nil, err
-	}
-
-	targets := make([]discovery_kit_api.Target, 0)
-	rows, ok := results.Data.([]any)
-	if !ok {
-		return targets, nil
-	}
-	for _, r := range rows {
-		items, ok := r.(map[string]any)
-		if !ok {
-			continue
-		}
-		targets = append(targets, toScaleSetTarget(items))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesScaleSet), nil
 }
@@ -136,14 +111,14 @@ func toScaleSetTarget(items map[string]any) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["azure.vmss.name"] = []string{name}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
+	attributes["azure.subscription.id"] = []string{common.StringFromMap(items, "subscriptionId")}
+	attributes["azure.resource-group.name"] = []string{common.StringFromMap(items, "resourceGroup")}
+	attributes["azure.location"] = []string{common.StringFromMap(items, "location")}
 
-	if v := stringFromMap(sku, "name"); v != "" {
+	if v := common.StringFromMap(sku, "name"); v != "" {
 		attributes["azure.vmss.sku.name"] = []string{v}
 	}
-	if v := stringFromMap(sku, "tier"); v != "" {
+	if v := common.StringFromMap(sku, "tier"); v != "" {
 		attributes["azure.vmss.sku.tier"] = []string{v}
 	}
 	if v, ok := sku["capacity"].(float64); ok {
@@ -153,7 +128,7 @@ func toScaleSetTarget(items map[string]any) discovery_kit_api.Target {
 		sort.Strings(zones)
 		attributes["azure.vmss.zones"] = zones
 	}
-	if v := stringFromMap(upgradePolicy, "mode"); v != "" {
+	if v := common.StringFromMap(upgradePolicy, "mode"); v != "" {
 		attributes["azure.vmss.upgrade-policy.mode"] = []string{v}
 	}
 	if v, ok := properties["platformFaultDomainCount"].(float64); ok {
@@ -165,16 +140,16 @@ func toScaleSetTarget(items map[string]any) discovery_kit_api.Target {
 	if v, ok := properties["zoneBalance"].(bool); ok {
 		attributes["azure.vmss.zone-balance"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(properties, "orchestrationMode"); v != "" {
+	if v := common.StringFromMap(properties, "orchestrationMode"); v != "" {
 		attributes["azure.vmss.orchestration-mode"] = []string{v}
 	}
-	if v := stringFromMap(properties, "provisioningState"); v != "" {
+	if v := common.StringFromMap(properties, "provisioningState"); v != "" {
 		attributes["azure.vmss.provisioning-state"] = []string{v}
 	}
-	if v := stringFromMap(vmProfile, "priority"); v != "" {
+	if v := common.StringFromMap(vmProfile, "priority"); v != "" {
 		attributes["azure.vmss.spot.priority"] = []string{v}
 	}
-	if v := stringFromMap(vmProfile, "evictionPolicy"); v != "" {
+	if v := common.StringFromMap(vmProfile, "evictionPolicy"); v != "" {
 		attributes["azure.vmss.spot.eviction-policy"] = []string{v}
 	}
 	_ = priorityProfile // reserved; could expose ratios in a follow-up
@@ -189,15 +164,6 @@ func toScaleSetTarget(items map[string]any) discovery_kit_api.Target {
 		Label:      name,
 		Attributes: attributes,
 	}
-}
-
-func stringFromMap(m map[string]any, key string) string {
-	if v, ok := m[key]; ok {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-	return ""
 }
 
 func topLevelStringSlice(m map[string]any, key string) []string {

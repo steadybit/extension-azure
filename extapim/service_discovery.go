@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -22,7 +20,6 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"os"
 )
 
 const (
@@ -96,33 +93,12 @@ func (d *apimDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_ap
 }
 
 func getAllApimServices(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	var subscriptions []*string
-	if subscriptionId != "" {
-		subscriptions = []*string{&subscriptionId}
-	}
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.ApiManagement/service' | project id, name, type, resourceGroup, location, tags, properties, sku, zones, subscriptionId"),
-		Options: &armresourcegraph.QueryRequestOptions{
-			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
-		},
-		Subscriptions: subscriptions,
-	}, nil)
+	targets, err := common.DiscoverViaResourceGraph(ctx, client,
+		"Resources | where type =~ 'Microsoft.ApiManagement/service' | project id, name, type, resourceGroup, location, tags, properties, sku, zones, subscriptionId",
+		toApimTarget)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get API Management results")
+		log.Error().Err(err).Msg("failed to get API Management results")
 		return nil, err
-	}
-	targets := make([]discovery_kit_api.Target, 0)
-	rows, ok := results.Data.([]any)
-	if !ok {
-		return targets, nil
-	}
-	for _, r := range rows {
-		items, ok := r.(map[string]any)
-		if !ok {
-			continue
-		}
-		targets = append(targets, toApimTarget(items))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesApiManagement), nil
 }
@@ -136,11 +112,11 @@ func toApimTarget(items map[string]any) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["azure.apim.service.name"] = []string{name}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
+	attributes["azure.subscription.id"] = []string{common.StringFromMap(items, "subscriptionId")}
+	attributes["azure.resource-group.name"] = []string{common.StringFromMap(items, "resourceGroup")}
+	attributes["azure.location"] = []string{common.StringFromMap(items, "location")}
 
-	if v := stringFromMap(sku, "name"); v != "" {
+	if v := common.StringFromMap(sku, "name"); v != "" {
 		attributes["azure.apim.sku-name"] = []string{v}
 	}
 	if v, ok := sku["capacity"].(float64); ok {
@@ -150,22 +126,22 @@ func toApimTarget(items map[string]any) discovery_kit_api.Target {
 		sort.Strings(zones)
 		attributes["azure.apim.zones"] = zones
 	}
-	if v := stringFromMap(properties, "gatewayUrl"); v != "" {
+	if v := common.StringFromMap(properties, "gatewayUrl"); v != "" {
 		attributes["azure.apim.gateway-url"] = []string{v}
 	}
-	if v := stringFromMap(properties, "developerPortalUrl"); v != "" {
+	if v := common.StringFromMap(properties, "developerPortalUrl"); v != "" {
 		attributes["azure.apim.developer-portal-url"] = []string{v}
 	}
-	if v := stringFromMap(properties, "virtualNetworkType"); v != "" {
+	if v := common.StringFromMap(properties, "virtualNetworkType"); v != "" {
 		attributes["azure.apim.virtual-network-type"] = []string{v}
 	}
-	if v := stringFromMap(properties, "publicNetworkAccess"); v != "" {
+	if v := common.StringFromMap(properties, "publicNetworkAccess"); v != "" {
 		attributes["azure.apim.public-network-access"] = []string{v}
 	}
 	if v, ok := properties["disableGateway"].(bool); ok {
 		attributes["azure.apim.disable-gateway"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(properties, "provisioningState"); v != "" {
+	if v := common.StringFromMap(properties, "provisioningState"); v != "" {
 		attributes["azure.apim.provisioning-state"] = []string{v}
 	}
 
@@ -176,7 +152,7 @@ func toApimTarget(items map[string]any) discovery_kit_api.Target {
 			if !ok {
 				continue
 			}
-			if n := stringFromMap(loc, "location"); n != "" {
+			if n := common.StringFromMap(loc, "location"); n != "" {
 				names = append(names, n)
 			}
 		}
@@ -214,13 +190,4 @@ func topLevelStringSlice(m map[string]any, key string) []string {
 		}
 	}
 	return out
-}
-
-func stringFromMap(m map[string]any, key string) string {
-	if v, ok := m[key]; ok {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-	return ""
 }

@@ -16,8 +16,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -26,7 +24,6 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"os"
 )
 
 const (
@@ -102,35 +99,14 @@ func (d *accountDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit
 }
 
 func getAllStorageAccounts(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	var subscriptions []*string
-	if subscriptionId != "" {
-		subscriptions = []*string{&subscriptionId}
-	}
 	// We surface all storage accounts (not only those known to host queues) — most accounts can host queues, and the
 	// exact list of queues is not relevant for reliability findings. Filter at agent / experiment level if needed.
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.Storage/storageAccounts' | project id, name, kind, type, resourceGroup, location, tags, properties, sku, subscriptionId"),
-		Options: &armresourcegraph.QueryRequestOptions{
-			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
-		},
-		Subscriptions: subscriptions,
-	}, nil)
+	targets, err := common.DiscoverViaResourceGraph(ctx, client,
+		"Resources | where type =~ 'Microsoft.Storage/storageAccounts' | project id, name, kind, type, resourceGroup, location, tags, properties, sku, subscriptionId",
+		toStorageAccountTarget)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get Storage account results")
+		log.Error().Err(err).Msg("failed to get Storage account results")
 		return nil, err
-	}
-	targets := make([]discovery_kit_api.Target, 0)
-	rows, ok := results.Data.([]any)
-	if !ok {
-		return targets, nil
-	}
-	for _, r := range rows {
-		items, ok := r.(map[string]any)
-		if !ok {
-			continue
-		}
-		targets = append(targets, toStorageAccountTarget(items))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesStorageQueue), nil
 }
@@ -146,20 +122,20 @@ func toStorageAccountTarget(items map[string]any) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["azure.storage.account.name"] = []string{name}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
+	attributes["azure.subscription.id"] = []string{common.StringFromMap(items, "subscriptionId")}
+	attributes["azure.resource-group.name"] = []string{common.StringFromMap(items, "resourceGroup")}
+	attributes["azure.location"] = []string{common.StringFromMap(items, "location")}
 
-	if v := stringFromMap(items, "kind"); v != "" {
+	if v := common.StringFromMap(items, "kind"); v != "" {
 		attributes["azure.storage.kind"] = []string{v}
 	}
-	if v := stringFromMap(sku, "name"); v != "" {
+	if v := common.StringFromMap(sku, "name"); v != "" {
 		attributes["azure.storage.sku-name"] = []string{v}
 	}
-	if v := stringFromMap(sku, "tier"); v != "" {
+	if v := common.StringFromMap(sku, "tier"); v != "" {
 		attributes["azure.storage.sku-tier"] = []string{v}
 	}
-	if v := stringFromMap(properties, "publicNetworkAccess"); v != "" {
+	if v := common.StringFromMap(properties, "publicNetworkAccess"); v != "" {
 		attributes["azure.storage.public-network-access"] = []string{v}
 	}
 	if v, ok := properties["allowBlobPublicAccess"].(bool); ok {
@@ -168,22 +144,22 @@ func toStorageAccountTarget(items map[string]any) discovery_kit_api.Target {
 	if v, ok := properties["allowSharedKeyAccess"].(bool); ok {
 		attributes["azure.storage.allow-shared-key-access"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(properties, "minimumTlsVersion"); v != "" {
+	if v := common.StringFromMap(properties, "minimumTlsVersion"); v != "" {
 		attributes["azure.storage.minimum-tls-version"] = []string{v}
 	}
 	if v, ok := properties["supportsHttpsTrafficOnly"].(bool); ok {
 		attributes["azure.storage.supports-https-traffic-only"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(encryption, "keySource"); v != "" {
+	if v := common.StringFromMap(encryption, "keySource"); v != "" {
 		attributes["azure.storage.encryption.key-source"] = []string{v}
 	}
 	if v, ok := encryption["requireInfrastructureEncryption"].(bool); ok {
 		attributes["azure.storage.encryption.require-infrastructure-encryption"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(primaryEndpoints, "queue"); v != "" {
+	if v := common.StringFromMap(primaryEndpoints, "queue"); v != "" {
 		attributes["azure.storage.queue.endpoint"] = []string{v}
 	}
-	if v := stringFromMap(properties, "provisioningState"); v != "" {
+	if v := common.StringFromMap(properties, "provisioningState"); v != "" {
 		attributes["azure.storage.provisioning-state"] = []string{v}
 	}
 
@@ -197,13 +173,4 @@ func toStorageAccountTarget(items map[string]any) discovery_kit_api.Target {
 		Label:      name,
 		Attributes: attributes,
 	}
-}
-
-func stringFromMap(m map[string]any, key string) string {
-	if v, ok := m[key]; ok {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-	return ""
 }

@@ -153,10 +153,10 @@ func listServiceBusNamespaceRefs(ctx context.Context, rgClient common.ArmResourc
 			continue
 		}
 		refs = append(refs, serviceBusNamespaceRef{
-			name:           stringFromMap(items, "name"),
-			resourceGroup:  stringFromMap(items, "resourceGroup"),
-			subscriptionId: stringFromMap(items, "subscriptionId"),
-			location:       stringFromMap(items, "location"),
+			name:           common.StringFromMap(items, "name"),
+			resourceGroup:  common.StringFromMap(items, "resourceGroup"),
+			subscriptionId: common.StringFromMap(items, "subscriptionId"),
+			location:       common.StringFromMap(items, "location"),
 		})
 	}
 	return refs, nil

@@ -142,22 +142,22 @@ func toSubscriptionTarget(items map[string]any) discovery_kit_api.Target {
 	if parent != "" {
 		attributes["azure.eventgrid.subscription.topic"] = []string{parent}
 	}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
+	attributes["azure.subscription.id"] = []string{common.StringFromMap(items, "subscriptionId")}
+	attributes["azure.resource-group.name"] = []string{common.StringFromMap(items, "resourceGroup")}
+	attributes["azure.location"] = []string{common.StringFromMap(items, "location")}
 
-	if v := stringFromMap(destination, "endpointType"); v != "" {
+	if v := common.StringFromMap(destination, "endpointType"); v != "" {
 		attributes["azure.eventgrid.subscription.endpoint-type"] = []string{v}
 	}
-	if v := stringFromMap(properties, "eventDeliverySchema"); v != "" {
+	if v := common.StringFromMap(properties, "eventDeliverySchema"); v != "" {
 		attributes["azure.eventgrid.subscription.event-delivery-schema"] = []string{v}
 	}
-	if v := stringFromMap(properties, "provisioningState"); v != "" {
+	if v := common.StringFromMap(properties, "provisioningState"); v != "" {
 		attributes["azure.eventgrid.subscription.provisioning-state"] = []string{v}
 	}
 
 	dlqConfigured := false
-	if endpointType := stringFromMap(deadLetter, "endpointType"); endpointType != "" {
+	if endpointType := common.StringFromMap(deadLetter, "endpointType"); endpointType != "" {
 		dlqConfigured = true
 	}
 	attributes["azure.eventgrid.subscription.dlq.configured"] = []string{strconv.FormatBool(dlqConfigured)}

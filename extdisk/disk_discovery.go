@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -22,7 +20,6 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"os"
 )
 
 const (
@@ -100,34 +97,12 @@ func (d *diskDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_ap
 }
 
 func getAllDisks(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	var subscriptions []*string
-	if subscriptionId != "" {
-		subscriptions = []*string{&subscriptionId}
-	}
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.Compute/disks' | project id, name, type, resourceGroup, location, tags, properties, sku, zones, managedBy, subscriptionId"),
-		Options: &armresourcegraph.QueryRequestOptions{
-			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
-		},
-		Subscriptions: subscriptions,
-	}, nil)
+	targets, err := common.DiscoverViaResourceGraph(ctx, client,
+		"Resources | where type =~ 'Microsoft.Compute/disks' | project id, name, type, resourceGroup, location, tags, properties, sku, zones, managedBy, subscriptionId",
+		toDiskTarget)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get disk results")
+		log.Error().Err(err).Msg("failed to get disk results")
 		return nil, err
-	}
-
-	targets := make([]discovery_kit_api.Target, 0)
-	rows, ok := results.Data.([]any)
-	if !ok {
-		return targets, nil
-	}
-	for _, r := range rows {
-		items, ok := r.(map[string]any)
-		if !ok {
-			continue
-		}
-		targets = append(targets, toDiskTarget(items))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesManagedDisk), nil
 }
@@ -142,11 +117,11 @@ func toDiskTarget(items map[string]any) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["azure.disk.name"] = []string{name}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
+	attributes["azure.subscription.id"] = []string{common.StringFromMap(items, "subscriptionId")}
+	attributes["azure.resource-group.name"] = []string{common.StringFromMap(items, "resourceGroup")}
+	attributes["azure.location"] = []string{common.StringFromMap(items, "location")}
 
-	if v := stringFromMap(sku, "name"); v != "" {
+	if v := common.StringFromMap(sku, "name"); v != "" {
 		attributes["azure.disk.sku-name"] = []string{v}
 	}
 	if v, ok := properties["diskSizeGB"].(float64); ok {
@@ -158,22 +133,22 @@ func toDiskTarget(items map[string]any) discovery_kit_api.Target {
 	if v, ok := properties["diskMBpsReadWrite"].(float64); ok {
 		attributes["azure.disk.mbps-read-write"] = []string{strconv.Itoa(int(v))}
 	}
-	if v := stringFromMap(properties, "osType"); v != "" {
+	if v := common.StringFromMap(properties, "osType"); v != "" {
 		attributes["azure.disk.os-type"] = []string{v}
 	}
-	if v := stringFromMap(properties, "diskState"); v != "" {
+	if v := common.StringFromMap(properties, "diskState"); v != "" {
 		attributes["azure.disk.disk-state"] = []string{v}
 	}
-	if v := stringFromMap(encryption, "type"); v != "" {
+	if v := common.StringFromMap(encryption, "type"); v != "" {
 		attributes["azure.disk.encryption.type"] = []string{v}
 	}
-	if v := stringFromMap(encryption, "diskEncryptionSetId"); v != "" {
+	if v := common.StringFromMap(encryption, "diskEncryptionSetId"); v != "" {
 		attributes["azure.disk.encryption.set-id"] = []string{v}
 	}
-	if v := stringFromMap(properties, "publicNetworkAccess"); v != "" {
+	if v := common.StringFromMap(properties, "publicNetworkAccess"); v != "" {
 		attributes["azure.disk.public-network-access"] = []string{v}
 	}
-	if v := stringFromMap(properties, "networkAccessPolicy"); v != "" {
+	if v := common.StringFromMap(properties, "networkAccessPolicy"); v != "" {
 		attributes["azure.disk.network-access-policy"] = []string{v}
 	}
 	if v, ok := properties["maxShares"].(float64); ok {
@@ -182,10 +157,10 @@ func toDiskTarget(items map[string]any) discovery_kit_api.Target {
 	if v, ok := properties["burstingEnabled"].(bool); ok {
 		attributes["azure.disk.bursting-enabled"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(items, "managedBy"); v != "" {
+	if v := common.StringFromMap(items, "managedBy"); v != "" {
 		attributes["azure.disk.managed-by"] = []string{v}
 	}
-	if zones := stringSliceFromMap(items, "zones"); len(zones) > 0 {
+	if zones := common.StringSliceFromMap(items, "zones"); len(zones) > 0 {
 		sort.Strings(zones)
 		attributes["azure.disk.zones"] = zones
 	}
@@ -202,29 +177,3 @@ func toDiskTarget(items map[string]any) discovery_kit_api.Target {
 	}
 }
 
-func stringFromMap(m map[string]any, key string) string {
-	if v, ok := m[key]; ok {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-	return ""
-}
-
-func stringSliceFromMap(m map[string]any, key string) []string {
-	v, ok := m[key]
-	if !ok {
-		return nil
-	}
-	arr, ok := v.([]any)
-	if !ok {
-		return nil
-	}
-	out := make([]string, 0, len(arr))
-	for _, e := range arr {
-		if s, ok := e.(string); ok && s != "" {
-			out = append(out, s)
-		}
-	}
-	return out
-}

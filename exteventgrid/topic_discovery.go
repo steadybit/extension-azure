@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -21,7 +19,6 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"os"
 )
 
 const (
@@ -91,33 +88,12 @@ func (d *topicDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit_a
 }
 
 func getAllTopics(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	var subscriptions []*string
-	if subscriptionId != "" {
-		subscriptions = []*string{&subscriptionId}
-	}
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.EventGrid/topics' or type =~ 'Microsoft.EventGrid/systemTopics' or type =~ 'Microsoft.EventGrid/domains' | project id, name, type, kind, resourceGroup, location, tags, properties, subscriptionId"),
-		Options: &armresourcegraph.QueryRequestOptions{
-			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
-		},
-		Subscriptions: subscriptions,
-	}, nil)
+	targets, err := common.DiscoverViaResourceGraph(ctx, client,
+		"Resources | where type =~ 'Microsoft.EventGrid/topics' or type =~ 'Microsoft.EventGrid/systemTopics' or type =~ 'Microsoft.EventGrid/domains' | project id, name, type, kind, resourceGroup, location, tags, properties, subscriptionId",
+		toTopicTarget)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get Event Grid topic results")
+		log.Error().Err(err).Msg("failed to get Event Grid topic results")
 		return nil, err
-	}
-	targets := make([]discovery_kit_api.Target, 0)
-	rows, ok := results.Data.([]any)
-	if !ok {
-		return targets, nil
-	}
-	for _, r := range rows {
-		items, ok := r.(map[string]any)
-		if !ok {
-			continue
-		}
-		targets = append(targets, toTopicTarget(items))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesEventGrid), nil
 }
@@ -139,24 +115,24 @@ func toTopicTarget(items map[string]any) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["azure.eventgrid.topic.name"] = []string{name}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
+	attributes["azure.subscription.id"] = []string{common.StringFromMap(items, "subscriptionId")}
+	attributes["azure.resource-group.name"] = []string{common.StringFromMap(items, "resourceGroup")}
+	attributes["azure.location"] = []string{common.StringFromMap(items, "location")}
 	attributes["azure.eventgrid.topic.kind"] = []string{kind}
 
-	if v := stringFromMap(properties, "inputSchema"); v != "" {
+	if v := common.StringFromMap(properties, "inputSchema"); v != "" {
 		attributes["azure.eventgrid.topic.input-schema"] = []string{v}
 	}
-	if v := stringFromMap(properties, "publicNetworkAccess"); v != "" {
+	if v := common.StringFromMap(properties, "publicNetworkAccess"); v != "" {
 		attributes["azure.eventgrid.topic.public-network-access"] = []string{v}
 	}
 	if v, ok := properties["disableLocalAuth"].(bool); ok {
 		attributes["azure.eventgrid.topic.local-auth-disabled"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(properties, "endpoint"); v != "" {
+	if v := common.StringFromMap(properties, "endpoint"); v != "" {
 		attributes["azure.eventgrid.topic.endpoint"] = []string{v}
 	}
-	if v := stringFromMap(properties, "provisioningState"); v != "" {
+	if v := common.StringFromMap(properties, "provisioningState"); v != "" {
 		attributes["azure.eventgrid.topic.provisioning-state"] = []string{v}
 	}
 
@@ -170,13 +146,4 @@ func toTopicTarget(items map[string]any) discovery_kit_api.Target {
 		Label:      name,
 		Attributes: attributes,
 	}
-}
-
-func stringFromMap(m map[string]any, key string) string {
-	if v, ok := m[key]; ok {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-	return ""
 }

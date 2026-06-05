@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -21,7 +19,6 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"os"
 )
 
 const (
@@ -94,33 +91,12 @@ func (d *namespaceDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_k
 }
 
 func getAllNamespaces(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	var subscriptions []*string
-	if subscriptionId != "" {
-		subscriptions = []*string{&subscriptionId}
-	}
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.ServiceBus/namespaces' | project id, name, type, resourceGroup, location, tags, properties, sku, subscriptionId"),
-		Options: &armresourcegraph.QueryRequestOptions{
-			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
-		},
-		Subscriptions: subscriptions,
-	}, nil)
+	targets, err := common.DiscoverViaResourceGraph(ctx, client,
+		"Resources | where type =~ 'Microsoft.ServiceBus/namespaces' | project id, name, type, resourceGroup, location, tags, properties, sku, subscriptionId",
+		toNamespaceTarget)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get Service Bus namespace results")
+		log.Error().Err(err).Msg("failed to get Service Bus namespace results")
 		return nil, err
-	}
-	targets := make([]discovery_kit_api.Target, 0)
-	rows, ok := results.Data.([]any)
-	if !ok {
-		return targets, nil
-	}
-	for _, r := range rows {
-		items, ok := r.(map[string]any)
-		if !ok {
-			continue
-		}
-		targets = append(targets, toNamespaceTarget(items))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesServiceBus), nil
 }
@@ -134,14 +110,14 @@ func toNamespaceTarget(items map[string]any) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["azure.servicebus.namespace.name"] = []string{name}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
+	attributes["azure.subscription.id"] = []string{common.StringFromMap(items, "subscriptionId")}
+	attributes["azure.resource-group.name"] = []string{common.StringFromMap(items, "resourceGroup")}
+	attributes["azure.location"] = []string{common.StringFromMap(items, "location")}
 
-	if v := stringFromMap(sku, "name"); v != "" {
+	if v := common.StringFromMap(sku, "name"); v != "" {
 		attributes["azure.servicebus.sku-name"] = []string{v}
 	}
-	if v := stringFromMap(sku, "tier"); v != "" {
+	if v := common.StringFromMap(sku, "tier"); v != "" {
 		attributes["azure.servicebus.sku-tier"] = []string{v}
 	}
 	if v, ok := sku["capacity"].(float64); ok {
@@ -150,19 +126,19 @@ func toNamespaceTarget(items map[string]any) discovery_kit_api.Target {
 	if v, ok := properties["zoneRedundant"].(bool); ok {
 		attributes["azure.servicebus.zone-redundant"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(properties, "minimumTlsVersion"); v != "" {
+	if v := common.StringFromMap(properties, "minimumTlsVersion"); v != "" {
 		attributes["azure.servicebus.minimum-tls-version"] = []string{v}
 	}
-	if v := stringFromMap(properties, "publicNetworkAccess"); v != "" {
+	if v := common.StringFromMap(properties, "publicNetworkAccess"); v != "" {
 		attributes["azure.servicebus.public-network-access"] = []string{v}
 	}
 	if v, ok := properties["disableLocalAuth"].(bool); ok {
 		attributes["azure.servicebus.disable-local-auth"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(properties, "provisioningState"); v != "" {
+	if v := common.StringFromMap(properties, "provisioningState"); v != "" {
 		attributes["azure.servicebus.provisioning-state"] = []string{v}
 	}
-	if v := stringFromMap(properties, "serviceBusEndpoint"); v != "" {
+	if v := common.StringFromMap(properties, "serviceBusEndpoint"); v != "" {
 		attributes["azure.servicebus.endpoint"] = []string{v}
 	}
 
@@ -176,13 +152,4 @@ func toNamespaceTarget(items map[string]any) discovery_kit_api.Target {
 		Label:      name,
 		Attributes: attributes,
 	}
-}
-
-func stringFromMap(m map[string]any, key string) string {
-	if v, ok := m[key]; ok {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-	return ""
 }

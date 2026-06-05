@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_commons"
@@ -22,7 +20,6 @@ import (
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
 	"github.com/steadybit/extension-kit/extutil"
-	"os"
 )
 
 const (
@@ -100,34 +97,12 @@ func (d *accountDiscovery) DiscoverTargets(ctx context.Context) ([]discovery_kit
 }
 
 func getAllCosmosDbAccounts(ctx context.Context, client common.ArmResourceGraphApi) ([]discovery_kit_api.Target, error) {
-	subscriptionId := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	var subscriptions []*string
-	if subscriptionId != "" {
-		subscriptions = []*string{&subscriptionId}
-	}
-	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.DocumentDB/databaseAccounts' | project id, name, kind, type, resourceGroup, location, tags, properties, subscriptionId"),
-		Options: &armresourcegraph.QueryRequestOptions{
-			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
-		},
-		Subscriptions: subscriptions,
-	}, nil)
+	targets, err := common.DiscoverViaResourceGraph(ctx, client,
+		"Resources | where type =~ 'Microsoft.DocumentDB/databaseAccounts' | project id, name, kind, type, resourceGroup, location, tags, properties, subscriptionId",
+		toCosmosDbAccountTarget)
 	if err != nil {
-		log.Error().Err(err).Msgf("failed to get Cosmos DB results")
+		log.Error().Err(err).Msg("failed to get Cosmos DB results")
 		return nil, err
-	}
-
-	targets := make([]discovery_kit_api.Target, 0)
-	rows, ok := results.Data.([]any)
-	if !ok {
-		return targets, nil
-	}
-	for _, r := range rows {
-		items, ok := r.(map[string]any)
-		if !ok {
-			continue
-		}
-		targets = append(targets, toCosmosDbAccountTarget(items))
 	}
 	return discovery_kit_commons.ApplyAttributeExcludes(targets, config.Config.DiscoveryAttributesExcludesCosmosDb), nil
 }
@@ -142,14 +117,14 @@ func toCosmosDbAccountTarget(items map[string]any) discovery_kit_api.Target {
 
 	attributes := make(map[string][]string)
 	attributes["azure.cosmosdb.account.name"] = []string{name}
-	attributes["azure.subscription.id"] = []string{stringFromMap(items, "subscriptionId")}
-	attributes["azure.resource-group.name"] = []string{stringFromMap(items, "resourceGroup")}
-	attributes["azure.location"] = []string{stringFromMap(items, "location")}
+	attributes["azure.subscription.id"] = []string{common.StringFromMap(items, "subscriptionId")}
+	attributes["azure.resource-group.name"] = []string{common.StringFromMap(items, "resourceGroup")}
+	attributes["azure.location"] = []string{common.StringFromMap(items, "location")}
 
-	if v := stringFromMap(items, "kind"); v != "" {
+	if v := common.StringFromMap(items, "kind"); v != "" {
 		attributes["azure.cosmosdb.api-kind"] = []string{v}
 	}
-	if v := stringFromMap(consistency, "defaultConsistencyLevel"); v != "" {
+	if v := common.StringFromMap(consistency, "defaultConsistencyLevel"); v != "" {
 		attributes["azure.cosmosdb.consistency-level"] = []string{v}
 	}
 	if v, ok := properties["enableMultipleWriteLocations"].(bool); ok {
@@ -158,7 +133,7 @@ func toCosmosDbAccountTarget(items map[string]any) discovery_kit_api.Target {
 	if v, ok := properties["enableAutomaticFailover"].(bool); ok {
 		attributes["azure.cosmosdb.enable-automatic-failover"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(properties, "publicNetworkAccess"); v != "" {
+	if v := common.StringFromMap(properties, "publicNetworkAccess"); v != "" {
 		attributes["azure.cosmosdb.public-network-access"] = []string{v}
 	}
 	if v, ok := properties["isVirtualNetworkFilterEnabled"].(bool); ok {
@@ -170,10 +145,10 @@ func toCosmosDbAccountTarget(items map[string]any) discovery_kit_api.Target {
 	if v, ok := properties["disableLocalAuth"].(bool); ok {
 		attributes["azure.cosmosdb.disable-local-auth"] = []string{strconv.FormatBool(v)}
 	}
-	if v := stringFromMap(backupPolicy, "type"); v != "" {
+	if v := common.StringFromMap(backupPolicy, "type"); v != "" {
 		attributes["azure.cosmosdb.backup-policy.type"] = []string{v}
 	}
-	if v := stringFromMap(properties, "provisioningState"); v != "" {
+	if v := common.StringFromMap(properties, "provisioningState"); v != "" {
 		attributes["azure.cosmosdb.provisioning-state"] = []string{v}
 	}
 
@@ -257,13 +232,4 @@ func anyZoneRedundant(properties map[string]any) *bool {
 		return nil
 	}
 	return &hasAny
-}
-
-func stringFromMap(m map[string]any, key string) string {
-	if v, ok := m[key]; ok {
-		if s, ok := v.(string); ok {
-			return s
-		}
-	}
-	return ""
 }
