@@ -1,0 +1,33 @@
+name: Refresh dev extension after publish
+
+# Triggers the "Restart extension-azure" workflow in steadybit/infrastructure-azure
+# after the ci pipeline publishes a new :main image, so the long-lived dev
+# container app picks up the change without waiting for the daily 04:00 UTC cron.
+#
+# Required secrets:
+#   PAT_TOKEN  with workflow_dispatch scope on steadybit/infrastructure-azure
+#              (same PAT used by experiments-azure dispatches).
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  refresh:
+    name: Dispatch Restart extension-azure
+    runs-on: ubuntu-latest
+    # Only refresh when the publish actually succeeded.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    timeout-minutes: 15
+
+    steps:
+      - name: Trigger Restart extension-azure
+        uses: the-actions-org/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # v4.0.0
+        with:
+          workflow: Restart extension-azure
+          ref: main
+          repo: steadybit/infrastructure-azure
+          token: ${{ secrets.PAT_TOKEN }}
+          wait-for-completion: false
