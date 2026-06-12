@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.1
+
+- feat: add weekly auto patch-release workflow
+
 ## v1.2.9
 
 - Support discovery group attribute via `STEADYBIT_EXTENSION_DISCOVERY_GROUP` env var (or `discovery.group` Helm value) — when set, the extension adds `steadybit.group=<value>` to every discovered target
