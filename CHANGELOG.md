@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.2
+
+- build: rename workflow_dispatch input labels for the GH UI
+- chore(deps): bump alpine from 3.23 to 3.24
+
 ## v1.3.1
 
 - feat: add weekly auto patch-release workflow
