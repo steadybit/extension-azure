@@ -2,12 +2,15 @@ package nsg
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
@@ -281,6 +284,12 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 			return nil, fmt.Errorf("failed to create a security rule: %s", err)
 		}
 
+		// Record the rule under the deterministic name we created it with (rather than the
+		// name echoed back by the API) before waiting for the operation to finish, so that a
+		// timed-out-but-completed create is still cleaned up. cleanupRules tolerates a rule
+		// that does not exist (yet).
+		state.NetworkSecurityRuleNames = append(state.NetworkSecurityRuleNames, ruleName)
+
 		_, err = sg.PollUntilDone(ctx, &runtime.PollUntilDoneOptions{
 			Frequency: time.Second * 5,
 		})
@@ -294,10 +303,6 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 
 			return nil, fmt.Errorf("failed to create a security rule (timeout): %s", err)
 		}
-
-		// Record the rule under the deterministic name we created it with (rather than the
-		// name echoed back by the API) so cleanup can always delete it.
-		state.NetworkSecurityRuleNames = append(state.NetworkSecurityRuleNames, ruleName)
 	}
 
 	return nil, nil
@@ -336,6 +341,9 @@ func cleanupRules(ctx context.Context, state *BlockActionState, client *armnetwo
 		poller, err := client.BeginDelete(ctx, state.ResourceGroupName, state.NetworkSecurityGroupName, ruleName, nil)
 
 		if err != nil {
+			if isNotFound(err) {
+				continue
+			}
 			return fmt.Errorf("unable to create a delete poller: %s", err)
 		}
 
@@ -344,8 +352,18 @@ func cleanupRules(ctx context.Context, state *BlockActionState, client *armnetwo
 		})
 
 		if err != nil {
+			if isNotFound(err) {
+				continue
+			}
 			return fmt.Errorf("failed to delete a security rule (timeout): %s", err)
 		}
 	}
 	return nil
+}
+
+// isNotFound reports whether err is an Azure "not found" response, so deleting a rule that was
+// never actually created (e.g. a create that timed out but did not complete) is treated as done.
+func isNotFound(err error) bool {
+	var respErr *azcore.ResponseError
+	return errors.As(err, &respErr) && respErr.StatusCode == http.StatusNotFound
 }

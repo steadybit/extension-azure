@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- fix: don't panic in the NSG block-traffic attack when the security-rule creation poll fails (the rule name was dereferenced before the error was checked), and record the created rule under its deterministic name so it is always cleaned up
+- fix: don't panic in the NSG block-traffic attack when the security-rule creation poll fails (the rule name was dereferenced before the error was checked), and record the created rule (under its deterministic name, before waiting for the operation) so it is cleaned up even if the create times out after the rule was already applied; cleanup now tolerates an already-removed rule
 - fix: return a clear error instead of panicking when the block-traffic 'hosts' configuration is missing or not a list
 
 ## v1.3.2
