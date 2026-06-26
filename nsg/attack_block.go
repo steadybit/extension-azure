@@ -110,7 +110,10 @@ func getInjectBlockDescription() action_kit_api.ActionDescription {
 }
 
 func injectBlock(request action_kit_api.PrepareActionRequestBody) (*BlockHostsConfig, error) {
-	hostsInterface := request.Config["hosts"].([]any)
+	hostsInterface, ok := request.Config["hosts"].([]any)
+	if !ok {
+		return nil, fmt.Errorf("the 'hosts' config is missing or not a list")
+	}
 	ipHosts := make([]string, 0)
 	hosts := make([]string, len(hostsInterface))
 	for i, h := range hostsInterface {
@@ -249,10 +252,11 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 		}
 		usedPriorities[priority] = true
 
+		ruleName := fmt.Sprintf("SteadybitBlockRule-%d", i)
 		sg, err := securityRulesClient.BeginCreateOrUpdate(ctx,
 			state.ResourceGroupName,
 			*securityGroup.Name,
-			fmt.Sprintf("SteadybitBlockRule-%d", i),
+			ruleName,
 			armnetwork.SecurityRule{
 				Properties: &armnetwork.SecurityRulePropertiesFormat{
 					Protocol:                 to.Ptr(armnetwork.SecurityRuleProtocolAsterisk),
@@ -277,11 +281,9 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 			return nil, fmt.Errorf("failed to create a security rule: %s", err)
 		}
 
-		rule, err := sg.PollUntilDone(ctx, &runtime.PollUntilDoneOptions{
+		_, err = sg.PollUntilDone(ctx, &runtime.PollUntilDoneOptions{
 			Frequency: time.Second * 5,
 		})
-
-		state.NetworkSecurityRuleNames = append(state.NetworkSecurityRuleNames, *rule.Name)
 
 		if err != nil {
 			err = cleanupRules(ctx, state, securityRulesClient)
@@ -292,6 +294,10 @@ func (b *blockAction) Start(ctx context.Context, state *BlockActionState) (*acti
 
 			return nil, fmt.Errorf("failed to create a security rule (timeout): %s", err)
 		}
+
+		// Record the rule under the deterministic name we created it with (rather than the
+		// name echoed back by the API) so cleanup can always delete it.
+		state.NetworkSecurityRuleNames = append(state.NetworkSecurityRuleNames, ruleName)
 	}
 
 	return nil, nil
