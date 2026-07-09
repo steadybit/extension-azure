@@ -69,33 +69,33 @@ func (a *natGatewayDisassociateAttack) Describe() action_kit_api.ActionDescripti
 		Description: "Disassociates the NAT Gateway from all of its currently associated subnets to simulate an outbound-internet outage for the workloads in those subnets. " +
 			"Each subnet's NAT Gateway reference is restored on stop.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(targetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:    new(targetIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: TargetIDNatGateway,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "by NAT Gateway name",
-					Description: extutil.Ptr("Find NAT Gateway by name"),
+					Description: new("Find NAT Gateway by name"),
 					Query:       "azure.nat-gateway.name=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("Azure"),
-		Category:    extutil.Ptr("NAT Gateway"),
+		Technology:  new("Azure"),
+		Category:    new("NAT Gateway"),
 		TimeControl: action_kit_api.TimeControlExternal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "duration",
 				Label:        "Duration",
-				Description:  extutil.Ptr("How long subnets remain disassociated. The associations are restored on stop."),
+				Description:  new("How long subnets remain disassociated. The associations are restored on stop."),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("60s"),
-				Order:        extutil.Ptr(1),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("60s"),
+				Order:        new(1),
+				Required:     new(true),
 			},
 		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
@@ -115,7 +115,7 @@ func (a *natGatewayDisassociateAttack) Prepare(_ context.Context, state *NatGate
 	}
 	state.SubnetRefs = append(state.SubnetRefs, subnets...)
 	return &action_kit_api.PrepareResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Will disassociate %d subnet(s) from NAT Gateway %s", len(subnets), state.NatGatewayName),
 		}}),
@@ -140,7 +140,7 @@ func (a *natGatewayDisassociateAttack) Start(ctx context.Context, state *NatGate
 		disassociated = append(disassociated, fmt.Sprintf("%s/%s", vnet, subnet))
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Disassociated NAT Gateway %s from %d subnet(s): %v", state.NatGatewayName, len(disassociated), disassociated),
 		}}),
@@ -158,7 +158,7 @@ func (a *natGatewayDisassociateAttack) Stop(ctx context.Context, state *NatGatew
 		if !ok {
 			continue
 		}
-		ngRef := &armnetwork.SubResource{ID: extutil.Ptr(state.NatGatewayId)}
+		ngRef := &armnetwork.SubResource{ID: new(state.NatGatewayId)}
 		if err := updateSubnetNatGateway(ctx, client, rg, vnet, subnet, ngRef); err != nil {
 			log.Error().Err(err).Msgf("Failed to re-associate NAT Gateway %s with subnet %s/%s", state.NatGatewayName, vnet, subnet)
 			return nil, extension_kit.ToError(fmt.Sprintf("Failed to re-associate NAT Gateway %s with subnet %s/%s", state.NatGatewayName, vnet, subnet), err)
@@ -166,7 +166,7 @@ func (a *natGatewayDisassociateAttack) Stop(ctx context.Context, state *NatGatew
 		restored = append(restored, fmt.Sprintf("%s/%s", vnet, subnet))
 	}
 	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Re-associated NAT Gateway %s with %d subnet(s): %v", state.NatGatewayName, len(restored), restored),
 		}}),

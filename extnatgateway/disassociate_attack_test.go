@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-kit/extutil"
@@ -55,8 +54,8 @@ func subnetIDFor(subnet string) string {
 
 func prepareReqWithSubnets(natGwName string, subnetIDs ...string) action_kit_api.PrepareActionRequestBody {
 	return extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{"duration": "60s"},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Config: map[string]any{"duration": "60s"},
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"azure.subscription.id":     {"sub-1"},
 				"azure.resource-group.name": {"rg-1"},
@@ -72,7 +71,7 @@ func subnetRespWithNatGateway(natGwID string) *armnetwork.SubnetsClientGetRespon
 	return &armnetwork.SubnetsClientGetResponse{
 		Subnet: armnetwork.Subnet{
 			Properties: &armnetwork.SubnetPropertiesFormat{
-				NatGateway: &armnetwork.SubResource{ID: to.Ptr(natGwID)},
+				NatGateway: &armnetwork.SubResource{ID: new(natGwID)},
 			},
 		},
 	}

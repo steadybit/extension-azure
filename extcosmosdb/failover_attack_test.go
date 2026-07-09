@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos/v3"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-kit/extutil"
@@ -51,12 +50,12 @@ func newAttack(client *cosmosAccountsApiMock) *cosmosFailoverAttack {
 
 func prepareReq() action_kit_api.PrepareActionRequestBody {
 	return extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Config: map[string]any{},
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
-				"azure.subscription.id":         {"sub-1"},
-				"azure.resource-group.name":     {"rg-1"},
-				"azure.cosmosdb.account.name":   {"cosmos-1"},
+				"azure.subscription.id":       {"sub-1"},
+				"azure.resource-group.name":   {"rg-1"},
+				"azure.cosmosdb.account.name": {"cosmos-1"},
 			},
 		}),
 	})
@@ -69,8 +68,8 @@ func accountWithPolicies(policies ...struct {
 	fp := make([]*armcosmos.FailoverPolicy, 0, len(policies))
 	for _, p := range policies {
 		fp = append(fp, &armcosmos.FailoverPolicy{
-			LocationName:     to.Ptr(p.region),
-			FailoverPriority: to.Ptr(p.priority),
+			LocationName:     new(p.region),
+			FailoverPriority: new(p.priority),
 		})
 	}
 	return &armcosmos.DatabaseAccountsClientGetResponse{
@@ -132,7 +131,7 @@ func TestPrepare_RejectsMissingTargetAttributes(t *testing.T) {
 	a := newAttack(new(cosmosAccountsApiMock))
 	state := CosmosDbFailoverState{}
 	req := extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Target: extutil.Ptr(action_kit_api.Target{Attributes: map[string][]string{}}),
+		Target: new(action_kit_api.Target{Attributes: map[string][]string{}}),
 	})
 	_, err := a.Prepare(context.Background(), &state, req)
 	require.Error(t, err)
@@ -208,6 +207,6 @@ func TestPromotePolicies_PreservesUnrelatedRegions(t *testing.T) {
 		byRegion[p.LocationName] = p.Priority
 	}
 	assert.Equal(t, int32(0), byRegion["northeurope"])
-	assert.Equal(t, int32(1), byRegion["westeurope"]) // gets the vacated priority
+	assert.Equal(t, int32(1), byRegion["westeurope"])    // gets the vacated priority
 	assert.Equal(t, int32(2), byRegion["francecentral"]) // untouched
 }

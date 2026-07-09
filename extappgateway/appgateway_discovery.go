@@ -44,7 +44,7 @@ func NewAppGatewayDiscovery() discovery_kit_sdk.TargetDiscovery {
 func (d *appGatewayDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:       TargetIDAppGateway,
-		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: extutil.Ptr("60s")},
+		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: new("60s")},
 	}
 }
 
@@ -52,9 +52,9 @@ func (d *appGatewayDiscovery) DescribeTarget() discovery_kit_api.TargetDescripti
 	return discovery_kit_api.TargetDescription{
 		Id:       TargetIDAppGateway,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(targetIcon),
+		Icon:     new(targetIcon),
 		Label:    discovery_kit_api.PluralLabel{One: "Azure Application Gateway", Other: "Azure Application Gateways"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},

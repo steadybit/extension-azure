@@ -60,32 +60,32 @@ func (a *nodePoolTerminateInstancesAttack) Describe() action_kit_api.ActionDescr
 			"With cluster-autoscaler enabled, AKS replaces the deleted nodes within minutes; without autoscaling, the pool shrinks until manually scaled back. " +
 			"Validates pod rescheduling, PDB enforcement, and cluster-autoscaler scale-up timing.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(nodePoolIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:    new(nodePoolIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: TargetIDNodePool,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "by cluster and node pool name",
-					Description: extutil.Ptr("Find AKS node pool by cluster name and node pool name"),
+					Description: new("Find AKS node pool by cluster name and node pool name"),
 					Query:       "azure.aks.cluster.name=\"\" and azure.aks.nodepool.name=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("Azure"),
-		Category:    extutil.Ptr("AKS"),
+		Technology:  new("Azure"),
+		Category:    new("AKS"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "percentage",
 				Label:        "Percentage of nodes to terminate",
-				Description:  extutil.Ptr("Percentage (1-100) of the node pool's nodes to terminate. Defaults to 33%."),
+				Description:  new("Percentage (1-100) of the node pool's nodes to terminate. Defaults to 33%."),
 				Type:         action_kit_api.ActionParameterTypeInteger,
-				DefaultValue: extutil.Ptr("33"),
-				Order:        extutil.Ptr(1),
-				Required:     extutil.Ptr(true),
-				MinValue:     extutil.Ptr(1),
-				MaxValue:     extutil.Ptr(100),
+				DefaultValue: new("33"),
+				Order:        new(1),
+				Required:     new(true),
+				MinValue:     new(1),
+				MaxValue:     new(100),
 			},
 		},
 	}
@@ -131,10 +131,7 @@ func (a *nodePoolTerminateInstancesAttack) Prepare(ctx context.Context, state *N
 		return nil, extension_kit.ToError(fmt.Sprintf("AKS node pool %s/%s has no machines to terminate", state.ClusterName, state.NodePoolName), nil)
 	}
 
-	sampleSize := int(math.Ceil(float64(len(allNames)) * float64(pct) / 100.0))
-	if sampleSize < 1 {
-		sampleSize = 1
-	}
+	sampleSize := max(int(math.Ceil(float64(len(allNames))*float64(pct)/100.0)), 1)
 	if sampleSize > len(allNames) {
 		sampleSize = len(allNames)
 	}
@@ -157,7 +154,7 @@ func (a *nodePoolTerminateInstancesAttack) Prepare(ctx context.Context, state *N
 	sort.Strings(state.MachineNames)
 
 	return &action_kit_api.PrepareResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level: extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Selected %d of %d machine(s) (%d%%) in AKS node pool %s/%s for termination: %v",
 				sampleSize, len(allNames), pct, state.ClusterName, state.NodePoolName, state.MachineNames),
@@ -183,7 +180,7 @@ func (a *nodePoolTerminateInstancesAttack) Start(ctx context.Context, state *Nod
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to delete machines in AKS node pool %s/%s", state.ClusterName, state.NodePoolName), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level: extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Deletion requested for %d machine(s) in AKS node pool %s/%s: %v. AKS will replace them via the underlying VMSS.",
 				len(state.MachineNames), state.ClusterName, state.NodePoolName, state.MachineNames),

@@ -20,7 +20,6 @@ import (
 	"github.com/steadybit/extension-azure/common"
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"os"
 )
 
@@ -41,7 +40,7 @@ func NewSubscriptionDiscovery() discovery_kit_sdk.TargetDiscovery {
 func (d *subscriptionDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:       TargetIDSubscription,
-		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: extutil.Ptr("60s")},
+		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: new("60s")},
 	}
 }
 
@@ -49,9 +48,9 @@ func (d *subscriptionDiscovery) DescribeTarget() discovery_kit_api.TargetDescrip
 	return discovery_kit_api.TargetDescription{
 		Id:       TargetIDSubscription,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(targetIcon),
+		Icon:     new(targetIcon),
 		Label:    discovery_kit_api.PluralLabel{One: "Azure Event Grid event subscription", Other: "Azure Event Grid event subscriptions"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
@@ -92,7 +91,7 @@ func getAllSubscriptions(ctx context.Context, client common.ArmResourceGraphApi)
 		subscriptions = []*string{&subscriptionId}
 	}
 	results, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.EventGrid/eventSubscriptions' or type =~ 'Microsoft.EventGrid/topics/eventSubscriptions' or type =~ 'Microsoft.EventGrid/systemTopics/eventSubscriptions' | project id, name, type, resourceGroup, location, properties, subscriptionId"),
+		Query: new("Resources | where type =~ 'Microsoft.EventGrid/eventSubscriptions' or type =~ 'Microsoft.EventGrid/topics/eventSubscriptions' or type =~ 'Microsoft.EventGrid/systemTopics/eventSubscriptions' | project id, name, type, resourceGroup, location, properties, subscriptionId"),
 		Options: &armresourcegraph.QueryRequestOptions{
 			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 		},
