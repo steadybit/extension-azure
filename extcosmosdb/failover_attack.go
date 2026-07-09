@@ -78,20 +78,20 @@ func (a *cosmosFailoverAttack) Describe() action_kit_api.ActionDescription {
 		Label: "Trigger Cosmos DB Failover",
 		Description: "Promotes the secondary region to write for a multi-region Cosmos DB account, simulating a regional failover. " +
 			"Validates that your application correctly follows the SDK's automatic write-region tracking and that retry/backoff logic survives the promotion.",
-		Version:     extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:        extutil.Ptr(targetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Version: extbuild.GetSemverVersionStringOrUnknown(),
+		Icon:    new(targetIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: TargetIDCosmosDbAccount,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "by Cosmos DB account name",
-					Description: extutil.Ptr("Find Cosmos DB account by name"),
+					Description: new("Find Cosmos DB account by name"),
 					Query:       "azure.cosmosdb.account.name=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("Azure"),
-		Category:    extutil.Ptr("Cosmos DB"),
+		Technology:  new("Azure"),
+		Category:    new("Cosmos DB"),
 		TimeControl: action_kit_api.TimeControlInstantaneous,
 		Kind:        action_kit_api.Attack,
 		Parameters:  []action_kit_api.ActionParameter{},
@@ -135,7 +135,7 @@ func (a *cosmosFailoverAttack) Prepare(ctx context.Context, state *CosmosDbFailo
 	state.PromotedRegion = secondaryWithLowestPriority(current)
 	state.NewPolicies = promotePolicies(current, state.PromotedRegion)
 	return &action_kit_api.PrepareResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Cosmos DB account %s has %d region(s); will promote %q to write region. No automatic rollback.", state.AccountName, len(current), state.PromotedRegion),
 		}}),
@@ -154,7 +154,7 @@ func (a *cosmosFailoverAttack) Start(ctx context.Context, state *CosmosDbFailove
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to trigger failover for Cosmos DB account %s", state.AccountName), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Triggered failover for Cosmos DB account %s; promoted region %q to write region. Azure-side completion takes 5-15 min.", state.AccountName, state.PromotedRegion),
 		}}),
@@ -219,8 +219,8 @@ func toCosmosPolicies(in []failoverPolicy) []*armcosmos.FailoverPolicy {
 	for i := range in {
 		p := in[i]
 		out = append(out, &armcosmos.FailoverPolicy{
-			LocationName:     extutil.Ptr(p.LocationName),
-			FailoverPriority: extutil.Ptr(p.Priority),
+			LocationName:     new(p.LocationName),
+			FailoverPriority: new(p.Priority),
 		})
 	}
 	return out

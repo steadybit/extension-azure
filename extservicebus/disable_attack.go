@@ -77,33 +77,33 @@ func (a *queueDisableAttack) Describe() action_kit_api.ActionDescription {
 		Description: "Sets the queue's status to 'Disabled' to drop both sends and receives. The original status is restored on stop. " +
 			"Validates how producers and consumers handle the queue being unavailable.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(targetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:    new(targetIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: TargetIDQueue,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "by namespace and queue name",
-					Description: extutil.Ptr("Find Service Bus queue by namespace and queue name"),
+					Description: new("Find Service Bus queue by namespace and queue name"),
 					Query:       "azure.servicebus.namespace.name=\"\" and azure.servicebus.queue.name=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("Azure"),
-		Category:    extutil.Ptr("Service Bus"),
+		Technology:  new("Azure"),
+		Category:    new("Service Bus"),
 		TimeControl: action_kit_api.TimeControlExternal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "duration",
 				Label:        "Duration",
-				Description:  extutil.Ptr("How long the queue stays disabled. Status is restored on stop."),
+				Description:  new("How long the queue stays disabled. Status is restored on stop."),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("60s"),
-				Order:        extutil.Ptr(1),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("60s"),
+				Order:        new(1),
+				Required:     new(true),
 			},
 		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
@@ -136,7 +136,7 @@ func (a *queueDisableAttack) Start(ctx context.Context, state *EntityDisableStat
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to disable Service Bus queue %s/%s", state.NamespaceName, state.EntityName), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Disabled Service Bus queue %s/%s (was %s)", state.NamespaceName, state.EntityName, state.OriginalStatus),
 		}}),
@@ -149,7 +149,7 @@ func (a *queueDisableAttack) Stop(ctx context.Context, state *EntityDisableState
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to restore Service Bus queue %s/%s status to %s", state.NamespaceName, state.EntityName, state.OriginalStatus), err)
 	}
 	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Restored Service Bus queue %s/%s to status %s", state.NamespaceName, state.EntityName, state.OriginalStatus),
 		}}),
@@ -168,7 +168,7 @@ func setQueueStatus(ctx context.Context, provider func(subscriptionId string) (q
 	if got.SBQueue.Properties == nil {
 		got.SBQueue.Properties = &armservicebus.SBQueueProperties{}
 	}
-	got.SBQueue.Properties.Status = extutil.Ptr(status)
+	got.SBQueue.Properties.Status = new(status)
 	_, err = client.CreateOrUpdate(ctx, state.ResourceGroupName, state.NamespaceName, state.EntityName, got.SBQueue, nil)
 	return err
 }
@@ -207,33 +207,33 @@ func (a *topicDisableAttack) Describe() action_kit_api.ActionDescription {
 		Description: "Sets the topic's status to 'Disabled' to drop both publishes and subscriber receives. The original status is restored on stop. " +
 			"Validates how publishers and all subscribers handle the topic being unavailable.",
 		Version: extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:    extutil.Ptr(targetIcon),
-		TargetSelection: extutil.Ptr(action_kit_api.TargetSelection{
+		Icon:    new(targetIcon),
+		TargetSelection: new(action_kit_api.TargetSelection{
 			TargetType: TargetIDTopic,
-			SelectionTemplates: extutil.Ptr([]action_kit_api.TargetSelectionTemplate{
+			SelectionTemplates: new([]action_kit_api.TargetSelectionTemplate{
 				{
 					Label:       "by namespace and topic name",
-					Description: extutil.Ptr("Find Service Bus topic by namespace and topic name"),
+					Description: new("Find Service Bus topic by namespace and topic name"),
 					Query:       "azure.servicebus.namespace.name=\"\" and azure.servicebus.topic.name=\"\"",
 				},
 			}),
 		}),
-		Technology:  extutil.Ptr("Azure"),
-		Category:    extutil.Ptr("Service Bus"),
+		Technology:  new("Azure"),
+		Category:    new("Service Bus"),
 		TimeControl: action_kit_api.TimeControlExternal,
 		Kind:        action_kit_api.Attack,
 		Parameters: []action_kit_api.ActionParameter{
 			{
 				Name:         "duration",
 				Label:        "Duration",
-				Description:  extutil.Ptr("How long the topic stays disabled. Status is restored on stop."),
+				Description:  new("How long the topic stays disabled. Status is restored on stop."),
 				Type:         action_kit_api.ActionParameterTypeDuration,
-				DefaultValue: extutil.Ptr("60s"),
-				Order:        extutil.Ptr(1),
-				Required:     extutil.Ptr(true),
+				DefaultValue: new("60s"),
+				Order:        new(1),
+				Required:     new(true),
 			},
 		},
-		Stop: extutil.Ptr(action_kit_api.MutatingEndpointReference{}),
+		Stop: new(action_kit_api.MutatingEndpointReference{}),
 	}
 }
 
@@ -266,7 +266,7 @@ func (a *topicDisableAttack) Start(ctx context.Context, state *EntityDisableStat
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to disable Service Bus topic %s/%s", state.NamespaceName, state.EntityName), err)
 	}
 	return &action_kit_api.StartResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Disabled Service Bus topic %s/%s (was %s)", state.NamespaceName, state.EntityName, state.OriginalStatus),
 		}}),
@@ -279,7 +279,7 @@ func (a *topicDisableAttack) Stop(ctx context.Context, state *EntityDisableState
 		return nil, extension_kit.ToError(fmt.Sprintf("Failed to restore Service Bus topic %s/%s status to %s", state.NamespaceName, state.EntityName, state.OriginalStatus), err)
 	}
 	return &action_kit_api.StopResult{
-		Messages: extutil.Ptr([]action_kit_api.Message{{
+		Messages: new([]action_kit_api.Message{{
 			Level:   extutil.Ptr(action_kit_api.Info),
 			Message: fmt.Sprintf("Restored Service Bus topic %s/%s to status %s", state.NamespaceName, state.EntityName, state.OriginalStatus),
 		}}),
@@ -298,7 +298,7 @@ func setTopicStatus(ctx context.Context, provider func(subscriptionId string) (t
 	if got.SBTopic.Properties == nil {
 		got.SBTopic.Properties = &armservicebus.SBTopicProperties{}
 	}
-	got.SBTopic.Properties.Status = extutil.Ptr(status)
+	got.SBTopic.Properties.Status = new(status)
 	_, err = client.CreateOrUpdate(ctx, state.ResourceGroupName, state.NamespaceName, state.EntityName, got.SBTopic, nil)
 	return err
 }

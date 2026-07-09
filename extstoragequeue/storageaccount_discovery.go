@@ -48,7 +48,7 @@ func NewStorageAccountDiscovery() discovery_kit_sdk.TargetDiscovery {
 func (d *accountDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:       TargetIDStorageQueue,
-		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: extutil.Ptr("60s")},
+		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: new("60s")},
 	}
 }
 
@@ -56,9 +56,9 @@ func (d *accountDiscovery) DescribeTarget() discovery_kit_api.TargetDescription 
 	return discovery_kit_api.TargetDescription{
 		Id:       TargetIDStorageQueue,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(targetIcon),
+		Icon:     new(targetIcon),
 		Label:    discovery_kit_api.PluralLabel{One: "Azure Storage Queue", Other: "Azure Storage Queues"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},

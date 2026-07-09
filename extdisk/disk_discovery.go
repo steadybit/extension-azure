@@ -44,7 +44,7 @@ func NewDiskDiscovery() discovery_kit_sdk.TargetDiscovery {
 func (d *diskDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:       TargetIDDisk,
-		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: extutil.Ptr("60s")},
+		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: new("60s")},
 	}
 }
 
@@ -52,9 +52,9 @@ func (d *diskDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       TargetIDDisk,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(targetIcon),
+		Icon:     new(targetIcon),
 		Label:    discovery_kit_api.PluralLabel{One: "Azure Managed Disk", Other: "Azure Managed Disks"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
@@ -176,4 +176,3 @@ func toDiskTarget(items map[string]any) discovery_kit_api.Target {
 		Attributes: attributes,
 	}
 }
-

@@ -21,7 +21,6 @@ import (
 	"github.com/steadybit/extension-azure/common"
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"os"
 )
 
@@ -43,7 +42,7 @@ func (d *nodePoolDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id: TargetIDNodePool,
 		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{
-			CallInterval: extutil.Ptr("60s"),
+			CallInterval: new("60s"),
 		},
 	}
 }
@@ -52,9 +51,9 @@ func (d *nodePoolDiscovery) DescribeTarget() discovery_kit_api.TargetDescription
 	return discovery_kit_api.TargetDescription{
 		Id:       TargetIDNodePool,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(nodePoolIcon),
+		Icon:     new(nodePoolIcon),
 		Label:    discovery_kit_api.PluralLabel{One: "Azure AKS node pool", Other: "Azure AKS node pools"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
@@ -167,7 +166,7 @@ func listAksClusterRefs(ctx context.Context, rgClient common.ArmResourceGraphApi
 		subscriptions = []*string{&subscriptionId}
 	}
 	results, err := rgClient.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.ContainerService/managedClusters' | project name, resourceGroup, location, subscriptionId"),
+		Query: new("Resources | where type =~ 'Microsoft.ContainerService/managedClusters' | project name, resourceGroup, location, subscriptionId"),
 		Options: &armresourcegraph.QueryRequestOptions{
 			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 		},
@@ -215,8 +214,8 @@ func nodePoolTargetFromSDK(p *armcontainerservice.AgentPool, c aksClusterRef) di
 		"azure.aks.cluster.name":    {c.name},
 		// Surface the cluster-wide k8s.cluster-name attribute so extension-kubernetes's targets can be
 		// joined to this node pool via enrichment (matches the AKS cluster target's k8s.cluster-name).
-		"k8s.cluster-name":           {c.name},
-		"azure.aks.nodepool.name":    {poolName},
+		"k8s.cluster-name":        {c.name},
+		"azure.aks.nodepool.name": {poolName},
 	}
 
 	if pp := p.Properties; pp != nil {
@@ -293,4 +292,3 @@ func nodePoolTargetFromSDK(p *armcontainerservice.AgentPool, c aksClusterRef) di
 		Attributes: attributes,
 	}
 }
-

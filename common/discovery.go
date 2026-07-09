@@ -11,7 +11,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/steadybit/discovery-kit/go/discovery_kit_api"
-	"github.com/steadybit/extension-kit/extutil"
 )
 
 // DiscoverViaResourceGraph runs an Azure Resource Graph query, iterates the
@@ -33,7 +32,7 @@ func DiscoverViaResourceGraph(
 		subscriptions = []*string{&subscriptionId}
 	}
 	res, err := client.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr(query),
+		Query: new(query),
 		Options: &armresourcegraph.QueryRequestOptions{
 			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 		},

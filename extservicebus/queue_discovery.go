@@ -20,7 +20,6 @@ import (
 	"github.com/steadybit/extension-azure/common"
 	"github.com/steadybit/extension-azure/config"
 	"github.com/steadybit/extension-kit/extbuild"
-	"github.com/steadybit/extension-kit/extutil"
 	"os"
 )
 
@@ -43,7 +42,7 @@ func NewQueueDiscovery() discovery_kit_sdk.TargetDiscovery {
 func (d *queueDiscovery) Describe() discovery_kit_api.DiscoveryDescription {
 	return discovery_kit_api.DiscoveryDescription{
 		Id:       TargetIDQueue,
-		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: extutil.Ptr("60s")},
+		Discover: discovery_kit_api.DescribingEndpointReferenceWithCallInterval{CallInterval: new("60s")},
 	}
 }
 
@@ -51,9 +50,9 @@ func (d *queueDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 	return discovery_kit_api.TargetDescription{
 		Id:       TargetIDQueue,
 		Version:  extbuild.GetSemverVersionStringOrUnknown(),
-		Icon:     extutil.Ptr(targetIcon),
+		Icon:     new(targetIcon),
 		Label:    discovery_kit_api.PluralLabel{One: "Azure Service Bus queue", Other: "Azure Service Bus queues"},
-		Category: extutil.Ptr("cloud"),
+		Category: new("cloud"),
 		Table: discovery_kit_api.Table{
 			Columns: []discovery_kit_api.Column{
 				{Attribute: "steadybit.label"},
@@ -131,7 +130,7 @@ func listServiceBusNamespaceRefs(ctx context.Context, rgClient common.ArmResourc
 		subscriptions = []*string{&subscriptionId}
 	}
 	results, err := rgClient.Resources(ctx, armresourcegraph.QueryRequest{
-		Query: extutil.Ptr("Resources | where type =~ 'Microsoft.ServiceBus/namespaces' | project name, resourceGroup, location, subscriptionId"),
+		Query: new("Resources | where type =~ 'Microsoft.ServiceBus/namespaces' | project name, resourceGroup, location, subscriptionId"),
 		Options: &armresourcegraph.QueryRequestOptions{
 			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 		},

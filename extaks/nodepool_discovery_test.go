@@ -41,21 +41,21 @@ func TestNodePoolTargetFromSDK_HappyPath(t *testing.T) {
 	osSku := armcontainerservice.OSSKUUbuntu
 
 	p := &armcontainerservice.AgentPool{
-		ID:   to.Ptr("/subscriptions/sub-1/resourceGroups/rg-1/providers/Microsoft.ContainerService/managedClusters/aks-c/agentPools/np1"),
-		Name: to.Ptr("np1"),
+		ID:   new("/subscriptions/sub-1/resourceGroups/rg-1/providers/Microsoft.ContainerService/managedClusters/aks-c/agentPools/np1"),
+		Name: new("np1"),
 		Properties: &armcontainerservice.ManagedClusterAgentPoolProfileProperties{
-			Mode:               &mode,
-			ScaleSetPriority:   &prio,
-			OSType:             &osType,
-			OSSKU:              &osSku,
-			VMSize:             to.Ptr("Standard_B2s"),
-			Count:              to.Ptr[int32](3),
-			MinCount:           to.Ptr[int32](1),
-			MaxCount:           to.Ptr[int32](5),
-			EnableAutoScaling:  to.Ptr(true),
-			OrchestratorVersion: to.Ptr("1.29.0"),
-			ProvisioningState:  to.Ptr("Succeeded"),
-			PowerState:         &armcontainerservice.PowerState{Code: to.Ptr(armcontainerservice.CodeRunning)},
+			Mode:                &mode,
+			ScaleSetPriority:    &prio,
+			OSType:              &osType,
+			OSSKU:               &osSku,
+			VMSize:              new("Standard_B2s"),
+			Count:               to.Ptr[int32](3),
+			MinCount:            to.Ptr[int32](1),
+			MaxCount:            to.Ptr[int32](5),
+			EnableAutoScaling:   new(true),
+			OrchestratorVersion: new("1.29.0"),
+			ProvisioningState:   new("Succeeded"),
+			PowerState:          &armcontainerservice.PowerState{Code: to.Ptr(armcontainerservice.CodeRunning)},
 		},
 	}
 
@@ -79,8 +79,8 @@ func TestNodePoolTargetFromSDK_HappyPath(t *testing.T) {
 
 func TestNodePoolTargetFromSDK_NilProperties(t *testing.T) {
 	p := &armcontainerservice.AgentPool{
-		ID:   to.Ptr("/sub/s/rg/r/Microsoft.ContainerService/managedClusters/c/agentPools/np2"),
-		Name: to.Ptr("np2"),
+		ID:   new("/sub/s/rg/r/Microsoft.ContainerService/managedClusters/c/agentPools/np2"),
+		Name: new("np2"),
 	}
 	c := aksClusterRef{name: "c", resourceGroup: "r", subscriptionId: "s", location: "westeurope"}
 	got := nodePoolTargetFromSDK(p, c)
@@ -98,7 +98,7 @@ func TestGetAllAksNodePools_HappyPath(t *testing.T) {
 		assert.Equal(t, "rg-1", rg)
 		assert.Equal(t, "aks-c", cluster)
 		return []*armcontainerservice.AgentPool{
-			{ID: to.Ptr("/sub/sub-1/rg/rg-1/c/aks-c/np/np1"), Name: to.Ptr("np1"), Properties: &armcontainerservice.ManagedClusterAgentPoolProfileProperties{}},
+			{ID: new("/sub/sub-1/rg/rg-1/c/aks-c/np/np1"), Name: new("np1"), Properties: &armcontainerservice.ManagedClusterAgentPoolProfileProperties{}},
 		}, nil
 	}
 
@@ -120,7 +120,7 @@ func TestGetAllAksNodePools_PerClusterListerErrorIsTolerated(t *testing.T) {
 			return nil, errors.New("transient")
 		}
 		return []*armcontainerservice.AgentPool{
-			{ID: to.Ptr("/.../c2/np/ok"), Name: to.Ptr("ok"), Properties: &armcontainerservice.ManagedClusterAgentPoolProfileProperties{}},
+			{ID: new("/.../c2/np/ok"), Name: new("ok"), Properties: &armcontainerservice.ManagedClusterAgentPoolProfileProperties{}},
 		}, nil
 	}
 
@@ -152,4 +152,3 @@ func TestListAksClusterRefs_ParsesRows(t *testing.T) {
 	assert.Equal(t, "c1", refs[0].name)
 	assert.Equal(t, "s1", refs[0].subscriptionId)
 }
-

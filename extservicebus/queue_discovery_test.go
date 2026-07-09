@@ -60,16 +60,16 @@ func TestGetAllQueues_HappyPath(t *testing.T) {
 		assert.Equal(t, "sb-test-ns", ns)
 		return []*armservicebus.SBQueue{
 			{
-				ID:   to.Ptr("/subscriptions/sub-1/resourceGroups/rg-1/providers/Microsoft.ServiceBus/namespaces/sb-test-ns/queues/q1"),
-				Name: to.Ptr("q1"),
+				ID:   new("/subscriptions/sub-1/resourceGroups/rg-1/providers/Microsoft.ServiceBus/namespaces/sb-test-ns/queues/q1"),
+				Name: new("q1"),
 				Properties: &armservicebus.SBQueueProperties{
 					Status:                           to.Ptr(armservicebus.EntityStatusActive),
 					MaxDeliveryCount:                 to.Ptr[int32](10),
-					DeadLetteringOnMessageExpiration: to.Ptr(true),
-					RequiresDuplicateDetection:       to.Ptr(false),
-					RequiresSession:                  to.Ptr(false),
-					LockDuration:                     to.Ptr("PT1M"),
-					DefaultMessageTimeToLive:         to.Ptr("P14D"),
+					DeadLetteringOnMessageExpiration: new(true),
+					RequiresDuplicateDetection:       new(false),
+					RequiresSession:                  new(false),
+					LockDuration:                     new("PT1M"),
+					DefaultMessageTimeToLive:         new("P14D"),
 				},
 			},
 		}, nil
@@ -112,7 +112,7 @@ func TestGetAllQueues_MultipleNamespacesMixedSuccess(t *testing.T) {
 	lister := func(ctx context.Context, sub, _, _ string) ([]*armservicebus.SBQueue, error) {
 		if sub == "sub-1" {
 			return []*armservicebus.SBQueue{
-				{ID: to.Ptr("/.../q-a-1"), Name: to.Ptr("q-a-1"), Properties: &armservicebus.SBQueueProperties{Status: to.Ptr(armservicebus.EntityStatusActive)}},
+				{ID: new("/.../q-a-1"), Name: new("q-a-1"), Properties: &armservicebus.SBQueueProperties{Status: to.Ptr(armservicebus.EntityStatusActive)}},
 			}, nil
 		}
 		return nil, errors.New("permission denied")
@@ -143,7 +143,7 @@ func TestGetAllQueues_SkipsNilQueueEntries(t *testing.T) {
 	rg := new(azureResourceGraphClientMock)
 	rg.On("Resources", mock.Anything, mock.Anything, mock.Anything).Return(rgResponseWithOneNamespace(), nil)
 	lister := func(ctx context.Context, _, _, _ string) ([]*armservicebus.SBQueue, error) {
-		return []*armservicebus.SBQueue{nil, {ID: to.Ptr("/.../q1"), Name: to.Ptr("q1"), Properties: &armservicebus.SBQueueProperties{Status: to.Ptr(armservicebus.EntityStatusActive)}}}, nil
+		return []*armservicebus.SBQueue{nil, {ID: new("/.../q1"), Name: new("q1"), Properties: &armservicebus.SBQueueProperties{Status: to.Ptr(armservicebus.EntityStatusActive)}}}, nil
 	}
 	targets, err := getAllQueues(context.Background(), rg, lister)
 	require.NoError(t, err)
@@ -154,8 +154,8 @@ func TestQueueToTarget_OptionalPropertiesOmittedWhenNil(t *testing.T) {
 	// Only required fields set on Properties; other attributes should simply be absent rather than empty.
 	ns := serviceBusNamespaceRef{name: "ns", resourceGroup: "rg", subscriptionId: "sub", location: "loc"}
 	q := &armservicebus.SBQueue{
-		ID:         to.Ptr("/.../q"),
-		Name:       to.Ptr("q"),
+		ID:         new("/.../q"),
+		Name:       new("q"),
 		Properties: &armservicebus.SBQueueProperties{Status: to.Ptr(armservicebus.EntityStatusDisabled)},
 	}
 	tgt := queueToTarget(q, ns)

@@ -28,14 +28,14 @@ func TestGetAllTopics_HappyPath(t *testing.T) {
 		assert.Equal(t, "sb-test-ns", ns)
 		return []*armservicebus.SBTopic{
 			{
-				ID:   to.Ptr("/subscriptions/sub-1/resourceGroups/rg-1/providers/Microsoft.ServiceBus/namespaces/sb-test-ns/topics/t1"),
-				Name: to.Ptr("t1"),
+				ID:   new("/subscriptions/sub-1/resourceGroups/rg-1/providers/Microsoft.ServiceBus/namespaces/sb-test-ns/topics/t1"),
+				Name: new("t1"),
 				Properties: &armservicebus.SBTopicProperties{
 					Status:                     to.Ptr(armservicebus.EntityStatusActive),
-					RequiresDuplicateDetection: to.Ptr(false),
-					SupportOrdering:            to.Ptr(true),
-					EnablePartitioning:         to.Ptr(false),
-					DefaultMessageTimeToLive:   to.Ptr("P14D"),
+					RequiresDuplicateDetection: new(false),
+					SupportOrdering:            new(true),
+					EnablePartitioning:         new(false),
+					DefaultMessageTimeToLive:   new("P14D"),
 					SubscriptionCount:          to.Ptr[int32](3),
 				},
 			},
@@ -75,8 +75,8 @@ func TestGetAllTopics_PerNamespaceListerErrorIsTolerated(t *testing.T) {
 func TestTopicToTarget_OptionalPropertiesOmittedWhenNil(t *testing.T) {
 	ns := serviceBusNamespaceRef{name: "ns", resourceGroup: "rg", subscriptionId: "sub", location: "loc"}
 	tp := &armservicebus.SBTopic{
-		ID:         to.Ptr("/.../t"),
-		Name:       to.Ptr("t"),
+		ID:         new("/.../t"),
+		Name:       new("t"),
 		Properties: &armservicebus.SBTopicProperties{Status: to.Ptr(armservicebus.EntityStatusDisabled)},
 	}
 	tgt := topicToTarget(tp, ns)

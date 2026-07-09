@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v6"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-kit/extutil"
@@ -67,7 +66,7 @@ func identityPerm(n int) []int {
 func machinesPageWithNames(names ...string) *armcontainerservice.MachinesClientListResponse {
 	machines := make([]*armcontainerservice.Machine, 0, len(names))
 	for _, n := range names {
-		machines = append(machines, &armcontainerservice.Machine{Name: to.Ptr(n)})
+		machines = append(machines, &armcontainerservice.Machine{Name: new(n)})
 	}
 	return &armcontainerservice.MachinesClientListResponse{
 		MachineListResult: armcontainerservice.MachineListResult{Value: machines},
@@ -84,8 +83,8 @@ func newAttack(machines *machinesApiMock, agentPools *agentPoolsApiMock) *nodePo
 
 func prepareReq(percentage int, mode string) action_kit_api.PrepareActionRequestBody {
 	return extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{"percentage": percentage},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Config: map[string]any{"percentage": percentage},
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"azure.subscription.id":     {"sub-1"},
 				"azure.resource-group.name": {"rg-1"},

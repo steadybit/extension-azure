@@ -9,7 +9,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus"
 	"github.com/steadybit/action-kit/go/action_kit_api/v2"
 	"github.com/steadybit/extension-kit/extutil"
@@ -76,8 +75,8 @@ func newTopicAttack(client *topicsApiMock) *topicDisableAttack {
 
 func queuePrepareReq() action_kit_api.PrepareActionRequestBody {
 	return extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{"duration": "60s"},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Config: map[string]any{"duration": "60s"},
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"azure.subscription.id":           {"sub-1"},
 				"azure.resource-group.name":       {"rg-1"},
@@ -90,8 +89,8 @@ func queuePrepareReq() action_kit_api.PrepareActionRequestBody {
 
 func topicPrepareReq() action_kit_api.PrepareActionRequestBody {
 	return extutil.JsonMangle(action_kit_api.PrepareActionRequestBody{
-		Config: map[string]interface{}{"duration": "60s"},
-		Target: extutil.Ptr(action_kit_api.Target{
+		Config: map[string]any{"duration": "60s"},
+		Target: new(action_kit_api.Target{
 			Attributes: map[string][]string{
 				"azure.subscription.id":           {"sub-1"},
 				"azure.resource-group.name":       {"rg-1"},
@@ -105,7 +104,7 @@ func topicPrepareReq() action_kit_api.PrepareActionRequestBody {
 func queueResp(status armservicebus.EntityStatus) *armservicebus.QueuesClientGetResponse {
 	return &armservicebus.QueuesClientGetResponse{
 		SBQueue: armservicebus.SBQueue{
-			Properties: &armservicebus.SBQueueProperties{Status: to.Ptr(status)},
+			Properties: &armservicebus.SBQueueProperties{Status: new(status)},
 		},
 	}
 }
@@ -113,7 +112,7 @@ func queueResp(status armservicebus.EntityStatus) *armservicebus.QueuesClientGet
 func topicResp(status armservicebus.EntityStatus) *armservicebus.TopicsClientGetResponse {
 	return &armservicebus.TopicsClientGetResponse{
 		SBTopic: armservicebus.SBTopic{
-			Properties: &armservicebus.SBTopicProperties{Status: to.Ptr(status)},
+			Properties: &armservicebus.SBTopicProperties{Status: new(status)},
 		},
 	}
 }
