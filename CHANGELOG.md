@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.4
+
+- chore(deps): bump go to 1.26.5 (#207)
+- chore(deps): bump go-openapi/swag/loading to fix go mod tidy (#209)
+- refactor: register extension index via exthttp.RegisterRevisionedHandler (#208)
+
 ## v1.3.3
 
 - chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity
