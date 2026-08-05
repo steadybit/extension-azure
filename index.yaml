@@ -11,6 +11,35 @@ entries:
         - name: Steadybit reliability hub
           url: https://hub.steadybit.com
     apiVersion: v2
+    appVersion: v1.3.7
+    created: "2026-08-05T11:43:20.031713386Z"
+    dependencies:
+    - name: extensionlib
+      repository: https://steadybit.github.io/helm-charts
+      version: ^1.5.4
+    description: Steadybit azure extension Helm chart for Kubernetes.
+    digest: 6650879f4eb8fd4544658d7022cc8571634a7edd188580b2d928cd4c6bdce813
+    home: https://www.steadybit.com/
+    icon: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+    maintainers:
+    - email: ansgar.schulte@steadybit.com
+      name: ansgarschulte
+    name: steadybit-extension-azure
+    sources:
+    - https://github.com/steadybit/extension-azure
+    urls:
+    - https://github.com/steadybit/extension-azure/releases/download/steadybit-extension-azure-1.1.45/steadybit-extension-azure-1.1.45.tgz
+    version: 1.1.45
+  - annotations:
+      artifacthub.io/images: |
+        - name: logo
+          image: https://steadybit-website-assets.s3.amazonaws.com/logo-symbol-transparent.png
+      artifacthub.io/links: |-
+        - name: Steadybit website
+          url: https://www.steadybit.com
+        - name: Steadybit reliability hub
+          url: https://hub.steadybit.com
+    apiVersion: v2
     appVersion: v1.3.6
     created: "2026-07-30T12:08:13.143931634Z"
     dependencies:
@@ -1625,4 +1654,4 @@ entries:
     urls:
     - https://github.com/steadybit/extension-azure/releases/download/steadybit-extension-azure-1.0.1/steadybit-extension-azure-1.0.1.tgz
     version: 1.0.1
-generated: "2026-07-30T12:08:13.144126518Z"
+generated: "2026-08-05T11:43:20.031974564Z"
