@@ -86,6 +86,13 @@ func (d *ssiDiscovery) DescribeTarget() discovery_kit_api.TargetDescription {
 func (d *ssiDiscovery) DescribeAttributes() []discovery_kit_api.AttributeDescription {
 	return []discovery_kit_api.AttributeDescription{
 		{
+			Attribute: "azure.zone",
+			Label: discovery_kit_api.PluralLabel{
+				One:   "Zone",
+				Other: "Zones",
+			},
+		},
+		{
 			Attribute: "azure-containerservice-managed-cluster.name",
 			Label: discovery_kit_api.PluralLabel{
 				One:   "Cluster name",
