@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.7
+
+- chore(deps): bump goreleaser/goreleaser from v2.17.0 to v2.17.1
+- feat: support filtering targets out of discovery
+- fix: add missing label for azure.zone attribute
+
 ## v1.3.6
 
 - chore(deps): update dependencies
