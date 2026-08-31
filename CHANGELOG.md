@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.9
+
+- chore(deps): bump github.com/steadybit/action-kit/go/action_kit_test
+- chore(deps): bump github.com/steadybit/discovery-kit/go/discovery_kit_test
+- chore(deps): bump github.com/stretchr/testify from 1.12.0 to 1.12.1
+
 ## v1.3.8
 
 - chore(deps): bump github.com/stretchr/testify from 1.11.1 to 1.12.0
