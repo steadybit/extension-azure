@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.10
+
+- chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity
+- chore(deps): bump github.com/steadybit/action-kit/go/action_kit_test
+- chore(deps): bump goreleaser/goreleaser from v2.17.1 to v2.18.0
+
 ## v1.3.9
 
 - chore(deps): bump github.com/steadybit/action-kit/go/action_kit_test
