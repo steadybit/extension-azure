@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.11
+
+- chore(deps): bump github.com/KimMachineGun/automemlimit from 0.7.5 to 1.0.0
+- chore(deps): bump goreleaser/goreleaser from v2.18.0 to v2.18.1
+
 ## v1.3.10
 
 - chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity
