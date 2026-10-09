@@ -59,7 +59,7 @@ func NewQueueDisableAction() action_kit_sdk.ActionWithStop[EntityDisableState] {
 			if err != nil {
 				return nil, err
 			}
-			factory, err := armservicebus.NewClientFactory(subscriptionId, cred, nil)
+			factory, err := armservicebus.NewClientFactory(subscriptionId, cred, common.ArmClientOptions())
 			if err != nil {
 				return nil, err
 			}
@@ -189,7 +189,7 @@ func NewTopicDisableAction() action_kit_sdk.ActionWithStop[EntityDisableState] {
 			if err != nil {
 				return nil, err
 			}
-			factory, err := armservicebus.NewClientFactory(subscriptionId, cred, nil)
+			factory, err := armservicebus.NewClientFactory(subscriptionId, cred, common.ArmClientOptions())
 			if err != nil {
 				return nil, err
 			}
