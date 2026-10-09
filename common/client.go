@@ -4,8 +4,11 @@ import (
 	"crypto"
 	"crypto/x509"
 	"os"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v4"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
@@ -13,6 +16,21 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/steadybit/extension-azure/config"
 )
+
+// armTryTimeout bounds a single ARM HTTP attempt. ARM writes occasionally hang (e.g. a Service Bus
+// entity PUT stuck for ~30s while a retry succeeds in a few seconds). Without a per-try timeout the
+// first attempt eats the agent's whole request budget and the action fails with a 503 "Timeout".
+const armTryTimeout = 10 * time.Second
+
+// ArmClientOptions returns ARM client options that abandon and retry a hung attempt after
+// armTryTimeout, so a transient ARM stall is retried within the agent's request timeout.
+func ArmClientOptions() *arm.ClientOptions {
+	return &arm.ClientOptions{
+		ClientOptions: policy.ClientOptions{
+			Retry: policy.RetryOptions{TryTimeout: armTryTimeout},
+		},
+	}
+}
 
 func GetClientByCredentials() (*armresourcegraph.Client, error) {
 	cred, err := ConnectionAzure()
