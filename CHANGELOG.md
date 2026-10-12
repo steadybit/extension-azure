@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.14
+
+- chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azcore
+- chore(deps): bump golang.org/x/net to v0.61.0
+- chore(deps): update go toolchain to 1.27.2
+- fix: retry hung ARM attempts in Service Bus disable attacks (#227)
+
 ## v1.3.13
 
 - chore(deps): bump github.com/steadybit/action-kit/go/action_kit_test
