@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.15
+
+- chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azcore
+- chore(deps): bump goreleaser/goreleaser from v2.18.1 to v2.18.3
+
 ## v1.3.14
 
 - chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azcore
