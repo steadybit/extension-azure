@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.16
+
+- build(docker): build with golang:1.27-alpine to pick up Go patch releases
+- chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azidentity
+
 ## v1.3.15
 
 - chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azcore
