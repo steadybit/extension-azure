@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.17
+
+- chore(deps): bump github.com/KimMachineGun/automemlimit
+- chore(deps): bump github.com/steadybit/action-kit/go/action_kit_test
+- chore(deps): bump github.com/steadybit/extension-kit
+
 ## v1.3.16
 
 - build(docker): build with golang:1.27-alpine to pick up Go patch releases
