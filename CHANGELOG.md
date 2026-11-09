@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.3.18
+
+- chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azcore
+- chore(deps): bump github.com/steadybit/action-kit/go/action_kit_api/v2
+
 ## v1.3.17
 
 - chore(deps): bump github.com/KimMachineGun/automemlimit
