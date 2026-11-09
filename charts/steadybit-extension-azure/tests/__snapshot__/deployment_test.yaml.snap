@@ -134,10 +134,10 @@ manifest should match snapshot using podAnnotations and Labels:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -289,10 +289,10 @@ manifest should match snapshot with TLS:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -447,10 +447,10 @@ manifest should match snapshot with azure certificates vars:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -598,10 +598,10 @@ manifest should match snapshot with azure secrets vars:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -749,10 +749,10 @@ manifest should match snapshot with custom image registry:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -907,10 +907,10 @@ manifest should match snapshot with extra env vars:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -1060,10 +1060,10 @@ manifest should match snapshot with extra labels:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -1211,10 +1211,10 @@ manifest should match snapshot with global image pull secrets:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -1364,10 +1364,10 @@ manifest should match snapshot with global image registry:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -1515,10 +1515,10 @@ manifest should match snapshot with global priority class:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -1667,10 +1667,10 @@ manifest should match snapshot with image pull secrets:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -1820,10 +1820,10 @@ manifest should match snapshot with legacy image name containing registry:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -1977,10 +1977,10 @@ manifest should match snapshot with mutual TLS:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -2148,10 +2148,10 @@ manifest should match snapshot with mutual TLS using containerPaths:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -2299,10 +2299,10 @@ manifest should match snapshot with podSecurityContext:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -2451,10 +2451,10 @@ manifest should match snapshot with priority class:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -2603,10 +2603,10 @@ manifest should match snapshot without TLS:
               resources:
                 limits:
                   cpu: 200m
-                  memory: 32Mi
+                  memory: 128Mi
                 requests:
                   cpu: 50m
-                  memory: 16Mi
+                  memory: 48Mi
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
