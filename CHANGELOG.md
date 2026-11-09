@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- fix(chart): raise default memory to 48Mi request / 128Mi limit (was 16Mi / 32Mi), to avoid OOM kills during discovery
+
 ## v1.3.18
 
 - chore(deps): bump github.com/Azure/azure-sdk-for-go/sdk/azcore
