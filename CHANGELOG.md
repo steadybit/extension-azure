@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased
+## v1.3.19
 
+- chore(deps): bump github.com/steadybit/discovery-kit/go/discovery_kit_sdk
+- fix(chart): raise default memory to 48Mi request / 128Mi limit (#238)
 - fix(chart): raise default memory to 48Mi request / 128Mi limit (was 16Mi / 32Mi), to avoid OOM kills during discovery
 
 ## v1.3.18
