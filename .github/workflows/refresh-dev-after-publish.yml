@@ -18,8 +18,13 @@ jobs:
   refresh:
     name: Dispatch Restart extension-azure
     runs-on: ubuntu-latest
-    # Only refresh when the publish actually succeeded.
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # Only refresh when the publish actually succeeded. `branches: [main]` above also matches a pull
+    # request from a fork whose branch is called main, and such a run publishes nothing: require a
+    # run of this repository that is not a pull request.
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event != 'pull_request' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
     timeout-minutes: 15
 
     steps:
